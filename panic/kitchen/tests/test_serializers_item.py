@@ -1,43 +1,39 @@
 """Test the Item Serializer."""
 
-from django.contrib.auth import get_user_model
-from django.test import TestCase
 from rest_framework.serializers import ValidationError
 
 from ..models.item import Item
-from ..models.shelf import Shelf
-from ..models.store import Store
 from ..serializers import DUPLICATE_OBJECT_MESSAGE
 from ..serializers.item import ItemSerializer
+from .fixtures.django import MockRequest
+from .fixtures.item import ItemTestHarness
 
 
-class MockRequest:
+class TestItem(ItemTestHarness):
 
-  def __init__(self, user):
-    self.user = user
+  @classmethod
+  def create_data_hook(cls):
+    cls.serializer = ItemSerializer
+    cls.fields = {"name": 255}
+    cls.request = MockRequest(cls.user1)
 
-
-class TestItem(TestCase):
-
-  # pylint: disable=R0913
-  def sample_item(
-      self, user, name, shelf_life, shelf, preferred_stores, price, quantity
-  ):
-    """Create a test item."""
-    if user is None:
-      user = self.user
-    item = Item.objects.create(
-        name=name,
-        user=user,
-        shelf_life=shelf_life,
-        shelf=shelf,
-        price=price,
-        quantity=quantity
-    )
-    item.preferred_stores.add(preferred_stores)
-    item.save()
-    self.objects.append(item)
-    return item
+    cls.data = {
+        'name': "Canned Beans",
+        'shelf_life': 99,
+        'user': cls.user1,
+        'shelf': cls.shelf1,
+        'preferred_stores': [cls.store1],
+        'price': 2.00,
+        'quantity': 3
+    }
+    cls.serializer_data = {
+        'name': "Canned Beans",
+        'shelf_life': 109,
+        'shelf': cls.shelf1.id,
+        'preferred_stores': [cls.store1.id],
+        'price': 2.00,
+        'quantity': 3
+    }
 
   @staticmethod
   def generate_overload(fields):
@@ -48,51 +44,8 @@ class TestItem(TestCase):
       return_list.append(overloaded)
     return return_list
 
-  @classmethod
-  def setUpTestData(cls):
-    cls.serializer = ItemSerializer
-    cls.fields = {"name": 255}
-    cls.user = get_user_model().objects.create_user(
-        username="testuser",
-        email="test@niallbyrne.ca",
-        password="test123",
-    )
-    cls.store = Store.objects.create(
-        user=cls.user,
-        name="No Frills",
-    )
-    cls.shelf = Shelf.objects.create(
-        user=cls.user,
-        name="Pantry",
-    )
-    cls.data = {
-        'name': "Canned Beans",
-        'shelf_life': 99,
-        'user': cls.user,
-        'shelf': cls.shelf,
-        'preferred_stores': cls.store,
-        'price': 2.00,
-        'quantity': 3
-    }
-    cls.serializer_data = {
-        'name': "Canned Beans",
-        'shelf_life': 109,
-        'shelf': cls.shelf.id,
-        'preferred_stores': [cls.store.id],
-        'price': 2.00,
-        'quantity': 3
-    }
-    cls.request = MockRequest(cls.user)
-
-  def setUp(self):
-    self.objects = list()
-
-  def tearDown(self) -> None:
-    for obj in self.objects:
-      obj.delete()
-
   def testDeserialize(self):
-    item = self.sample_item(**self.data)
+    item = self.create_test_instance(**self.data)
     serialized = self.serializer(item)
     deserialized = serialized.data
 
@@ -100,11 +53,11 @@ class TestItem(TestCase):
 
     self.assertEqual(deserialized['name'], self.data['name'])
     self.assertEqual(deserialized['shelf_life'], self.data['shelf_life'])
-    self.assertEqual(deserialized['shelf'], self.shelf.id)
+    self.assertEqual(deserialized['shelf'], self.shelf1.id)
     self.assertEqual(deserialized['price'], price)
     self.assertEqual(deserialized['quantity'], self.data['quantity'])
     preferred_stores = [store.id for store in item.preferred_stores.all()]
-    self.assertEqual(deserialized['preferred_stores'], preferred_stores)
+    self.assertListEqual(deserialized['preferred_stores'], preferred_stores)
     assert 'user' not in deserialized
 
   def testSerialize(self):
@@ -122,8 +75,8 @@ class TestItem(TestCase):
 
     self.assertEqual(item.name, self.serializer_data['name'])
     self.assertEqual(item.shelf_life, self.serializer_data['shelf_life'])
-    self.assertEqual(item.user.id, self.user.id)
-    self.assertEqual(item.shelf.id, self.shelf.id)
+    self.assertEqual(item.user.id, self.user1.id)
+    self.assertEqual(item.shelf.id, self.shelf1.id)
     self.assertEqual(item.price, self.serializer_data['price'])
     self.assertEqual(item.quantity, self.serializer_data['quantity'])
 

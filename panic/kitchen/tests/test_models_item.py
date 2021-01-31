@@ -15,14 +15,14 @@ from .fixtures.item import ItemTestHarness
 class TestItem(ItemTestHarness):
 
   @classmethod
-  def create_items_hook(cls):
+  def create_data_hook(cls):
     cls.fields = {"name": 255}
     cls.data = {
         'user': cls.user1,
         'name': "Canned Beans",
         'shelf_life': 99,
         'shelf': cls.shelf1,
-        'preferred_store': cls.store1,
+        'preferred_stores': [cls.store1],
         'price': 2.00,
         'quantity': 3,
     }
@@ -35,26 +35,26 @@ class TestItem(ItemTestHarness):
     return return_value
 
   def testAddItem(self):
-    created = self.sample_item(**self.data)
+    created = self.create_test_instance(**self.data)
     query = Item.objects.filter(name=self.data['name'])
 
     self.assertQuerysetEqual(query, map(repr, [created]))
 
   def testUnique(self):
-    _ = self.sample_item(**self.data)
+    _ = self.create_test_instance(**self.data)
 
     with self.assertRaises(ValidationError):
-      _ = self.sample_item(**self.data)
+      _ = self.create_test_instance(**self.data)
 
-    query = Item.objects.filter(name=self.data['name'])
-    assert len(query) == 1
+    count = Item.objects.filter(name=self.data['name']).count()
+    assert count == 1
 
   def testAddItemInjection(self):
     injection_attack = dict(self.data)
     injection_attack['name'] = "Canned Beans<script>alert('hi');</script>"
     sanitized_name = "Canned Beans&lt;script&gt;alert('hi');&lt;/script&gt;"
 
-    _ = self.sample_item(**injection_attack)
+    _ = self.create_test_instance(**injection_attack)
 
     query = Item.objects.filter(name=injection_attack['name']).count()
     assert query == 0
@@ -72,7 +72,7 @@ class TestItem(ItemTestHarness):
     self.assertEqual(item.quantity, self.data['quantity'])
 
   def testStr(self):
-    item = self.sample_item(**self.data)
+    item = self.create_test_instance(**self.data)
     self.assertEqual(self.data['name'], str(item))
 
   def testFieldLengths(self):
@@ -80,73 +80,73 @@ class TestItem(ItemTestHarness):
       local_data = dict(self.data)
       local_data.update(overloaded_field)
       with self.assertRaises(ValidationError):
-        _ = self.sample_item(**local_data)
+        _ = self.create_test_instance(**local_data)
 
   def testNegativeQuantity(self):
-    item = self.sample_item(**self.data)
+    item = self.create_test_instance(**self.data)
     item.quantity = -5
     assert item.quantity < MINIMUM_QUANTITY
     with self.assertRaises(ValidationError):
       item.save()
 
   def testEnormousQuantity(self):
-    item = self.sample_item(**self.data)
+    item = self.create_test_instance(**self.data)
     item.quantity = 9000000
     assert item.quantity > MAXIMUM_QUANTITY
     with self.assertRaises(ValidationError):
       item.save()
 
   def testShelfLifeRestrictionsLow(self):
-    item = self.sample_item(**self.data)
+    item = self.create_test_instance(**self.data)
     item.shelf_life = 0
     assert item.shelf_life < MINIMUM_SHELF_LIFE
     with self.assertRaises(ValidationError):
       item.save()
 
   def testShelfLifeRestrictionsHigh(self):
-    item = self.sample_item(**self.data)
+    item = self.create_test_instance(**self.data)
     item.shelf_life = 9000
     assert item.shelf_life > MAXIMUM_SHELF_LIFE
     with self.assertRaises(ValidationError):
       item.save()
 
   def test_next_expiry_quantity_low(self):
-    item = self.sample_item(**self.data)
+    item = self.create_test_instance(**self.data)
     item.next_expiry_quantity = -5
     assert item.next_expiry_quantity < MINIMUM_QUANTITY
     with self.assertRaises(ValidationError):
       item.save()
 
   def test_next_expiry_quantity_high(self):
-    item = self.sample_item(**self.data)
+    item = self.create_test_instance(**self.data)
     item.next_expiry_quantity = 9000000
     assert item.next_expiry_quantity > MAXIMUM_QUANTITY
     with self.assertRaises(ValidationError):
       item.save()
 
   def test_expired_low(self):
-    item = self.sample_item(**self.data)
+    item = self.create_test_instance(**self.data)
     item.expired = -5
     assert item.expired < MINIMUM_QUANTITY
     with self.assertRaises(ValidationError):
       item.save()
 
   def test_expired_high(self):
-    item = self.sample_item(**self.data)
+    item = self.create_test_instance(**self.data)
     item.expired = 9000000
     assert item.expired > MAXIMUM_QUANTITY
     with self.assertRaises(ValidationError):
       item.save()
 
   def test_two_users_with_the_same_item_name(self):
-    item1 = self.sample_item(**self.data)
+    item1 = self.create_test_instance(**self.data)
 
     self.create_second_test_set()
     second_item_data = dict(self.data)
     second_item_data['user'] = self.user2
     second_item_data['shelf'] = self.shelf2
-    second_item_data['preferred_store'] = self.store2
-    item2 = self.sample_item(**second_item_data)
+    second_item_data['preferred_stores'] = [self.store2]
+    item2 = self.create_test_instance(**second_item_data)
 
     self.assertEqual(item1.name, item2.name)
     self.assertNotEqual(item1, item2)
