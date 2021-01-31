@@ -10,7 +10,7 @@ REST_FRAMEWORK_AVAILABLE = {
         ],
         'DEFAULT_PERMISSION_CLASSES': [
             'rest_framework.permissions.IsAuthenticated',
-            'spa_security.permissions.IsOwner',
+            'kitchen.permissions.IsOwner',
         ],
         'DEFAULT_FILTER_BACKENDS':
             ('django_filters.rest_framework.DjangoFilterBackend',),
@@ -21,7 +21,7 @@ REST_FRAMEWORK_AVAILABLE = {
         ],
         'DEFAULT_PERMISSION_CLASSES': [
             'rest_framework.permissions.IsAuthenticated',
-            'spa_security.permissions.IsOwner',
+            'kitchen.permissions.IsOwner',
         ],
         'DEFAULT_RENDERER_CLASSES': ('rest_framework.renderers.JSONRenderer',),
         'DEFAULT_THROTTLE_CLASSES': [
@@ -41,7 +41,7 @@ REST_FRAMEWORK_AVAILABLE = {
         ],
         'DEFAULT_PERMISSION_CLASSES': [
             'rest_framework.permissions.IsAuthenticated',
-            'spa_security.permissions.IsOwner',
+            'kitchen.permissions.IsOwner',
         ],
         'DEFAULT_RENDERER_CLASSES': ('rest_framework.renderers.JSONRenderer',),
         'DEFAULT_THROTTLE_CLASSES': [
