@@ -62,6 +62,10 @@ class PublicTCHTest(TestCase):
   def setUp(self) -> None:
     self.client = APIClient()
 
+  def test_todo(self):
+    assert True is False
+    # TODO: refactor this tch view and serializer to work around the item model
+
   def test_get_login_required(self):
     res = self.client.get(transaction_query_url(0))
 
