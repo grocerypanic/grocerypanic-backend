@@ -1,22 +1,16 @@
 """Test the Shelf Model."""
 
-from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
-from django.test import TestCase
 
 from ..models.shelf import Shelf
+from .fixtures.shelf import ShelfTestHarness
 
 
-class TestShelf(TestCase):
+class TestShelf(ShelfTestHarness):
 
-  def sample_shelf(self, user=None, name="Over Sink"):
-    """Create a test shelf."""
-    if user is None:
-      user = self.user
-    shelf = Shelf.objects.create(user=user, name=name)
-    shelf.save()
-    self.objects.append(shelf)
-    return shelf
+  @classmethod
+  def create_data_hook(cls):
+    cls.fields = {"name": 255}
 
   @staticmethod
   def generate_overload(fields):
@@ -25,64 +19,44 @@ class TestShelf(TestCase):
       return_value.append({key: "abc" * value})
     return return_value
 
-  @classmethod
-  def setUpTestData(cls):
-    cls.fields = {"name": 255}
-    cls.user = get_user_model().objects.create_user(
-        username="testuser",
-        email="test@niallbyrne.ca",
-        password="test123",
-    )
-
-  def setUp(self):
-    self.objects = list()
-
-  def tearDown(self) -> None:
-    for obj in self.objects:
-      obj.delete()
-
   def testAddShelf(self):
     test_name = "Refrigerator"
-    _ = self.sample_shelf(self.user, test_name)
+    shelf = self.create_test_instance(user=self.user1, name=test_name)
 
     query = Shelf.objects.filter(name=test_name)
-
-    assert len(query) == 1
-    self.assertEqual(query[0].index, test_name.lower())
-    self.assertEqual(query[0].name, test_name)
-    self.assertEqual(query[0].user.id, self.user.id)
+    self.assertQuerysetEqual(query, [repr(shelf)])
 
   def testUnique(self):
     test_name = "Above Sink"
-    _ = self.sample_shelf(self.user, test_name)
+    _ = self.create_test_instance(user=self.user1, name=test_name)
 
     with self.assertRaises(ValidationError):
-      _ = self.sample_shelf(self.user, test_name)
+      _ = self.create_test_instance(user=self.user1, name=test_name)
 
-    query = Shelf.objects.filter(name=test_name)
-    assert len(query) == 1
+    count = Shelf.objects.filter(name=test_name).count()
+    assert count == 1
 
   def testAddShelfInjection(self):
     test_name = "Refrigerator<script>alert('hi');</script>"
     sanitized_name = "Refrigerator&lt;script&gt;alert('hi');&lt;/script&gt;"
-    _ = self.sample_shelf(self.user, test_name)
+    _ = self.create_test_instance(user=self.user1, name=test_name)
 
     query = Shelf.objects.filter(name=sanitized_name)
 
     assert len(query) == 1
     self.assertEqual(query[0].index, sanitized_name.lower())
     self.assertEqual(query[0].name, sanitized_name)
-    self.assertEqual(query[0].user.id, self.user.id)
+    self.assertEqual(query[0].user.id, self.user1.id)
 
   def testStr(self):
     test_name = "Pantry"
-    item = self.sample_shelf(self.user, test_name)
+    item = self.create_test_instance(user=self.user1, name=test_name)
 
     self.assertEqual(test_name, str(item))
 
   def testFieldLengths(self):
     for overloaded_field in self.generate_overload(self.fields):
-      local_data = {"name": "Refrigerator"}
+      local_data = {"user": self.user1, "name": "Refrigerator"}
       local_data.update(overloaded_field)
       with self.assertRaises(ValidationError):
-        _ = self.sample_shelf(**local_data)
+        _ = self.create_test_instance(**local_data)

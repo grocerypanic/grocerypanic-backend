@@ -1,30 +1,21 @@
 """Test the Shelf Serializer."""
 
-from django.contrib.auth import get_user_model
-from django.test import TestCase
 from rest_framework.serializers import ValidationError
 
 from ..models.shelf import Shelf
 from ..serializers import DUPLICATE_OBJECT_MESSAGE
 from ..serializers.shelf import ShelfSerializer
+from .fixtures.django import MockRequest
+from .fixtures.shelf import ShelfTestHarness
 
 
-class MockRequest:
+class TestShelf(ShelfTestHarness):
 
-  def __init__(self, user):
-    self.user = user
-
-
-class TestShelf(TestCase):
-
-  def sample_shelf(self, user=None, name="Over Sink"):
-    """Create a shelf."""
-    if user is None:
-      user = self.user
-    shelf = Shelf.objects.create(user=user, name=name)
-    shelf.save()
-    self.objects.append(shelf)
-    return shelf
+  @classmethod
+  def create_data_hook(cls):
+    cls.serializer = ShelfSerializer
+    cls.fields = {"name": 255}
+    cls.request = MockRequest(cls.user1)
 
   @staticmethod
   def generate_overload(fields):
@@ -35,18 +26,6 @@ class TestShelf(TestCase):
       return_list.append(overloaded)
     return return_list
 
-  @classmethod
-  def setUpTestData(cls):
-    cls.objects = list()
-    cls.serializer = ShelfSerializer
-    cls.fields = {"name": 255}
-    cls.user = get_user_model().objects.create_user(
-        username="testuser",
-        email="test@niallbyrne.ca",
-        password="test123",
-    )
-    cls.request = MockRequest(cls.user)
-
   def setUp(self):
     self.objects = list()
 
@@ -56,8 +35,8 @@ class TestShelf(TestCase):
 
   def testDeserialize(self):
     test_value = "Refrigerator"
-    shelf = self.sample_shelf(self.user, test_value)
 
+    shelf = self.create_test_instance(user=self.user1, name=test_value)
     serialized = self.serializer(shelf)
 
     self.assertEqual(serialized.data['name'], test_value)
@@ -77,7 +56,7 @@ class TestShelf(TestCase):
     query = Shelf.objects.filter(name="Pantry")
 
     assert len(query) == 1
-    self.assertEqual(query[0].user.id, self.user.id)
+    self.assertEqual(query[0].user.id, self.user1.id)
     self.assertEqual(query[0].name, "Pantry")
 
   def testUniqueConstraint(self):
