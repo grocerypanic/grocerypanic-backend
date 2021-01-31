@@ -33,7 +33,7 @@ class PrivateTransactionConsumptionHistoryTest(TransactionTestHarness):
 
   @classmethod
   @freeze_time("2020-01-14")
-  def create_transactions_hook(cls):
+  def create_data_hook(cls):
 
     cls.serializer_data = {'item': cls.item.id, 'quantity': 3}
     cls.today = timezone.now()
@@ -71,9 +71,9 @@ class PrivateTransactionConsumptionHistoryTest(TransactionTestHarness):
       obj.delete()
 
   def populate_history(self):
-    self.sample_transaction(**self.object_def1)
-    self.sample_transaction(**self.object_def2)
-    self.sample_transaction(**self.object_def3)
+    self.create_test_instance(**self.object_def1)
+    self.create_test_instance(**self.object_def2)
+    self.create_test_instance(**self.object_def3)
 
   @freeze_time("2020-01-14")
   def test_get_item_history(self):

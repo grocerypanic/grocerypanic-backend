@@ -19,7 +19,7 @@ class TestTransactionSerializer(TransactionTestHarness):
 
   @classmethod
   @freeze_time("2020-01-14")
-  def create_transactions_hook(cls):
+  def create_data_hook(cls):
     cls.serializer = TransactionSerializer
     cls.today = timezone.now()
     cls.fields = {"name": 255}
@@ -56,7 +56,7 @@ class TestTransactionSerializer(TransactionTestHarness):
       obj.delete()
 
   def testDeserialize(self):
-    transaction = self.sample_transaction(**self.data)
+    transaction = self.create_test_instance(**self.data)
     serialized = self.serializer(transaction)
     deserialized = serialized.data
 
@@ -100,7 +100,7 @@ class TestTransactionConsumptionHistorySerializer(TransactionTestHarness):
 
   @classmethod
   @freeze_time("2020-01-14")
-  def create_transactions_hook(cls):
+  def create_data_hook(cls):
     cls.serializer = TransactionConsumptionHistorySerializer
     cls.today = timezone.now()
     cls.fields = {"name": 255}
@@ -128,7 +128,7 @@ class TestTransactionConsumptionHistorySerializer(TransactionTestHarness):
   @freeze_time("2020-01-14")
   def test_deserialize_last_two_weeks(self):
 
-    transaction = self.sample_transaction(**self.data)
+    transaction = self.create_test_instance(**self.data)
     deserialized_transaction = TransactionSerializer([transaction], many=True)
 
     serialized = self.serializer(
@@ -144,7 +144,7 @@ class TestTransactionConsumptionHistorySerializer(TransactionTestHarness):
 
   @freeze_time("2020-01-14")
   def test_deserialize_consumption_per_week(self):
-    self.sample_transaction(**self.data)
+    self.create_test_instance(**self.data)
 
     serialized = self.serializer(
         {"item_id": self.item.id},
@@ -159,7 +159,7 @@ class TestTransactionConsumptionHistorySerializer(TransactionTestHarness):
 
   @freeze_time("2020-01-14")
   def test_deserialize_consumption_per_month(self):
-    self.sample_transaction(**self.data)
+    self.create_test_instance(**self.data)
 
     serialized = self.serializer(
         {"item_id": self.item.id},
