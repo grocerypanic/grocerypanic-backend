@@ -3,27 +3,35 @@
 from django.urls import include, path
 from rest_framework import routers
 
-from . import views
+from .views import item, shelf, store, suggested, transaction
 
 app_name = "kitchen"
 
 router = routers.SimpleRouter()
+
+router.register("items", item.ItemViewSet, basename="items")
+router.register("items", item.ItemListCreateViewSet, basename="items")
+
+router.register("shelves", shelf.ShelfViewSet, basename="shelves")
+router.register("shelves", shelf.ShelfListCreateViewSet, basename="shelves")
+
+router.register("stores", store.StoreViewSet, basename="stores")
+router.register("stores", store.StoreListCreateViewSet, basename="stores")
+
 router.register(
     "suggestions",
-    views.SuggestedItemViewSet,
+    suggested.SuggestedItemListViewSet,
     basename="suggestions",
 )
-router.register("shelves", views.ShelfViewSet, basename="shelves")
-router.register("stores", views.StoreViewSet, basename="stores")
-router.register("items", views.ItemViewSet, basename="items")
+
 router.register(
     "transactions",
-    views.TransactionViewSet,
+    transaction.TransactionViewSet,
     basename="transactions",
 )
 router.register(
     "transaction-consumption-history",
-    views.TransactionConsumptionHistoryViewSet,
+    transaction.TransactionConsumptionHistoryViewSet,
     basename="transaction-consumption-history",
 )
 
