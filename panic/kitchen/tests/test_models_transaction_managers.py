@@ -10,7 +10,7 @@ from freezegun import freeze_time
 import kitchen
 from ..models.transaction import Transaction
 from ..models.transaction_managers import ItemExpirationCalculator
-from .fixtures.transaction_fixtures import TransactionTestHarness
+from .fixtures.transaction import TransactionTestHarness
 
 
 class MockExpiryCalculator:

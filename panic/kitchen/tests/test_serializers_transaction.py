@@ -11,8 +11,8 @@ from ..serializers.transaction import (
     TransactionConsumptionHistorySerializer,
     TransactionSerializer,
 )
-from .fixtures.django_fixtures import MockRequest, deserialize_datetime
-from .fixtures.transaction_fixtures import TransactionTestHarness
+from .fixtures.django import MockRequest, deserialize_datetime
+from .fixtures.transaction import TransactionTestHarness
 
 
 class TestTransactionSerializer(TransactionTestHarness):

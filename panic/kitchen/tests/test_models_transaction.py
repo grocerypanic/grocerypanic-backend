@@ -4,7 +4,7 @@ from django.core.exceptions import ValidationError
 from freezegun import freeze_time
 
 from ..models.transaction import Transaction
-from .fixtures.transaction_fixtures import TransactionTestHarness
+from .fixtures.transaction import TransactionTestHarness
 
 
 class TestTransaction(TransactionTestHarness):

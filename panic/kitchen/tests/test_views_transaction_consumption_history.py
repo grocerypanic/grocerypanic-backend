@@ -8,8 +8,8 @@ from rest_framework import status
 from rest_framework.test import APIClient
 
 from ..serializers.transaction import TransactionConsumptionHistorySerializer
-from .fixtures.django_fixtures import MockRequest
-from .fixtures.transaction_fixtures import TransactionTestHarness
+from .fixtures.django import MockRequest
+from .fixtures.transaction import TransactionTestHarness
 
 
 def transaction_query_url(item):  # pylint: disable=W0102

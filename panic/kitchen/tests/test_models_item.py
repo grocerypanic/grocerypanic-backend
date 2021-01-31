@@ -9,7 +9,7 @@ from ..models.item import (
     MINIMUM_SHELF_LIFE,
     Item,
 )
-from .fixtures.item_fixtures import ItemTestHarness
+from .fixtures.item import ItemTestHarness
 
 
 class TestItem(ItemTestHarness):
