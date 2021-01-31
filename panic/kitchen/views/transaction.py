@@ -3,12 +3,10 @@
 import datetime
 
 from django.conf import settings
-from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django_filters import rest_framework as filters
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import mixins, viewsets
-from rest_framework.response import Response
 
 from spa_security.auth_cookie import CSRFMixin
 from ..filters import TransactionFilter
@@ -72,14 +70,3 @@ class TransactionConsumptionHistoryViewSet(
   """Transaction Consumption History API View"""
   serializer_class = TransactionConsumptionHistorySerializer
   queryset = Item.objects.all()
-
-  @openapi_ready
-  def get_object(self):
-    obj = get_object_or_404(self.queryset, pk=self.kwargs.get('pk'))
-    return obj
-
-  def retrieve(self, request, *args, **kwargs):
-    serializer = self.get_serializer({
-        "item_id": self.get_object().id,
-    },)
-    return Response(serializer.data)

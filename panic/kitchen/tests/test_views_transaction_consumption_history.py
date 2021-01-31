@@ -12,29 +12,11 @@ from .fixtures.django import MockRequest
 from .fixtures.transaction import TransactionTestHarness
 
 
-def transaction_query_url(item):  # pylint: disable=W0102
-  return reverse("kitchen:transaction-consumption-history-detail", args=[item])
-
-
-class PublicTransactionConsumptionHistoryTest(TestCase):
-  """Test the public Transaction Consumption History API"""
-
-  def setUp(self) -> None:
-    self.client = APIClient()
-
-  def test_get_login_required(self):
-    res = self.client.get(transaction_query_url(0))
-
-    self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
-
-
-class PrivateTransactionConsumptionHistoryTest(TransactionTestHarness):
-  """Test the authorized Transaction Consumption History API"""
+class PrivateTCHTestHarness(TransactionTestHarness):
 
   @classmethod
   @freeze_time("2020-01-14")
   def create_data_hook(cls):
-
     cls.serializer_data = {'item': cls.item.id, 'quantity': 3}
     cls.today = timezone.now()
     cls.object_def1 = {
@@ -59,30 +41,47 @@ class PrivateTransactionConsumptionHistoryTest(TransactionTestHarness):
     cls.MockRequest = MockRequest(cls.user)
 
   def setUp(self):
-    self.objects = list()
+    super().setUp()
     self.item.quantity = 2000
     self.item.save()
-    self.client = APIClient()
-    self.client.force_authenticate(self.user)
     self.populate_history()
-
-  def tearDown(self) -> None:
-    for obj in self.objects:
-      obj.delete()
 
   def populate_history(self):
     self.create_test_instance(**self.object_def1)
     self.create_test_instance(**self.object_def2)
     self.create_test_instance(**self.object_def3)
 
+
+def transaction_query_url(item):  # pylint: disable=W0102
+  return reverse("kitchen:transaction-consumption-history-detail", args=[item])
+
+
+class PublicTCHTest(TestCase):
+  """Test the public Transaction Consumption History API"""
+
+  def setUp(self) -> None:
+    self.client = APIClient()
+
+  def test_get_login_required(self):
+    res = self.client.get(transaction_query_url(0))
+
+    self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
+
+
+class PrivateTCHTest(PrivateTCHTestHarness):
+  """Test the authorized TCH API"""
+
+  def setUp(self):
+    super().setUp()
+    self.client = APIClient()
+    self.client.force_authenticate(self.user)
+
   @freeze_time("2020-01-14")
   def test_get_item_history(self):
     """Test retrieving consumption history for the last two weeks"""
     res = self.client.get(transaction_query_url(self.item.id))
     serializer = TransactionConsumptionHistorySerializer(
-        {
-            "item_id": self.item,
-        },
+        self.item,
         context={
             'request': self.MockRequest,
         },
@@ -115,3 +114,39 @@ class PrivateTransactionConsumptionHistoryTest(TransactionTestHarness):
 
     self.assertEqual(res.status_code, status.HTTP_200_OK)
     self.assertEqual(res.data['total_consumption'], total_consumption)
+
+
+class PrivateTCHTestAnotherUser(PrivateTCHTestHarness):
+  """Test the authorized TCH API from Another User"""
+
+  @classmethod
+  @freeze_time("2020-01-14")
+  def create_data_hook(cls):
+    super().create_data_hook()
+    test_data2 = cls.create_dependencies(2)
+    cls.user2 = test_data2['user']
+
+  def setUp(self):
+    super().setUp()
+    self.client = APIClient()
+    self.client.force_authenticate(self.user2)
+
+  @freeze_time("2020-01-14")
+  def test_get_item_history(self):
+    """Test retrieving consumption history for the last two weeks"""
+    res = self.client.get(transaction_query_url(self.item.id))
+
+    self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
+
+  @freeze_time("2020-01-14")
+  def test_first_transaction(self):
+    """Test identifying the first transaction date of a consumption event."""
+    res = self.client.get(transaction_query_url(self.item.id))
+    self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
+
+  @freeze_time("2020-01-14")
+  def test_total_consumption(self):
+    """Test identifying the total consumption of a user's item."""
+    res = self.client.get(transaction_query_url(self.item.id))
+
+    self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
