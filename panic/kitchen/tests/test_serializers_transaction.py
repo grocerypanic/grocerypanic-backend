@@ -111,9 +111,6 @@ class TestTransactionConsumptionHistorySerializer(TransactionTestHarness):
         'user': cls.user,
         'quantity': -3
     }
-    cls.serializer_data = {
-        'item_id': cls.item.id,
-    }
     cls.request = MockRequest(cls.user)
 
   def setUp(self):
@@ -132,7 +129,7 @@ class TestTransactionConsumptionHistorySerializer(TransactionTestHarness):
     deserialized_transaction = TransactionSerializer([transaction], many=True)
 
     serialized = self.serializer(
-        {"item_id": self.item.id},
+        self.item,
         context={'request': self.request},
     )
     deserialized = serialized.data
@@ -147,7 +144,7 @@ class TestTransactionConsumptionHistorySerializer(TransactionTestHarness):
     self.create_test_instance(**self.data)
 
     serialized = self.serializer(
-        {"item_id": self.item.id},
+        self.item,
         context={'request': self.request},
     )
     deserialized = serialized.data
@@ -162,7 +159,7 @@ class TestTransactionConsumptionHistorySerializer(TransactionTestHarness):
     self.create_test_instance(**self.data)
 
     serialized = self.serializer(
-        {"item_id": self.item.id},
+        self.item,
         context={'request': self.request},
     )
     deserialized = serialized.data

@@ -17,25 +17,25 @@ class TransactionSerializer(serializers.ModelSerializer):
 
 class TransactionConsumptionHistorySerializer(serializers.Serializer):
   """Serializer for Transaction Consumption History"""
-  item_id = serializers.IntegerField(write_only=True)
+  id = serializers.IntegerField(write_only=True)
   consumption_last_two_weeks = serializers.SerializerMethodField(read_only=True)
   first_consumption_date = serializers.SerializerMethodField(read_only=True)
   total_consumption = serializers.SerializerMethodField(read_only=True)
 
-  def get_consumption_last_two_weeks(self, _):
+  def get_consumption_last_two_weeks(self, obj):
     user_id = self.context['request'].user.id
-    item_id = self.instance['item_id']
+    item_id = obj.id
     query = Transaction.consumption.get_last_two_weeks(item_id, user_id)
     return TransactionSerializer(query, many=True).data
 
-  def get_first_consumption_date(self, _):
+  def get_first_consumption_date(self, obj):
     user_id = self.context['request'].user.id
-    item_id = self.instance['item_id']
+    item_id = obj.id
     return Transaction.consumption.get_first_consumption(item_id, user_id)
 
-  def get_total_consumption(self, _):
+  def get_total_consumption(self, obj):
     user_id = self.context['request'].user.id
-    item_id = self.instance['item_id']
+    item_id = obj.id
     return Transaction.consumption.get_total_consumption(item_id, user_id)
 
   def update(self, instance, validated_data):
