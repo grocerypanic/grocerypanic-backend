@@ -1,8 +1,6 @@
 """Test the Item Model."""
 
-from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
-from django.test import TestCase
 
 from ..models.item import (
     MAXIMUM_QUANTITY,
@@ -11,31 +9,23 @@ from ..models.item import (
     MINIMUM_SHELF_LIFE,
     Item,
 )
-from ..models.shelf import Shelf
-from ..models.store import Store
+from .fixtures.item_fixtures import ItemTestHarness
 
 
-class TestItem(TestCase):
+class TestItem(ItemTestHarness):
 
-  # pylint: disable=R0913
-  def sample_item(
-      self, user, name, shelf_life, shelf, preferred_stores, price, quantity
-  ):
-    """Create a test item."""
-    if user is None:
-      user = self.user
-    item = Item.objects.create(
-        name=name,
-        user=user,
-        shelf_life=shelf_life,
-        shelf=shelf,
-        price=price,
-        quantity=quantity
-    )
-    item.preferred_stores.add(preferred_stores)
-    item.save()
-    self.objects.append(item)
-    return item
+  @classmethod
+  def create_items_hook(cls):
+    cls.fields = {"name": 255}
+    cls.data = {
+        'user': cls.user1,
+        'name': "Canned Beans",
+        'shelf_life': 99,
+        'shelf': cls.shelf1,
+        'preferred_store': cls.store1,
+        'price': 2.00,
+        'quantity': 3,
+    }
 
   @staticmethod
   def generate_overload(fields):
@@ -44,69 +34,11 @@ class TestItem(TestCase):
       return_value.append({key: "abc" * value})
     return return_value
 
-  @classmethod
-  def setUpTestData(cls):
-    cls.fields = {"name": 255}
-    cls.user = get_user_model().objects.create_user(
-        username="testuser",
-        email="test@niallbyrne.ca",
-        password="test123",
-    )
-    cls.second_user = get_user_model().objects.create_user(
-        username="testuser2",
-        email="test2@niallbyrne.ca",
-        password="test123",
-    )
-
-    cls.store = Store.objects.create(
-        user=cls.user,
-        name="No Frills",
-    )
-    cls.shelf = Shelf.objects.create(
-        user=cls.user,
-        name="Pantry",
-    )
-
-    cls.second_store = Store.objects.create(
-        user=cls.second_user,
-        name="No Frills",
-    )
-    cls.second_shelf = Shelf.objects.create(
-        user=cls.second_user,
-        name="Pantry",
-    )
-
-    cls.data = {
-        'name': "Canned Beans",
-        'shelf_life': 99,
-        'user': cls.user,
-        'shelf': cls.shelf,
-        'preferred_stores': cls.store,
-        'price': 2.00,
-        'quantity': 3
-    }
-
-  def setUp(self):
-    self.objects = list()
-
-  def tearDown(self) -> None:
-    for obj in self.objects:
-      obj.delete()
-
   def testAddItem(self):
-    _ = self.sample_item(**self.data)
-
+    created = self.sample_item(**self.data)
     query = Item.objects.filter(name=self.data['name'])
 
-    assert len(query) == 1
-    item = query[0]
-    self.assertEqual(item.index, self.data['name'].lower())
-    self.assertEqual(item.name, self.data['name'])
-    self.assertEqual(item.shelf_life, self.data['shelf_life'])
-    self.assertEqual(item.user.id, self.user.id)
-    self.assertEqual(item.shelf.id, self.shelf.id)
-    self.assertEqual(item.price, self.data['price'])
-    self.assertEqual(item.quantity, self.data['quantity'])
+    self.assertQuerysetEqual(query, map(repr, [created]))
 
   def testUnique(self):
     _ = self.sample_item(**self.data)
@@ -134,8 +66,8 @@ class TestItem(TestCase):
     self.assertEqual(item.index, sanitized_name.lower())
     self.assertEqual(item.name, sanitized_name)
     self.assertEqual(item.shelf_life, self.data['shelf_life'])
-    self.assertEqual(item.user.id, self.user.id)
-    self.assertEqual(item.shelf.id, self.shelf.id)
+    self.assertEqual(item.user.id, self.user1.id)
+    self.assertEqual(item.shelf.id, self.shelf1.id)
     self.assertEqual(item.price, self.data['price'])
     self.assertEqual(item.quantity, self.data['quantity'])
 
@@ -209,10 +141,12 @@ class TestItem(TestCase):
   def test_two_users_with_the_same_item_name(self):
     item1 = self.sample_item(**self.data)
 
-    second_item_definition = dict(self.data)
-    second_item_definition['user'] = self.second_user
-    second_item_definition['shelf'] = self.second_shelf
-    second_item_definition['preferred_stores'] = self.second_store
-    item2 = self.sample_item(**second_item_definition)
+    self.create_second_test_set()
+    second_item_data = dict(self.data)
+    second_item_data['user'] = self.user2
+    second_item_data['shelf'] = self.shelf2
+    second_item_data['preferred_store'] = self.store2
+    item2 = self.sample_item(**second_item_data)
 
     self.assertEqual(item1.name, item2.name)
+    self.assertNotEqual(item1, item2)
