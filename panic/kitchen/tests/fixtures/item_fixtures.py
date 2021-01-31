@@ -9,45 +9,6 @@ from ...models.shelf import Shelf
 from ...models.store import Store
 
 
-def create_item(**kwargs):
-  """Create a test item."""
-  item = Item.objects.create(
-      name=kwargs['name'],
-      user=kwargs['user'],
-      shelf_life=kwargs['shelf_life'],
-      shelf=kwargs['shelf'],
-      price=kwargs['price'],
-      quantity=kwargs['quantity']
-  )
-  item.preferred_stores.add(kwargs['preferred_store'])
-  item.save()
-  return item
-
-
-def create_item_dependencies(seed):
-  user = get_user_model().objects.create_user(
-      username=f"testuser{seed}",
-      email=f"test{seed}@niallbyrne.ca",
-      password="test123",
-  )
-
-  store = Store.objects.create(
-      user=user,
-      name=f"Store{seed}",
-  )
-
-  shelf = Shelf.objects.create(
-      user=user,
-      name=f"Shelf{seed}",
-  )
-
-  return {
-      "user": user,
-      "store": store,
-      "shelf": shelf,
-  }
-
-
 class ItemTestHarness(TestCase):
   user1 = None
   shelf1 = None
@@ -57,18 +18,57 @@ class ItemTestHarness(TestCase):
   store2 = None
   objects = None
 
+  @staticmethod
+  def create_item(**kwargs):
+    """Create a test item."""
+    item = Item.objects.create(
+        name=kwargs['name'],
+        user=kwargs['user'],
+        shelf_life=kwargs['shelf_life'],
+        shelf=kwargs['shelf'],
+        price=kwargs['price'],
+        quantity=kwargs['quantity'],
+    )
+    item.preferred_stores.add(kwargs['preferred_store'])
+    item.save()
+    return item
+
+  @staticmethod
+  def create_item_dependencies(seed):
+    user = get_user_model().objects.create_user(
+        username=f"testuser{seed}",
+        email=f"test{seed}@niallbyrne.ca",
+        password="test123",
+    )
+
+    store = Store.objects.create(
+        user=user,
+        name=f"Store{seed}",
+    )
+
+    shelf = Shelf.objects.create(
+        user=user,
+        name=f"Shelf{seed}",
+    )
+
+    return {
+        "user": user,
+        "store": store,
+        "shelf": shelf,
+    }
+
   @classmethod
   def create_items_hook(cls):
     pass
 
   def sample_item(self, **kwargs):
     """Create a test item."""
-    item = create_item(**kwargs)
+    item = self.__class__.create_item(**kwargs)
     self.objects.append(item)
     return item
 
   def create_second_test_set(self):
-    test_data1 = create_item_dependencies(2)
+    test_data1 = self.__class__.create_item_dependencies(2)
     self.user2 = test_data1['user']
     self.store2 = test_data1['store']
     self.shelf2 = test_data1['shelf']
@@ -77,7 +77,7 @@ class ItemTestHarness(TestCase):
   @classmethod
   def setUpTestData(cls):
     cls.today = timezone.now()
-    test_data1 = create_item_dependencies(1)
+    test_data1 = cls.create_item_dependencies(1)
     cls.user1 = test_data1['user']
     cls.store1 = test_data1['store']
     cls.shelf1 = test_data1['shelf']
