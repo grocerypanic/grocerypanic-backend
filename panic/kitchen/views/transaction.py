@@ -47,14 +47,10 @@ class TransactionViewSet(
   def get_queryset(self):
     history = self.parse_history_querystring()
 
-    queryset = self.queryset
-    return queryset.\
-        filter(user=self.request.user).\
-        filter(
-          datetime__lte=timezone.now(),
-          datetime__gt=timezone.now() - datetime.timedelta(days=int(history))
-        ).\
-        order_by('-datetime')
+    return self.queryset.filter(user=self.request.user).filter(
+        datetime__date__lte=timezone.now(),
+        datetime__date__gt=timezone.now() - datetime.timedelta(days=history)
+    ).order_by('-datetime')
 
   @openapi_ready
   def perform_create(self, serializer):

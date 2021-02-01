@@ -17,33 +17,33 @@ class PrivateTCHTestHarness(TransactionTestHarness):
   @classmethod
   @freeze_time("2020-01-14")
   def create_data_hook(cls):
-    cls.serializer_data = {'item': cls.item.id, 'quantity': 3}
+    cls.serializer_data = {'item': cls.item1.id, 'quantity': 3}
     cls.today = timezone.now()
     cls.object_def1 = {
-        'user': cls.user,
+        'user': cls.user1,
         'date_object': cls.today,
-        'item': cls.item,
+        'item': cls.item1,
         'quantity': -5
     }
     cls.object_def2 = {
-        'user': cls.user,
+        'user': cls.user1,
         'date_object': cls.today - timezone.timedelta(days=5),
-        'item': cls.item,
+        'item': cls.item1,
         'quantity': -5
     }
     cls.object_def3 = {
-        'user': cls.user,
+        'user': cls.user1,
         'date_object': cls.today - timezone.timedelta(days=16),
-        'item': cls.item,
+        'item': cls.item1,
         'quantity': -5
     }
 
-    cls.MockRequest = MockRequest(cls.user)
+    cls.MockRequest = MockRequest(cls.user1)
 
   def setUp(self):
     super().setUp()
-    self.item.quantity = 2000
-    self.item.save()
+    self.item1.quantity = 2000
+    self.item1.save()
     self.populate_history()
 
   def populate_history(self):
@@ -78,14 +78,14 @@ class PrivateTCHTest(PrivateTCHTestHarness):
   def setUp(self):
     super().setUp()
     self.client = APIClient()
-    self.client.force_authenticate(self.user)
+    self.client.force_authenticate(self.user1)
 
   @freeze_time("2020-01-14")
   def test_get_item_history(self):
     """Test retrieving consumption history for the last two weeks"""
-    res = self.client.get(transaction_query_url(self.item.id))
+    res = self.client.get(transaction_query_url(self.item1.id))
     serializer = TransactionConsumptionHistorySerializer(
-        self.item,
+        self.item1,
         context={
             'request': self.MockRequest,
         },
@@ -100,7 +100,7 @@ class PrivateTCHTest(PrivateTCHTestHarness):
   @freeze_time("2020-01-14")
   def test_first_transaction(self):
     """Test identifying the first transaction date of a consumption event."""
-    res = self.client.get(transaction_query_url(self.item.id))
+    res = self.client.get(transaction_query_url(self.item1.id))
 
     self.assertEqual(res.status_code, status.HTTP_200_OK)
     self.assertEqual(
@@ -110,7 +110,7 @@ class PrivateTCHTest(PrivateTCHTestHarness):
   @freeze_time("2020-01-14")
   def test_total_consumption(self):
     """Test identifying the total consumption of a user's item."""
-    res = self.client.get(transaction_query_url(self.item.id))
+    res = self.client.get(transaction_query_url(self.item1.id))
     total_consumption = abs(
         self.object_def1['quantity'] + self.object_def2['quantity'] +
         self.object_def3['quantity']
@@ -138,19 +138,6 @@ class PrivateTCHTestAnotherUser(PrivateTCHTestHarness):
   @freeze_time("2020-01-14")
   def test_get_item_history(self):
     """Test retrieving consumption history for the last two weeks"""
-    res = self.client.get(transaction_query_url(self.item.id))
-
-    self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
-
-  @freeze_time("2020-01-14")
-  def test_first_transaction(self):
-    """Test identifying the first transaction date of a consumption event."""
-    res = self.client.get(transaction_query_url(self.item.id))
-    self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
-
-  @freeze_time("2020-01-14")
-  def test_total_consumption(self):
-    """Test identifying the total consumption of a user's item."""
-    res = self.client.get(transaction_query_url(self.item.id))
+    res = self.client.get(transaction_query_url(self.item1.id))
 
     self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)

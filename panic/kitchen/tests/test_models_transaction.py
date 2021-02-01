@@ -13,45 +13,45 @@ class TestTransaction(TransactionTestHarness):
   @freeze_time("2020-01-14")
   def create_data_hook(cls):
     cls.positive_data = {
-        'item': cls.item,
+        'item': cls.item1,
         'date_object': cls.today,
-        'user': cls.user,
+        'user': cls.user1,
         'quantity': 3
     }
     cls.negative_data = {
-        'item': cls.item,
+        'item': cls.item1,
         'date_object': cls.today,
-        'user': cls.user,
+        'user': cls.user1,
         'quantity': -3
     }
     cls.invalid_data = {
-        'item': cls.item,
+        'item': cls.item1,
         'date_object': cls.today,
-        'user': cls.user,
+        'user': cls.user1,
         'quantity': -5
     }
     cls.neutral_data = {
-        'item': cls.item,
+        'item': cls.item1,
         'date_object': cls.today,
-        'user': cls.user,
+        'user': cls.user1,
         'quantity': 0
     }
 
   def setUp(self):
-    self.item.quantity = 3
-    self.item.save()
+    self.item1.quantity = 3
+    self.item1.save()
     super().setUp()
 
   def testPositiveTransaction(self):
     self.create_test_instance(**self.positive_data)
 
-    query = Transaction.objects.filter(item=self.item)
+    query = Transaction.objects.filter(item=self.item1)
 
     assert len(query) == 1
     transaction = query[0]
-    self.assertEqual(transaction.item.id, self.item.id)
+    self.assertEqual(transaction.item.id, self.item1.id)
     self.assertEqual(transaction.datetime, self.today)
-    self.assertEqual(transaction.user.id, self.user.id)
+    self.assertEqual(transaction.user.id, self.user1.id)
     self.assertEqual(transaction.quantity, self.positive_data['quantity'])
     assert transaction.item.quantity == 6  # The modified value
 
@@ -69,13 +69,13 @@ class TestTransaction(TransactionTestHarness):
   def testNegativeTransaction(self):
     self.create_test_instance(**self.negative_data)
 
-    query = Transaction.objects.filter(item=self.item)
+    query = Transaction.objects.filter(item=self.item1)
 
     assert len(query) == 1
     transaction = query[0]
-    self.assertEqual(transaction.item.id, self.item.id)
+    self.assertEqual(transaction.item.id, self.item1.id)
     self.assertEqual(transaction.datetime, self.today)
-    self.assertEqual(transaction.user.id, self.user.id)
+    self.assertEqual(transaction.user.id, self.user1.id)
     self.assertEqual(transaction.quantity, self.negative_data['quantity'])
     assert transaction.item.quantity == 0  # The modified value
 
@@ -94,19 +94,19 @@ class TestTransaction(TransactionTestHarness):
     with self.assertRaises(ValidationError):
       self.create_test_instance(**self.invalid_data)
 
-    query = Transaction.objects.filter(item=self.item)
+    query = Transaction.objects.filter(item=self.item1)
     assert len(query) == 0
-    self.item.refresh_from_db()
-    assert self.item.quantity == 3  # The original value
+    self.item1.refresh_from_db()
+    assert self.item1.quantity == 3  # The original value
 
   def testNeutralTransaction(self):
     with self.assertRaises(ValidationError):
       self.create_test_instance(**self.neutral_data)
 
-    query = Transaction.objects.filter(item=self.item)
+    query = Transaction.objects.filter(item=self.item1)
     assert len(query) == 0
-    self.item.refresh_from_db()
-    assert self.item.quantity == 3  # The original value
+    self.item1.refresh_from_db()
+    assert self.item1.quantity == 3  # The original value
 
   def testOperationNeutral(self):
     transaction = self.create_test_instance(**self.negative_data)

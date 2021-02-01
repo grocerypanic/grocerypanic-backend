@@ -39,8 +39,6 @@ class MockExpiryCalculator:
 
 
 class TestHarnessWithTestData(TransactionTestHarness):
-  item = None
-  user = None
 
   @classmethod
   @freeze_time("2020-01-14")
@@ -50,27 +48,27 @@ class TestHarnessWithTestData(TransactionTestHarness):
     cls.yesterday = timezone.now() + timedelta(days=-1)
     cls.last_year = timezone.now() + timedelta(days=-365)
     cls.transaction1 = {
-        'item': cls.item,
+        'item': cls.item1,
         'date_object': cls.today,
-        'user': cls.user,
+        'user': cls.user1,
         'quantity': 3
     }
     cls.transaction2 = {
-        'item': cls.item,
+        'item': cls.item1,
         'date_object': cls.yesterday,
-        'user': cls.user,
+        'user': cls.user1,
         'quantity': 3
     }
     cls.transaction3 = {
-        'item': cls.item,
+        'item': cls.item1,
         'date_object': cls.tomorrow,
-        'user': cls.user,
+        'user': cls.user1,
         'quantity': 3
     }
     cls.transaction4 = {
-        'item': cls.item,
+        'item': cls.item1,
         'date_object': cls.last_year,
-        'user': cls.user,
+        'user': cls.user1,
         'quantity': 3
     }
 
@@ -82,10 +80,10 @@ class TestHarnessWithTestData(TransactionTestHarness):
 
   def tearDown(self):
     super().tearDown()
-    self.item.expired = 0
-    self.item.quantity = 3
-    self.item.next_to_expire = 0
-    self.item.save()
+    self.item1.expired = 0
+    self.item1.quantity = 3
+    self.item1.next_to_expire = 0
+    self.item1.save()
 
 
 class TestItemExpirationCalculator(TestHarnessWithTestData):
@@ -110,7 +108,7 @@ class TestItemExpirationCalculator(TestHarnessWithTestData):
     ) as reconciler:
 
       reconciler.side_effect = [3, 2, 0]
-      calculator = ItemExpirationCalculator(self.item)
+      calculator = ItemExpirationCalculator(self.item1)
       calculator.oldest = self.last_year
       history = [1, 2, 3]
       calculator.reconcile_transaction_history(history)
@@ -133,7 +131,7 @@ class TestItemExpirationCalculator(TestHarnessWithTestData):
     ) as reconciler:
 
       reconciler.side_effect = [3, 2, 0]
-      calculator = ItemExpirationCalculator(self.item)
+      calculator = ItemExpirationCalculator(self.item1)
       calculator.next_to_expire = 1
       calculator.oldest = self.last_year
       history = [1, 2, 3]
@@ -151,42 +149,42 @@ class TestItemExpirationCalculator(TestHarnessWithTestData):
     oldest = self.last_year
     expired = 5
 
-    calculator = ItemExpirationCalculator(self.item)
+    calculator = ItemExpirationCalculator(self.item1)
     calculator.next_to_expire = next_to_expire
     calculator.oldest = oldest
     calculator.expired = expired
 
     calculator.write_expiry_to_item_model()
 
-    assert self.item.next_expiry_quantity == next_to_expire
-    assert self.item.next_expiry_date == (
-        self.last_year + timedelta(days=self.item.shelf_life)
+    assert self.item1.next_expiry_quantity == next_to_expire
+    assert self.item1.next_expiry_date == (
+        self.last_year + timedelta(days=self.item1.shelf_life)
     )
-    assert self.item.expired == expired
+    assert self.item1.expired == expired
 
   def test_write_expiry_to_item_model_neg_expired_items(self):
     next_to_expire = 1
     oldest = self.last_year
     expired = -5
 
-    calculator = ItemExpirationCalculator(self.item)
+    calculator = ItemExpirationCalculator(self.item1)
     calculator.next_to_expire = next_to_expire
     calculator.oldest = oldest
     calculator.expired = expired
 
     calculator.write_expiry_to_item_model()
 
-    assert self.item.next_expiry_quantity == next_to_expire
-    assert self.item.next_expiry_date == (
-        self.last_year + timedelta(days=self.item.shelf_life)
+    assert self.item1.next_expiry_quantity == next_to_expire
+    assert self.item1.next_expiry_date == (
+        self.last_year + timedelta(days=self.item1.shelf_life)
     )
-    assert self.item.expired == 0
+    assert self.item1.expired == 0
 
   @freeze_time("2020-01-14")
   def test_reconcile_single_transaction_pos_qty(self):
     batch, total_quantity = self.create_batch_with_total()
 
-    calculator = ItemExpirationCalculator(self.item)
+    calculator = ItemExpirationCalculator(self.item1)
     result = calculator.reconcile_single_transaction(batch['yesterday'])
     self.assertEqual(result, total_quantity)
     self.assertEqual(calculator.expired, 0)
@@ -195,7 +193,7 @@ class TestItemExpirationCalculator(TestHarnessWithTestData):
   def test_reconcile_single_transaction_pos_qty_future(self):
     batch, total_quantity = self.create_batch_with_total()
 
-    calculator = ItemExpirationCalculator(self.item)
+    calculator = ItemExpirationCalculator(self.item1)
     result = calculator.reconcile_single_transaction(batch['yesterday'])
     self.assertEqual(result, total_quantity)
     self.assertEqual(calculator.expired, batch['yesterday'].quantity)
@@ -207,7 +205,7 @@ class TestItemExpirationCalculator(TestHarnessWithTestData):
     batch['yesterday'].quantity = -3
     batch['yesterday'].save()
 
-    calculator = ItemExpirationCalculator(self.item)
+    calculator = ItemExpirationCalculator(self.item1)
     result = calculator.reconcile_single_transaction(batch['yesterday'])
     self.assertEqual(result, total_quantity)
     self.assertEqual(calculator.expired, -3)
@@ -219,7 +217,7 @@ class TestItemExpirationCalculator(TestHarnessWithTestData):
     batch['yesterday'].quantity = -3
     batch['yesterday'].save()
 
-    calculator = ItemExpirationCalculator(self.item)
+    calculator = ItemExpirationCalculator(self.item1)
     result = calculator.reconcile_single_transaction(batch['yesterday'])
     self.assertEqual(result, total_quantity)
     self.assertEqual(calculator.expired, -3)
@@ -229,20 +227,20 @@ class TestExpiryManager(TestHarnessWithTestData):
 
   def test_get_item_history_is_correct_order(self):
     batch = self.create_timebatch()
-    query_set = Transaction.expiration.get_item_history(self.item)
+    query_set = Transaction.expiration.get_item_history(self.item1)
     self.assertEqual(batch['yesterday'].id, query_set[2].id)
     self.assertEqual(batch['today'].id, query_set[1].id)
     self.assertEqual(batch['tomorrow'].id, query_set[0].id)
 
   def test_get_item_history_is_correct_type(self):
     self.create_test_instance(**self.transaction1)
-    query_set = Transaction.expiration.get_item_history(self.item)
+    query_set = Transaction.expiration.get_item_history(self.item1)
     assert len(query_set) == 1
     self.assertIsInstance(query_set[0], Transaction)
 
   def test_update_with_non_zero_quantity(self):
     transaction = self.create_test_instance(**self.transaction1)
-    MockExpiryCalculator.configure(self.item, 3)
+    MockExpiryCalculator.configure(self.item1, 3)
     mock_query_set = [1, 2, 3]
 
     with patch(
@@ -266,7 +264,7 @@ class TestExpiryManager(TestHarnessWithTestData):
   def test_update_with_zero_quantity(self):
     transaction = self.create_test_instance(**self.transaction1)
 
-    MockExpiryCalculator.configure(self.item, 0)
+    MockExpiryCalculator.configure(self.item1, 0)
 
     with patch(
         kitchen.__name__ +
@@ -292,18 +290,20 @@ class TestConsumptionHistoryManagerTwoWeeks(TestHarnessWithTestData):
 
     last_week = timezone.now() - timedelta(days=8)
     transaction5 = {
-        'item': self.item,
+        'item': self.item1,
         'date_object': last_week,
-        'user': self.user,
+        'user': self.user1,
         'quantity': 3
     }
 
     self.create_test_instance(**transaction5)
 
-    received = Transaction.consumption.get_last_two_weeks(self.item, self.user)
+    received = Transaction.consumption.get_last_two_weeks(
+        self.item1, self.user1
+    )
     expected = Transaction.objects.filter(
-        user=self.user,
-        item=self.item,
+        user=self.user1,
+        item=self.item1,
         datetime__lte=start_of_window,
         datetime__gt=end_of_window
     ).order_by('-datetime')
@@ -313,7 +313,9 @@ class TestConsumptionHistoryManagerTwoWeeks(TestHarnessWithTestData):
   @freeze_time("2020-01-14")
   def test_last_two_weeks_no_history(self):
 
-    received = Transaction.consumption.get_last_two_weeks(self.item, self.user)
+    received = Transaction.consumption.get_last_two_weeks(
+        self.item1, self.user1
+    )
     self.assertQuerysetEqual(received, map(repr, []))
 
   @freeze_time("2020-01-14")
@@ -321,7 +323,7 @@ class TestConsumptionHistoryManagerTwoWeeks(TestHarnessWithTestData):
     self.create_timebatch()
     new_user = self.create_another_user(2)
 
-    received = Transaction.consumption.get_last_two_weeks(self.item, new_user)
+    received = Transaction.consumption.get_last_two_weeks(self.item1, new_user)
     self.assertQuerysetEqual(received, map(repr, []))
 
 
@@ -332,9 +334,9 @@ class TestConsumptionHistoryManagerStats(TransactionTestHarness):
   def create_data_hook(cls):
 
     cls.initial_transaction = {
-        'item': cls.item,
+        'item': cls.item1,
         'date_object': timezone.now() + timedelta(days=-90),
-        'user': cls.user,
+        'user': cls.user1,
         'quantity': 3000
     }
 
@@ -352,26 +354,26 @@ class TestConsumptionHistoryManagerStats(TransactionTestHarness):
     self.create_test_instance(**self.initial_transaction)
     for value in self.dates.values():
       self.create_test_instance(
-          item=self.item, date_object=value, user=self.user, quantity=-3
+          item=self.item1, date_object=value, user=self.user1, quantity=-3
       )
 
   def setUp(self):
-    self.item.quantity = 0
-    self.item.save()
+    self.item1.quantity = 0
+    self.item1.save()
     super().setUp()
 
   @freeze_time("2020-01-14")
   def test_get_first_consumption(self):
     self.create_transaction_history()
     first_consumption = Transaction.objects.filter(
-        item=self.item.id,
+        item=self.item1.id,
         quantity__lt=0,
     ).order_by('datetime',).first().datetime
 
     self.assertEqual(
         first_consumption,
         Transaction.consumption.get_first_consumption(
-            self.item.id, self.user.id
+            self.item1.id, self.user1.id
         )
     )
 
@@ -381,7 +383,7 @@ class TestConsumptionHistoryManagerStats(TransactionTestHarness):
 
     self.assertIsNone(
         Transaction.consumption.get_first_consumption(
-            self.item.id, self.user.id
+            self.item1.id, self.user1.id
         )
     )
 
@@ -391,7 +393,7 @@ class TestConsumptionHistoryManagerStats(TransactionTestHarness):
     new_user = self.create_another_user(2)
 
     self.assertIsNone(
-        Transaction.consumption.get_first_consumption(self.item.id, new_user)
+        Transaction.consumption.get_first_consumption(self.item1.id, new_user)
     )
 
   @freeze_time("2020-01-14")
@@ -402,7 +404,7 @@ class TestConsumptionHistoryManagerStats(TransactionTestHarness):
     self.assertEqual(
         expected,
         Transaction.consumption.get_total_consumption(
-            self.item.id, self.user.id
+            self.item1.id, self.user1.id
         )
     )
 
@@ -413,7 +415,7 @@ class TestConsumptionHistoryManagerStats(TransactionTestHarness):
     self.assertEqual(
         0,
         Transaction.consumption.get_total_consumption(
-            self.item.id, self.user.id
+            self.item1.id, self.user1.id
         )
     )
 
@@ -424,5 +426,5 @@ class TestConsumptionHistoryManagerStats(TransactionTestHarness):
 
     self.assertEqual(
         0,
-        Transaction.consumption.get_total_consumption(self.item.id, new_user)
+        Transaction.consumption.get_total_consumption(self.item1.id, new_user)
     )

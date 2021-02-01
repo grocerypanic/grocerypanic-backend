@@ -25,17 +25,17 @@ class TestTransactionSerializer(TransactionTestHarness):
     cls.fields = {"name": 255}
 
     cls.data = {
-        'item': cls.item,
+        'item': cls.item1,
         'date_object': cls.today,
-        'user': cls.user,
+        'user': cls.user1,
         'quantity': 3
     }
     cls.serializer_data = {
-        'item': cls.item.id,
+        'item': cls.item1.id,
         'datetime': cls.today,
         'quantity': 3
     }
-    cls.request = MockRequest(cls.user)
+    cls.request = MockRequest(cls.user1)
 
   @staticmethod
   def generate_overload(fields):
@@ -48,8 +48,8 @@ class TestTransactionSerializer(TransactionTestHarness):
 
   def setUp(self):
     self.objects = list()
-    self.item.quantity = 3
-    self.item.save()
+    self.item1.quantity = 3
+    self.item1.save()
 
   def tearDown(self):
     for obj in self.objects:
@@ -61,7 +61,7 @@ class TestTransactionSerializer(TransactionTestHarness):
     deserialized = serialized.data
 
     self.assertEqual(deserialize_datetime(deserialized['datetime']), self.today)
-    self.assertEqual(deserialized['item'], self.item.id)
+    self.assertEqual(deserialized['item'], self.item1.id)
     self.assertEqual(deserialized['quantity'], self.data['quantity'])
     assert 'user' not in deserialized
 
@@ -73,13 +73,13 @@ class TestTransactionSerializer(TransactionTestHarness):
     serialized.is_valid(raise_exception=True)
     serialized.save()
 
-    query = Transaction.objects.filter(user=self.user.id)
+    query = Transaction.objects.filter(user=self.user1.id)
 
     assert len(query) == 1
     transaction = query[0]
 
-    self.assertEqual(transaction.user.id, self.user.id)
-    self.assertEqual(transaction.item.id, self.item.id)
+    self.assertEqual(transaction.user.id, self.user1.id)
+    self.assertEqual(transaction.item.id, self.item1.id)
     self.assertEqual(transaction.datetime, self.today)
     self.assertEqual(transaction.quantity, self.serializer_data['quantity'])
 
@@ -106,17 +106,17 @@ class TestTransactionConsumptionHistorySerializer(TransactionTestHarness):
     cls.fields = {"name": 255}
 
     cls.data = {
-        'item': cls.item,
+        'item': cls.item1,
         'date_object': cls.today,
-        'user': cls.user,
+        'user': cls.user1,
         'quantity': -3
     }
-    cls.request = MockRequest(cls.user)
+    cls.request = MockRequest(cls.user1)
 
   def setUp(self):
     self.objects = list()
-    self.item.quantity = 3
-    self.item.save()
+    self.item1.quantity = 3
+    self.item1.save()
 
   def tearDown(self):
     for obj in self.objects:
@@ -129,7 +129,7 @@ class TestTransactionConsumptionHistorySerializer(TransactionTestHarness):
     deserialized_transaction = TransactionSerializer([transaction], many=True)
 
     serialized = self.serializer(
-        self.item,
+        self.item1,
         context={'request': self.request},
     )
     deserialized = serialized.data
@@ -144,7 +144,7 @@ class TestTransactionConsumptionHistorySerializer(TransactionTestHarness):
     self.create_test_instance(**self.data)
 
     serialized = self.serializer(
-        self.item,
+        self.item1,
         context={'request': self.request},
     )
     deserialized = serialized.data
@@ -159,7 +159,7 @@ class TestTransactionConsumptionHistorySerializer(TransactionTestHarness):
     self.create_test_instance(**self.data)
 
     serialized = self.serializer(
-        self.item,
+        self.item1,
         context={'request': self.request},
     )
     deserialized = serialized.data

@@ -1,6 +1,5 @@
 """Test the Transaction API."""
 
-from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
@@ -9,11 +8,9 @@ from freezegun import freeze_time
 from rest_framework import status
 from rest_framework.test import APIClient
 
-from ..models.item import Item
-from ..models.shelf import Shelf
-from ..models.store import Store
 from ..models.transaction import Transaction
 from ..serializers.transaction import TransactionSerializer
+from .fixtures.transaction import TransactionTestHarness
 
 TRANSACTION_URL = reverse("kitchen:transactions-list")
 
@@ -35,97 +32,57 @@ class PublicItemTest(TestCase):
     self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
 
 
-class PrivateItemTest(TestCase):
+class PrivateItemTest(TransactionTestHarness):
   """Test the authorized Transaction API"""
-
-  # pylint: disable=R0913
-  def sample_transaction(self, user, item, transaction_date, quantity):
-    """Create a test item."""
-    if user is None:
-      user = self.user
-    transaction = Transaction.objects.create(
-        item=item,
-        user=user,
-        datetime=transaction_date,
-        quantity=quantity,
-    )
-    self.objects.append(transaction)
-    return transaction
+  item2 = None
+  user2 = None
 
   @classmethod
-  def setUpTestData(cls):
-    cls.serializer = TransactionSerializer
+  @freeze_time("2020-01-14")
+  def create_data_hook(cls):
     cls.today = timezone.now()
-    cls.fields = {"name": 255}
-    cls.user = get_user_model().objects.create_user(
-        username="testuser",
-        email="test@niallbyrne.ca",
-        password="test123",
-    )
-    cls.store = Store.objects.create(
-        user=cls.user,
-        name="No Frills",
-    )
-    cls.shelf = Shelf.objects.create(
-        user=cls.user,
-        name="Pantry",
-    )
-    cls.item1 = Item.objects.create(
-        name="Canned Beans",
-        shelf_life=99,
-        user=cls.user,
-        shelf=cls.shelf,
-        price=2.00,
-        quantity=3
-    )
-    cls.item1.preferred_stores.add(cls.store)
-    cls.item1.save()
-    cls.item2 = Item.objects.create(
-        name="Bananas",
-        shelf_life=99,
-        user=cls.user,
-        shelf=cls.shelf,
-        price=2.00,
-        quantity=3
-    )
-    cls.item2.preferred_stores.add(cls.store)
-    cls.item2.save()
+
     cls.serializer_data = {'item': cls.item1.id, 'quantity': 3}
     cls.object_def1 = {
-        'user': cls.user,
-        'transaction_date': timezone.now(),
+        'user': cls.user1,
+        'date_object': timezone.now(),
         'item': cls.item1,
         'quantity': 5
     }
     cls.object_def2 = {
-        'user': cls.user,
-        'transaction_date': timezone.now(),
+        'user': cls.user1,
+        'date_object': timezone.now() + timezone.timedelta(seconds=1),
         'item': cls.item1,
         'quantity': 5
     }
     cls.object_def3 = {
-        'user': cls.user,
-        'transaction_date': timezone.now(),
+        'user': cls.user1,
+        'date_object': timezone.now() + timezone.timedelta(seconds=2),
         'item': cls.item2,
         'quantity': 5
     }
     cls.object_def4 = {
-        'user': cls.user,
-        'transaction_date': timezone.now() - timezone.timedelta(days=11),
+        'user': cls.user1,
+        'date_object': timezone.now() - timezone.timedelta(days=11),
         'item': cls.item1,
         'quantity': 5
     }
 
+  @classmethod
+  def setUpTestData(cls):
+    test_data = cls.create_dependencies(2)
+    cls.user2 = test_data['user']
+    cls.store2 = test_data['store']
+    cls.shelf2 = test_data['shelf']
+    cls.item2 = test_data['item']
+    super().setUpTestData()
+
   def setUp(self):
-    self.objects = list()
+    super().setUp()
     self.item1.quantity = 3
     self.item1.save()
     self.client = APIClient()
-    self.client.force_authenticate(self.user)
-
-  def tearDown(self) -> None:
-    for obj in self.objects:
-      obj.delete()
+    self.client.force_authenticate(self.user1)
 
   @freeze_time("2014-01-01")
   def test_create_transaction(self):
@@ -138,7 +95,7 @@ class PrivateItemTest(TestCase):
     assert len(items) == 1
     transaction = items[0]
 
-    self.assertEqual(transaction.user.id, self.user.id)
+    self.assertEqual(transaction.user.id, self.user1.id)
     self.assertEqual(transaction.item.id, self.item1.id)
     self.assertEqual(transaction.datetime, timezone.now())
     self.assertEqual(transaction.quantity, self.serializer_data['quantity'])
@@ -146,18 +103,19 @@ class PrivateItemTest(TestCase):
 
   def test_list_all_transactions_without_item_filter(self):
     """Test retrieving a list of all user transactions."""
-    self.sample_transaction(**self.object_def1)
-    self.sample_transaction(**self.object_def2)
-    self.sample_transaction(**self.object_def3)
+    self.create_test_instance(**self.object_def1)
+    self.create_test_instance(**self.object_def2)
+    self.create_test_instance(**self.object_def3)
 
     res = self.client.get(transaction_query_url())
 
     self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
 
+  @freeze_time("2020-01-14")
   def test_list_all_transactions(self):
     """Test retrieving a list of all user transactions."""
-    self.sample_transaction(**self.object_def1)
-    self.sample_transaction(**self.object_def2)
+    self.create_test_instance(**self.object_def1)
+    self.create_test_instance(**self.object_def2)
 
     res = self.client.get(transaction_query_url({"item": self.item1.id}))
 
@@ -168,11 +126,12 @@ class PrivateItemTest(TestCase):
     self.assertEqual(res.status_code, status.HTTP_200_OK)
     self.assertEqual(res.data, serializer.data)
 
+  @freeze_time("2020-01-14")
   def test_list_transactions_by_item_filter(self):
     """Test retrieving a list of transactions by item id."""
-    self.sample_transaction(**self.object_def1)
-    self.sample_transaction(**self.object_def2)
-    self.sample_transaction(**self.object_def3)
+    self.create_test_instance(**self.object_def1)
+    self.create_test_instance(**self.object_def2)
+    self.create_test_instance(**self.object_def3)
 
     res = self.client.get(transaction_query_url({"item": self.item1.id}))
 
@@ -183,11 +142,12 @@ class PrivateItemTest(TestCase):
     self.assertEqual(res.status_code, status.HTTP_200_OK)
     self.assertEqual(res.data, serializer.data)
 
+  @freeze_time("2020-01-14")
   def test_list_transactions_by_another_item_filter(self):
     """Test retrieving a list of transactions by item id."""
-    self.sample_transaction(**self.object_def1)
-    self.sample_transaction(**self.object_def2)
-    self.sample_transaction(**self.object_def3)
+    self.create_test_instance(**self.object_def1)
+    self.create_test_instance(**self.object_def2)
+    self.create_test_instance(**self.object_def3)
 
     res = self.client.get(transaction_query_url({"item": self.item2.id}))
 
@@ -198,11 +158,12 @@ class PrivateItemTest(TestCase):
     self.assertEqual(res.status_code, status.HTTP_200_OK)
     self.assertEqual(res.data, serializer.data)
 
+  @freeze_time("2020-01-14")
   def test_list_transactions_by_history_manual_value(self):
     """Test retrieving the last 10 days worth of transactions."""
-    self.sample_transaction(**self.object_def1)
-    self.sample_transaction(**self.object_def2)
-    self.sample_transaction(**self.object_def4)
+    self.create_test_instance(**self.object_def1)
+    self.create_test_instance(**self.object_def2)
+    self.create_test_instance(**self.object_def4)
 
     res = self.client.get(
         transaction_query_url({
@@ -212,22 +173,24 @@ class PrivateItemTest(TestCase):
     )
     self.assertEqual(len(res.data), 2)
 
+  @freeze_time("2020-01-14")
   def test_list_transactions_by_history_default_value(self):
     """Test retrieving the default number of days of transactions."""
-    self.sample_transaction(**self.object_def1)
-    self.sample_transaction(**self.object_def2)
-    self.sample_transaction(**self.object_def4)
+    self.create_test_instance(**self.object_def1)
+    self.create_test_instance(**self.object_def2)
+    self.create_test_instance(**self.object_def4)
 
     res = self.client.get(transaction_query_url({
         "item": self.item1.id,
     }))
     self.assertEqual(len(res.data), 3)
 
+  @freeze_time("2020-01-14")
   def test_list_transactions_by_history_invalid_value(self):
     """Test fall back to default when an invalid number of days is specified."""
-    self.sample_transaction(**self.object_def1)
-    self.sample_transaction(**self.object_def2)
-    self.sample_transaction(**self.object_def4)
+    self.create_test_instance(**self.object_def1)
+    self.create_test_instance(**self.object_def2)
+    self.create_test_instance(**self.object_def4)
 
     res = self.client.get(
         transaction_query_url({

@@ -12,9 +12,10 @@ from .abc_model_fixture import KitchenModelTestFixture
 
 
 class TransactionTestHarness(KitchenModelTestFixture, TestCase):
-  item = None
-  user = None
+  item1 = None
+  user1 = None
   objects = None
+  today = None
 
   @staticmethod
   def create_instance(**kwargs):
@@ -83,10 +84,10 @@ class TransactionTestHarness(KitchenModelTestFixture, TestCase):
   def setUpTestData(cls):
     cls.today = timezone.now()
     test_data = cls.create_dependencies(1)
-    cls.user = test_data['user']
-    cls.store = test_data['store']
-    cls.shelf = test_data['shelf']
-    cls.item = test_data['item']
+    cls.user1 = test_data['user']
+    cls.store1 = test_data['store']
+    cls.shelf1 = test_data['shelf']
+    cls.item1 = test_data['item']
     cls.create_data_hook()
 
   def setUp(self):
