@@ -10,12 +10,8 @@ from rest_framework import mixins, viewsets
 
 from spa_security.auth_cookie import CSRFMixin
 from ..filters import TransactionFilter
-from ..models.item import Item
 from ..models.transaction import Transaction
-from ..serializers.transaction import (
-    TransactionConsumptionHistorySerializer,
-    TransactionSerializer,
-)
+from ..serializers.transaction import TransactionSerializer
 from ..swagger import custom_transaction_view_parm, openapi_ready
 
 
@@ -56,13 +52,3 @@ class TransactionViewSet(
   def perform_create(self, serializer):
     """Create a new Transaction"""
     serializer.save(user=self.request.user)
-
-
-class TransactionConsumptionHistoryViewSet(
-    CSRFMixin,
-    mixins.RetrieveModelMixin,
-    viewsets.GenericViewSet,
-):
-  """Transaction Consumption History API View"""
-  serializer_class = TransactionConsumptionHistorySerializer
-  queryset = Item.objects.all()

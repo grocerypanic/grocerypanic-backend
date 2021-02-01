@@ -12,6 +12,12 @@ router = routers.SimpleRouter()
 router.register("items", item.ItemViewSet, basename="items")
 router.register("items", item.ItemListCreateViewSet, basename="items")
 
+router.register(
+    "items/consumption",
+    item.ItemConsumptionHistoryViewSet,
+    basename="item-consumption",
+)
+
 router.register("shelves", shelf.ShelfViewSet, basename="shelves")
 router.register("shelves", shelf.ShelfListCreateViewSet, basename="shelves")
 
@@ -28,11 +34,6 @@ router.register(
     "transactions",
     transaction.TransactionViewSet,
     basename="transactions",
-)
-router.register(
-    "transaction-consumption-history",
-    transaction.TransactionConsumptionHistoryViewSet,
-    basename="transaction-consumption-history",
 )
 
 urlpatterns = [

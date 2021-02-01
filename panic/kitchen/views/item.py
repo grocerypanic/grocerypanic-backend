@@ -7,7 +7,7 @@ from spa_security.auth_cookie import CSRFMixin
 from ..filters import ItemFilter
 from ..models.item import Item
 from ..pagination import PagePagination
-from ..serializers.item import ItemSerializer
+from ..serializers.item import ItemConsumptionHistorySerializer, ItemSerializer
 from ..swagger import openapi_ready
 
 
@@ -54,3 +54,13 @@ class ItemListCreateViewSet(
   def perform_create(self, serializer):
     """Create a new Item"""
     serializer.save(user=self.request.user)
+
+
+class ItemConsumptionHistoryViewSet(
+    CSRFMixin,
+    mixins.RetrieveModelMixin,
+    viewsets.GenericViewSet,
+):
+  """Item Consumption History API View"""
+  serializer_class = ItemConsumptionHistorySerializer
+  queryset = Item.objects.all()

@@ -1,12 +1,18 @@
 """Test the Item Serializer."""
 
+import json
+
+from django.utils import timezone
+from freezegun import freeze_time
 from rest_framework.serializers import ValidationError
 
 from ..models.item import Item
 from ..serializers import DUPLICATE_OBJECT_MESSAGE
-from ..serializers.item import ItemSerializer
+from ..serializers.item import ItemConsumptionHistorySerializer, ItemSerializer
+from ..serializers.transaction import TransactionSerializer
 from .fixtures.django import MockRequest
 from .fixtures.item import ItemTestHarness
+from .fixtures.transaction import TransactionTestHarness
 
 
 class TestItem(ItemTestHarness):
@@ -110,3 +116,77 @@ class TestItem(ItemTestHarness):
             data=local_data,
         )
         serialized.is_valid(raise_exception=True)
+
+
+class TestItemConsumptionHistorySerializer(TransactionTestHarness):
+
+  @classmethod
+  @freeze_time("2020-01-14")
+  def create_data_hook(cls):
+    cls.serializer = ItemConsumptionHistorySerializer
+    cls.today = timezone.now()
+    cls.fields = {"name": 255}
+
+    cls.data = {
+        'item': cls.item1,
+        'date_object': cls.today,
+        'user': cls.user1,
+        'quantity': -3
+    }
+    cls.request = MockRequest(cls.user1)
+
+  def setUp(self):
+    self.objects = list()
+    self.item1.quantity = 3
+    self.item1.save()
+
+  def tearDown(self):
+    for obj in self.objects:
+      obj.delete()
+
+  @freeze_time("2020-01-14")
+  def test_deserialize_last_two_weeks(self):
+
+    transaction = self.create_test_instance(**self.data)
+    deserialized_transaction = TransactionSerializer([transaction], many=True)
+
+    serialized = self.serializer(
+        self.item1,
+        context={'request': self.request},
+    )
+    deserialized = serialized.data
+
+    self.assertEqual(
+        json.dumps(deserialized['consumption_last_two_weeks']),
+        json.dumps(deserialized_transaction.data),
+    )
+
+  @freeze_time("2020-01-14")
+  def test_deserialize_consumption_per_week(self):
+    self.create_test_instance(**self.data)
+
+    serialized = self.serializer(
+        self.item1,
+        context={'request': self.request},
+    )
+    deserialized = serialized.data
+
+    self.assertEqual(
+        deserialized['first_consumption_date'],
+        self.today,
+    )
+
+  @freeze_time("2020-01-14")
+  def test_deserialize_consumption_per_month(self):
+    self.create_test_instance(**self.data)
+
+    serialized = self.serializer(
+        self.item1,
+        context={'request': self.request},
+    )
+    deserialized = serialized.data
+
+    self.assertEqual(
+        deserialized['total_consumption'],
+        3,
+    )

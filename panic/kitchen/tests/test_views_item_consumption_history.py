@@ -7,7 +7,7 @@ from freezegun import freeze_time
 from rest_framework import status
 from rest_framework.test import APIClient
 
-from ..serializers.transaction import TransactionConsumptionHistorySerializer
+from ..serializers.item import ItemConsumptionHistorySerializer
 from .fixtures.django import MockRequest
 from .fixtures.transaction import TransactionTestHarness
 
@@ -52,8 +52,8 @@ class PrivateTCHTestHarness(TransactionTestHarness):
     self.create_test_instance(**self.object_def3)
 
 
-def transaction_query_url(item):  # pylint: disable=W0102
-  return reverse("kitchen:transaction-consumption-history-detail", args=[item])
+def transaction_query_url(item):
+  return reverse("kitchen:item-consumption-detail", args=[item])
 
 
 class PublicTCHTest(TestCase):
@@ -61,10 +61,6 @@ class PublicTCHTest(TestCase):
 
   def setUp(self) -> None:
     self.client = APIClient()
-
-  def test_todo(self):
-    assert True is False
-    # TODO: refactor this tch view and serializer to work around the item model
 
   def test_get_login_required(self):
     res = self.client.get(transaction_query_url(0))
@@ -84,7 +80,7 @@ class PrivateTCHTest(PrivateTCHTestHarness):
   def test_get_item_history(self):
     """Test retrieving consumption history for the last two weeks"""
     res = self.client.get(transaction_query_url(self.item1.id))
-    serializer = TransactionConsumptionHistorySerializer(
+    serializer = ItemConsumptionHistorySerializer(
         self.item1,
         context={
             'request': self.MockRequest,

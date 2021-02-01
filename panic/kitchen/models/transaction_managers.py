@@ -159,33 +159,30 @@ class ExpiryManager(models.Manager):
 
 class ConsumptionHistoryManager(models.Manager):
 
-  def get_first_consumption(self, item_id, user_id):
+  def get_first_consumption(self, item_id):
     query_set = super().get_queryset().filter(
         quantity__lt=0,
-        user=user_id,
         item=item_id,
     ).values('datetime').order_by('datetime').first()
     if query_set:
       return query_set['datetime']
     return None
 
-  def get_last_two_weeks(self, item_id, user_id):
+  def get_last_two_weeks(self, item_id):
     start_of_window = now()
     end_of_window = start_of_window - timedelta(
         days=int(settings.TRANSACTION_HISTORY_MAX)
     )
 
     return super().get_queryset().filter(
-        user=user_id,
         item=item_id,
         datetime__date__lte=start_of_window,
         datetime__date__gt=end_of_window
     ).order_by('-datetime')
 
-  def get_total_consumption(self, item_id, user_id):
+  def get_total_consumption(self, item_id):
     quantity = super().get_queryset().filter(
         quantity__lt=0,
-        user=user_id,
         item=item_id,
     ).aggregate(quantity=Sum('quantity'))['quantity']
     if quantity:

@@ -298,9 +298,7 @@ class TestConsumptionHistoryManagerTwoWeeks(TestHarnessWithTestData):
 
     self.create_test_instance(**transaction5)
 
-    received = Transaction.consumption.get_last_two_weeks(
-        self.item1, self.user1
-    )
+    received = Transaction.consumption.get_last_two_weeks(self.item1)
     expected = Transaction.objects.filter(
         user=self.user1,
         item=self.item1,
@@ -313,17 +311,7 @@ class TestConsumptionHistoryManagerTwoWeeks(TestHarnessWithTestData):
   @freeze_time("2020-01-14")
   def test_last_two_weeks_no_history(self):
 
-    received = Transaction.consumption.get_last_two_weeks(
-        self.item1, self.user1
-    )
-    self.assertQuerysetEqual(received, map(repr, []))
-
-  @freeze_time("2020-01-14")
-  def test_last_two_weeks_another_user(self):
-    self.create_timebatch()
-    new_user = self.create_another_user(2)
-
-    received = Transaction.consumption.get_last_two_weeks(self.item1, new_user)
+    received = Transaction.consumption.get_last_two_weeks(self.item1)
     self.assertQuerysetEqual(received, map(repr, []))
 
 
@@ -372,9 +360,7 @@ class TestConsumptionHistoryManagerStats(TransactionTestHarness):
 
     self.assertEqual(
         first_consumption,
-        Transaction.consumption.get_first_consumption(
-            self.item1.id, self.user1.id
-        )
+        Transaction.consumption.get_first_consumption(self.item1.id)
     )
 
   @freeze_time("2020-01-14")
@@ -382,18 +368,7 @@ class TestConsumptionHistoryManagerStats(TransactionTestHarness):
     assert Transaction.objects.all().count() == 0
 
     self.assertIsNone(
-        Transaction.consumption.get_first_consumption(
-            self.item1.id, self.user1.id
-        )
-    )
-
-  @freeze_time("2020-01-14")
-  def test_get_first_consumption_another_user(self):
-    self.create_transaction_history()
-    new_user = self.create_another_user(2)
-
-    self.assertIsNone(
-        Transaction.consumption.get_first_consumption(self.item1.id, new_user)
+        Transaction.consumption.get_first_consumption(self.item1.id)
     )
 
   @freeze_time("2020-01-14")
@@ -402,10 +377,7 @@ class TestConsumptionHistoryManagerStats(TransactionTestHarness):
     expected = len(self.dates) * 3
 
     self.assertEqual(
-        expected,
-        Transaction.consumption.get_total_consumption(
-            self.item1.id, self.user1.id
-        )
+        expected, Transaction.consumption.get_total_consumption(self.item1.id)
     )
 
   @freeze_time("2020-01-14")
@@ -413,18 +385,5 @@ class TestConsumptionHistoryManagerStats(TransactionTestHarness):
     assert Transaction.objects.all().count() == 0
 
     self.assertEqual(
-        0,
-        Transaction.consumption.get_total_consumption(
-            self.item1.id, self.user1.id
-        )
-    )
-
-  @freeze_time("2020-01-14")
-  def test_get_total_consumption_another_user(self):
-    self.create_transaction_history()
-    new_user = self.create_another_user(2)
-
-    self.assertEqual(
-        0,
-        Transaction.consumption.get_total_consumption(self.item1.id, new_user)
+        0, Transaction.consumption.get_total_consumption(self.item1.id)
     )
