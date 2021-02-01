@@ -10,7 +10,7 @@ from ..models.item import Item
 from ..serializers.item import ItemSerializer
 from .fixtures.item import ItemTestHarness
 
-ITEM_URL = reverse("kitchen:items-list")
+ITEM_URL = reverse("v1:items-list")
 
 
 class PrivateItemTestHarness(ItemTestHarness):

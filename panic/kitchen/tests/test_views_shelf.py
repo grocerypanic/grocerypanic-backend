@@ -11,7 +11,7 @@ from ..models.shelf import Shelf
 from ..serializers.shelf import ShelfSerializer
 from .fixtures.shelf import ShelfTestHarness
 
-SHELF_URL = reverse("kitchen:shelves-list")
+SHELF_URL = reverse("v1:shelves-list")
 
 
 class AnotherUserTestHarness(ShelfTestHarness):

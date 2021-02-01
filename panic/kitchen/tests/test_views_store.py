@@ -11,7 +11,7 @@ from ..models.store import Store
 from ..serializers.store import StoreSerializer
 from .fixtures.store import StoreTestHarness
 
-STORE_URL = reverse("kitchen:stores-list")
+STORE_URL = reverse("v1:stores-list")
 
 
 class AnotherUserTestHarness(StoreTestHarness):

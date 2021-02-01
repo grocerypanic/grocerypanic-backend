@@ -10,7 +10,7 @@ from rest_framework.test import APIClient
 from ..models.suggested import SuggestedItem
 from ..serializers.suggested import SuggestedItemSerializer
 
-LIST_URL = reverse("kitchen:suggestions-list")
+LIST_URL = reverse("v1:suggestions-list")
 
 
 def item_url_with_params(query_kwargs):

@@ -1,6 +1,5 @@
 """panic URL Configuration"""
 
-from allauth.socialaccount.views import connections, signup
 from django.conf import settings
 from django.conf.urls import url
 from django.contrib import admin
@@ -9,23 +8,14 @@ from drf_yasg import openapi
 from drf_yasg.views import get_schema_view
 from rest_framework import permissions
 
+from .v1_api import v1_urlpatterns
+
 urlpatterns = [
     path("", include("appengine.urls")),
-    path("api/v1/", include("kitchen.urls")),
-    path("api/v1/auth/", include('dj_rest_auth.urls')),
-    path(
-        "api/v1/auth/registration/", include('dj_rest_auth.registration.urls')
-    ),
-    path("api/v1/auth/", include("spa_security.urls")),
-    path("api/v1/auth/social/", include("social_accounts.urls")),
-    path("api/v1/auth/social/signup/", signup, name='socialaccount_signup'),
-    path(
-        "api/v1/auth/social/connect/",
-        connections,
-        name='socialaccount_connections'
-    ),
     path('watchman/', include("watchman.urls")),
 ]
+
+urlpatterns += v1_urlpatterns
 
 if settings.ENVIRONMENT in ['local', 'stage', 'admin']:
   urlpatterns = [path('admin/', admin.site.urls)] + urlpatterns

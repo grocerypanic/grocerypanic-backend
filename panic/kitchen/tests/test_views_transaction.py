@@ -12,7 +12,7 @@ from ..models.transaction import Transaction
 from ..serializers.transaction import TransactionSerializer
 from .fixtures.transaction import TransactionTestHarness
 
-TRANSACTION_URL = reverse("kitchen:transactions-list")
+TRANSACTION_URL = reverse("v1:transactions-list")
 
 
 def transaction_query_url(query_kwargs={}):  # pylint: disable=W0102

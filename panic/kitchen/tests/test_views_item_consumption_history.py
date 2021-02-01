@@ -53,7 +53,7 @@ class PrivateTCHTestHarness(TransactionTestHarness):
 
 
 def transaction_query_url(item):
-  return reverse("kitchen:item-consumption-detail", args=[item])
+  return reverse("v1:item-consumption-detail", args=[item])
 
 
 class PublicTCHTest(TestCase):

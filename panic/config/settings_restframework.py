@@ -6,7 +6,6 @@ REST_FRAMEWORK_AVAILABLE = {
         'DEFAULT_AUTHENTICATION_CLASSES': [
             'spa_security.auth_cookie.JWTCookieAuthentication',
             'rest_framework.authentication.BasicAuthentication',
-            'rest_framework.authentication.TokenAuthentication',
         ],
         'DEFAULT_PERMISSION_CLASSES': [
             'rest_framework.permissions.IsAuthenticated',
@@ -14,6 +13,8 @@ REST_FRAMEWORK_AVAILABLE = {
         ],
         'DEFAULT_FILTER_BACKENDS':
             ('django_filters.rest_framework.DjangoFilterBackend',),
+        'DEFAULT_VERSIONING_CLASS':
+            'rest_framework.versioning.NamespaceVersioning',
     },
     'stage': {
         'DEFAULT_AUTHENTICATION_CLASSES': [
@@ -34,6 +35,8 @@ REST_FRAMEWORK_AVAILABLE = {
         },
         'DEFAULT_FILTER_BACKENDS':
             ('django_filters.rest_framework.DjangoFilterBackend',),
+        'DEFAULT_VERSIONING_CLASS':
+            'rest_framework.versioning.NamespaceVersioning',
     },
     'prod': {
         'DEFAULT_AUTHENTICATION_CLASSES': [
@@ -54,15 +57,20 @@ REST_FRAMEWORK_AVAILABLE = {
         },
         'DEFAULT_FILTER_BACKENDS':
             ('django_filters.rest_framework.DjangoFilterBackend',),
+        'DEFAULT_VERSIONING_CLASS':
+            'rest_framework.versioning.NamespaceVersioning',
     },
     'admin': {
         'DEFAULT_AUTHENTICATION_CLASSES': [
             'spa_security.auth_cookie.JWTCookieAuthentication',
+            'rest_framework.authentication.BasicAuthentication',
         ],
         'DEFAULT_PERMISSION_CLASSES': [
             'rest_framework.permissions.IsAuthenticated',
         ],
         'DEFAULT_FILTER_BACKENDS':
             ('django_filters.rest_framework.DjangoFilterBackend',),
+        'DEFAULT_VERSIONING_CLASS':
+            'rest_framework.versioning.NamespaceVersioning',
     },
 }
