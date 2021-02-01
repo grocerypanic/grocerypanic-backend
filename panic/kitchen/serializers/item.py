@@ -1,5 +1,6 @@
 """Serializer for the Item Model"""
 
+from drf_yasg.utils import swagger_serializer_method
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 
@@ -45,15 +46,20 @@ class ItemConsumptionHistorySerializer(serializers.ModelSerializer):
         "total_consumption",
     )
 
+  @swagger_serializer_method(
+      serializer_or_field=TransactionSerializer(many=True)
+  )
   def get_consumption_last_two_weeks(self, obj):
     item_id = obj.id
     query = Transaction.consumption.get_last_two_weeks(item_id)
     return TransactionSerializer(query, many=True).data
 
+  @swagger_serializer_method(serializer_or_field=serializers.DateTimeField)
   def get_first_consumption_date(self, obj):
     item_id = obj.id
     return Transaction.consumption.get_first_consumption(item_id)
 
+  @swagger_serializer_method(serializer_or_field=serializers.IntegerField)
   def get_total_consumption(self, obj):
     item_id = obj.id
     return Transaction.consumption.get_total_consumption(item_id)
