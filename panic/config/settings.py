@@ -186,6 +186,11 @@ SITE_ID = 1
 
 MESSAGE_LEVEL = message_constants.WARNING
 
+# API Versioning
+
+DEFAULT_VERSION = "v1"
+ALLOWED_VERSIONS = ("v1",)
+
 # Bleach
 
 BLEACH_RESTORE_LIST = {"&amp;": "&"}
