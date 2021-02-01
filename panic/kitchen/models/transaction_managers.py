@@ -177,7 +177,7 @@ class ConsumptionHistoryManager(models.Manager):
     return super().get_queryset().filter(
         item=item_id,
         datetime__date__lte=start_of_window,
-        datetime__date__gt=end_of_window
+        datetime__date__gte=end_of_window
     ).order_by('-datetime')
 
   def get_total_consumption(self, item_id):

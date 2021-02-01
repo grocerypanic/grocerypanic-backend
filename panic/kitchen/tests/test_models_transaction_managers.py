@@ -279,31 +279,56 @@ class TestExpiryManager(TestHarnessWithTestData):
 
 class TestConsumptionHistoryManagerTwoWeeks(TestHarnessWithTestData):
 
+  @classmethod
+  def setUpTestData(cls):
+    super().setUpTestData()
+    cls.today = timezone.now()
+    test_data = cls.create_dependencies(2)
+    cls.user2 = test_data['user']
+    cls.store2 = test_data['store']
+    cls.shelf2 = test_data['shelf']
+    cls.item2 = test_data['item']
+
+  @freeze_time("2020-01-14")
+  def create_lower_bounds_edge_case_transaction(self):
+    edge_case = (
+        timezone.now() - timedelta(days=settings.TRANSACTION_HISTORY_MAX)
+    )
+    edge_case_transaction = {
+        'item': self.item1,
+        'date_object': edge_case,
+        'user': self.user1,
+        'quantity': 3
+    }
+    self.create_test_instance(**edge_case_transaction)
+
+  @freeze_time("2020-01-14")
+  def create_another_user_transaction(self):
+    another_user_transaction = {
+        'item': self.item2,
+        'date_object': timezone.now(),
+        'user': self.user2,
+        'quantity': 3
+    }
+    self.create_test_instance(**another_user_transaction)
+
   @freeze_time("2020-01-14")
   def test_last_two_weeks(self):
+    self.create_timebatch()
+
     start_of_window = timezone.now()
     end_of_window = start_of_window - timedelta(
         days=int(settings.TRANSACTION_HISTORY_MAX)
     )
 
-    self.create_timebatch()
-
-    last_week = timezone.now() - timedelta(days=8)
-    transaction5 = {
-        'item': self.item1,
-        'date_object': last_week,
-        'user': self.user1,
-        'quantity': 3
-    }
-
-    self.create_test_instance(**transaction5)
+    self.create_lower_bounds_edge_case_transaction()
+    self.create_another_user_transaction()
 
     received = Transaction.consumption.get_last_two_weeks(self.item1)
     expected = Transaction.objects.filter(
-        user=self.user1,
         item=self.item1,
-        datetime__lte=start_of_window,
-        datetime__gt=end_of_window
+        datetime__date__lte=start_of_window,
+        datetime__date__gte=end_of_window
     ).order_by('-datetime')
 
     self.assertQuerysetEqual(received, map(repr, expected))
@@ -338,6 +363,16 @@ class TestConsumptionHistoryManagerStats(TransactionTestHarness):
     cls.dates['last_year'] = timezone.now() + timedelta(days=-27)
     cls.dates['two_months_ago'] = timezone.now() + timedelta(days=-67)
 
+  @classmethod
+  def setUpTestData(cls):
+    super().setUpTestData()
+    cls.today = timezone.now()
+    test_data = cls.create_dependencies(2)
+    cls.user2 = test_data['user']
+    cls.store2 = test_data['store']
+    cls.shelf2 = test_data['shelf']
+    cls.item2 = test_data['item']
+
   def create_transaction_history(self):
     self.create_test_instance(**self.initial_transaction)
     for value in self.dates.values():
@@ -364,6 +399,14 @@ class TestConsumptionHistoryManagerStats(TransactionTestHarness):
     )
 
   @freeze_time("2020-01-14")
+  def test_get_first_consumption_another_user(self):
+    self.create_transaction_history()
+
+    self.assertIsNone(
+        Transaction.consumption.get_first_consumption(self.item2.id)
+    )
+
+  @freeze_time("2020-01-14")
   def test_get_first_consumption_no_history(self):
     assert Transaction.objects.all().count() == 0
 
@@ -378,6 +421,14 @@ class TestConsumptionHistoryManagerStats(TransactionTestHarness):
 
     self.assertEqual(
         expected, Transaction.consumption.get_total_consumption(self.item1.id)
+    )
+
+  @freeze_time("2020-01-14")
+  def test_get_total_consumption_another_user(self):
+    self.create_transaction_history()
+
+    self.assertEqual(
+        0, Transaction.consumption.get_total_consumption(self.item2.id)
     )
 
   @freeze_time("2020-01-14")
