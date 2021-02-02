@@ -43,9 +43,9 @@ class SameSiteMiddleware(MiddlewareMixin):
     :param cookie: A cookie object from a Django response
     :type cookie: A Django Restframework Response Cookie Object
     :param samesite: The samesite django config for this cookie
-    :type samesite: String, Bool or None
+    :type samesite: string, bool, none
     :param secure: The secure django config for this cookie
-    :type secure: Bool
+    :type secure: bool
 
     :returns: A rewritten cookie object
     :rtype: A Django Restframework Response Cookie Object
@@ -60,9 +60,9 @@ class SameSiteMiddleware(MiddlewareMixin):
     """Reads a setting from the django config.
 
     :param setting_key: The key of the setting to read
-    :type setting_key: String
+    :type setting_key: string
     :param default: The default value to use if not configured
-    :type setting_key: Any
+    :type setting_key: any
 
     :returns: The value of the key, or `default` accordingly
     """
@@ -80,9 +80,9 @@ class SameSiteMiddleware(MiddlewareMixin):
     :param response: A Django Rest Framework Response Object
     :type response: :class:`rest_framework.response.Response`
     :param setting_key: The key of the setting to read
-    :type setting_key: String
+    :type setting_key: string
     :param default: The default value to use if not configured
-    :type setting_key: Any
+    :type setting_key: any
 
     :returns: The value of the key, or `default` accordingly
     """
@@ -100,11 +100,11 @@ class SameSiteMiddleware(MiddlewareMixin):
     :param response: A Django Rest Framework Response Object
     :type response: :class:`rest_framework.response.Response`
     :param cookie_name: The cookie name to process
-    :type cookie_name: String
+    :type cookie_name: string
     :param samesite_key: The django setting for this cookie's samesite config
-    :type samesite_key: String
+    :type samesite_key: string
     :param secure_key: The django setting for this cookie's secure config
-    :type secure_key: String
+    :type secure_key: string
 
     :returns: The modified response object.
     :rtype: :class:`rest_framework.response.Response`
