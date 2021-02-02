@@ -9,64 +9,82 @@ from ..auth_cookie import SameSiteMiddleware
 
 class TestSameSiteMiddleware(TestCase):
 
-  def setUp(self) -> None:
+  def setUp(self):
     self.response = HttpResponse()
+    self.mixin = SameSiteMiddleware()
+
+  @override_settings()
+  def test_csrf_cookie_defaults(self):
+    del settings.CSRF_COOKIE_SECURE
+    del settings.CSRF_COOKIE_SAMESITE
+    cookie_name = settings.CSRF_COOKIE_NAME
+    self.response.set_cookie(cookie_name, "somevalue")
+    self.mixin.process_response(None, self.response)
+    self.assertEqual(self.response.cookies[cookie_name]['samesite'], 'None')
+    self.assertFalse(self.response.cookies[cookie_name]['secure'])
 
   @override_settings(CSRF_COOKIE_SAMESITE=None)
   def test_csrf_cookie_same_site_none(self):
     cookie_name = settings.CSRF_COOKIE_NAME
     self.response.set_cookie(cookie_name, "somevalue")
-    SameSiteMiddleware.process_response(None, None, self.response)
+    self.mixin.process_response(None, self.response)
     self.assertEqual(self.response.cookies[cookie_name]['samesite'], 'None')
 
   @override_settings(CSRF_COOKIE_SAMESITE="lax")
   def test_csrf_cookie_same_site_lax(self):
     cookie_name = settings.CSRF_COOKIE_NAME
     self.response.set_cookie(cookie_name, "somevalue")
-    SameSiteMiddleware.process_response(None, None, self.response)
+    self.mixin.process_response(None, self.response)
     self.assertNotEqual(self.response.cookies[cookie_name]['samesite'], 'None')
 
-  @override_settings(REST_COOKIES_SECURE=False)
+  @override_settings(CSRF_COOKIE_SECURE=False)
   def test_csrf_cookie_same_site_not_secure(self):
     cookie_name = settings.CSRF_COOKIE_NAME
     self.response.set_cookie(cookie_name, "somevalue")
-    SameSiteMiddleware.process_response(None, None, self.response)
+    self.mixin.process_response(None, self.response)
     self.assertFalse(self.response.cookies[cookie_name]['secure'])
 
-  @override_settings(REST_COOKIES_SECURE=True)
+  @override_settings(CSRF_COOKIE_SECURE=True)
   def test_csrf_cookie_same_site_secure(self):
     cookie_name = settings.CSRF_COOKIE_NAME
     self.response.set_cookie(cookie_name, "somevalue")
-    SameSiteMiddleware.process_response(None, None, self.response)
+    self.mixin.process_response(None, self.response)
     self.assertTrue(self.response.cookies[cookie_name]['secure'])
+
+  @override_settings()
+  def test_jwt_cookie_defaults(self):
+    del settings.JWT_AUTH_COOKIE_SAMESITE
+    del settings.REST_COOKIES_SECURE
+    cookie_name = settings.JWT_AUTH_COOKIE
+    self.response.set_cookie(cookie_name, "somevalue")
+    self.mixin.process_response(None, self.response)
+    self.assertEqual(self.response.cookies[cookie_name]['samesite'], 'None')
+    self.assertFalse(self.response.cookies[cookie_name]['secure'])
 
   @override_settings(JWT_AUTH_COOKIE_SAMESITE="lax")
   def test_jwt_cookie_same_site_lax(self):
     cookie_name = settings.JWT_AUTH_COOKIE
     self.response.set_cookie(cookie_name, "somevalue")
-    SameSiteMiddleware.process_response(None, None, self.response)
+    self.mixin.process_response(None, self.response)
     self.assertEqual(self.response.cookies[cookie_name]['samesite'], 'lax')
 
   @override_settings(JWT_AUTH_COOKIE_SAMESITE=None)
   def test_jwt_cookie_same_site_none(self):
     cookie_name = settings.JWT_AUTH_COOKIE
     self.response.set_cookie(cookie_name, "somevalue")
-    SameSiteMiddleware.process_response(None, None, self.response)
+    self.mixin.process_response(None, self.response)
     self.assertEqual(self.response.cookies[cookie_name]['samesite'], 'None')
 
   @override_settings(REST_COOKIES_SECURE=False)
   def test_jwt_cookie_same_site_not_secure(self):
     cookie_name = settings.JWT_AUTH_COOKIE
     self.response.set_cookie(cookie_name, "somevalue")
-    SameSiteMiddleware.process_response(None, None, self.response)
+    self.mixin.process_response(None, self.response)
     self.assertFalse(self.response.cookies[cookie_name]['secure'])
 
   @override_settings(REST_COOKIES_SECURE=True)
   def test_jwt_cookie_same_site_secure(self):
     cookie_name = settings.JWT_AUTH_COOKIE
     self.response.set_cookie(cookie_name, "somevalue")
-    SameSiteMiddleware.process_response(None, None, self.response)
+    self.mixin.process_response(None, self.response)
     self.assertTrue(self.response.cookies[cookie_name]['secure'])
-
-  def tearDown(self):
-    pass
