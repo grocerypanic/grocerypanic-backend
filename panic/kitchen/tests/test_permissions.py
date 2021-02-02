@@ -8,7 +8,7 @@ from ..permissions import IsOwner
 class IsOwnerTest(TestCase):
   """Test the isOwner"""
 
-  def setUp(self) -> None:
+  def setUp(self):
 
     class MockRequest:
 

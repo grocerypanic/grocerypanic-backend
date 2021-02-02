@@ -7,7 +7,7 @@ from ..swagger import openapi_ready
 
 class TestOpenApiReady(TestCase):
 
-  def setUp(self) -> None:
+  def setUp(self):
 
     class MockParent:
 
@@ -26,7 +26,7 @@ class TestOpenApiReady(TestCase):
     self.parent = MockParent()
     self.child = MockChild()
 
-  def tearDown(self) -> None:
+  def tearDown(self):
     pass
 
   def test_with_swagger_fake_view_false(self):

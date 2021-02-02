@@ -24,7 +24,7 @@ def transaction_query_url(query_kwargs={}):  # pylint: disable=W0102
 class PublicItemTest(TestCase):
   """Test the public Transaction API"""
 
-  def setUp(self) -> None:
+  def setUp(self):
     self.client = APIClient()
 
   def test_create_login_required(self):

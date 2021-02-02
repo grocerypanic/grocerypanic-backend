@@ -29,7 +29,7 @@ def store_url_with_params(query_kwargs):
 class PublicStoreTest(TestCase):
   """Test the public Store API"""
 
-  def setUp(self) -> None:
+  def setUp(self):
     self.client = APIClient()
 
   def test_login_required(self):

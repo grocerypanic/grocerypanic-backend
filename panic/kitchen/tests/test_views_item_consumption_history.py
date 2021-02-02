@@ -59,7 +59,7 @@ def transaction_query_url(item):
 class PublicTCHTest(TestCase):
   """Test the public Transaction Consumption History API"""
 
-  def setUp(self) -> None:
+  def setUp(self):
     self.client = APIClient()
 
   def test_get_login_required(self):

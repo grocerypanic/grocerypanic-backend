@@ -29,7 +29,7 @@ class TestShelf(ShelfTestHarness):
   def setUp(self):
     self.objects = list()
 
-  def tearDown(self) -> None:
+  def tearDown(self):
     for obj in self.objects:
       obj.delete()
 

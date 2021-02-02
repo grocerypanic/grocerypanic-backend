@@ -20,7 +20,7 @@ def item_url_with_params(query_kwargs):
 class PublicListItemsTest(TestCase):
   """Test the public Suggested Items API"""
 
-  def setUp(self) -> None:
+  def setUp(self):
     self.client = APIClient()
 
   def test_login_required(self):
@@ -60,7 +60,7 @@ class PrivateListItemsTest(TestCase):
     self.client = APIClient()
     self.client.force_authenticate(self.user)
 
-  def tearDown(self) -> None:
+  def tearDown(self):
     for obj in self.objects:
       obj.delete()
 

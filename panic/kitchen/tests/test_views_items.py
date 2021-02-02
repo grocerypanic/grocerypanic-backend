@@ -62,7 +62,7 @@ def item_url_with_params(query_kwargs):
 class PublicItemTest(TestCase):
   """Test the public Item API"""
 
-  def setUp(self) -> None:
+  def setUp(self):
     self.client = APIClient()
 
   def test_login_required(self):
