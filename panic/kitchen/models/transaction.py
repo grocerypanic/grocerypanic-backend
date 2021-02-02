@@ -12,6 +12,15 @@ User = get_user_model()
 
 
 def validate_quantity(value):
+  """Validator for Transaction Quantity.
+
+  :param value: The quantity to be validated
+  :type value: int
+
+  :returns: The validated value
+  :rtype: value
+  :raises: :class:`django.core.exceptions.ValidationError`
+  """
   if value == 0:
     raise ValidationError([{'quantity': "Must not be equal to 0"}])
   return value
@@ -35,6 +44,11 @@ class Transaction(models.Model):
 
   @property
   def operation(self):
+    """Returns a string indicating if the quantity is consumption or purchase.
+
+    :returns: A string describing the transaaction
+    :rtype: str
+    """
     if isinstance(self.quantity, int):
       if self.quantity > 0:
         return "Purchase"
@@ -53,6 +67,7 @@ class Transaction(models.Model):
     return "Invalid Transaction"
 
   def update_related_item_quantity(self):
+    """Updates the quantity of the related item instance."""
     self.item.quantity = self.item.quantity + self.quantity
 
   def clean(self):

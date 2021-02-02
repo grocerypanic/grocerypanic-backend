@@ -160,6 +160,14 @@ class ExpiryManager(models.Manager):
 class ConsumptionHistoryManager(models.Manager):
 
   def get_first_consumption(self, item_id):
+    """Searches for the first transaction for this item, and returns the date.
+
+    :param item_id: The pk of the item model instance in question
+    :type item_id: int
+
+    :returns: The datetime, or None
+    :rtype: :class:`datetime.datetime`, None
+    """
     query_set = super().get_queryset().filter(
         quantity__lt=0,
         item=item_id,
@@ -169,6 +177,14 @@ class ConsumptionHistoryManager(models.Manager):
     return None
 
   def get_last_two_weeks(self, item_id):
+    """Retrieves the last two weeks of transaction activity.
+
+    :param item_id: The pk of the item model instance in question
+    :type item_id: int
+
+    :returns: A queryset representing the activity
+    :rtype: :class:`django.db.models.QuerySet`, None
+    """
     start_of_window = now()
     end_of_window = start_of_window - timedelta(
         days=int(settings.TRANSACTION_HISTORY_MAX)
@@ -181,6 +197,14 @@ class ConsumptionHistoryManager(models.Manager):
     ).order_by('-datetime')
 
   def get_total_consumption(self, item_id):
+    """Retrieves the last two weeks of transaction activity.
+
+    :param item_id: The pk of the item model instance in question
+    :type item_id: int
+
+    :returns: The total count of cumulative consumption
+    :rtype: int
+    """
     quantity = super().get_queryset().filter(
         quantity__lt=0,
         item=item_id,

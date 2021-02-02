@@ -43,7 +43,7 @@ class SameSiteMiddleware(MiddlewareMixin):
     :param cookie: A cookie object from a Django response
     :type cookie: A Django Restframework Response Cookie Object
     :param samesite: The samesite django config for this cookie
-    :type samesite: string, bool, none
+    :type samesite: string, bool, None
     :param secure: The secure django config for this cookie
     :type secure: bool
 

@@ -25,6 +25,11 @@ MAX_LENGTH = 255
 
 
 def default_expiry():
+  """Calculates the default expiry for an Item.
+
+  :returns: A datetime in the future
+  :rtype: :class:`datetime.datetime`
+  """
   return now() + timedelta(days=DEFAULT_SHELF_LIFE)
 
 
