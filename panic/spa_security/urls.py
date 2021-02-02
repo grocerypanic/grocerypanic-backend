@@ -1,15 +1,11 @@
 """Security App Urls"""
 
-from django.urls import include, path
+from django.urls import path
 
-from spa_security.views import CSRFview
+from spa_security.views import CSRFView
 
 app_name = "spa_security"
 
-csrf_url = [
-    path("csrf/", CSRFview.as_view(), name='csrf'),
-]
-
 urlpatterns = [
-    path('', include(csrf_url)),
+    path("csrf/", CSRFView.as_view(), name='csrf'),
 ]

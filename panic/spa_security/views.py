@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 
-class CSRFview(APIView):
+class CSRFView(APIView):
 
   def get(self, request):
     """Returns a 200, and a message containing the CSRF Token."""
