@@ -1,0 +1,6 @@
+views
+=====
+.. toctree::
+   :glob:
+
+   *

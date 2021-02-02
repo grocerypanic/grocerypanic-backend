@@ -1,4 +1,4 @@
-auth_cookie.py
-==============
+social.py
+=========
 .. automodule:: social_accounts.social
     :members:
