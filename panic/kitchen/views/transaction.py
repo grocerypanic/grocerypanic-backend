@@ -11,8 +11,12 @@ from rest_framework import mixins, viewsets
 from spa_security.auth_cookie import CSRFMixin
 from ..filters import TransactionFilter
 from ..models.transaction import Transaction
+from ..pagination import LegacyTransactionPagination
 from ..serializers.transaction import TransactionSerializer
 from ..swagger import custom_transaction_view_parm, openapi_ready
+from .deprecation import deprecated_warning
+
+TRANSACTION_LIST_SUNSET = datetime.date(year=2021, month=3, day=1)
 
 
 class TransactionViewSet(
@@ -26,6 +30,7 @@ class TransactionViewSet(
   queryset = Transaction.objects.all()
   filter_backends = (filters.DjangoFilterBackend,)
   filterset_class = TransactionFilter
+  pagination_class = LegacyTransactionPagination
 
   def parse_history_querystring(self):
     try:
@@ -35,9 +40,15 @@ class TransactionViewSet(
     except ValueError:
       return int(settings.TRANSACTION_HISTORY_MAX)
 
-  @swagger_auto_schema(manual_parameters=[custom_transaction_view_parm])
+  @swagger_auto_schema(
+      deprecated=True,
+      manual_parameters=[custom_transaction_view_parm],
+  )
   def list(self, request, *args, **kwargs):
-    return super().list(request, *args, **kwargs)
+    return deprecated_warning(
+        super().list(request, *args, **kwargs),
+        TRANSACTION_LIST_SUNSET,
+    )
 
   @openapi_ready
   def get_queryset(self):

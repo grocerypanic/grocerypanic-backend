@@ -10,6 +10,8 @@ from rest_framework.test import APIClient
 
 from ..models.transaction import Transaction
 from ..serializers.transaction import TransactionSerializer
+from ..views.deprecation import DEPRECATED_WARNING
+from ..views.transaction import TRANSACTION_LIST_SUNSET
 from .fixtures.transaction import TransactionTestHarness
 
 TRANSACTION_URL = reverse("v1:transactions-list")
@@ -124,7 +126,17 @@ class PrivateItemTest(TransactionTestHarness):
 
     assert len(items) == 2
     self.assertEqual(res.status_code, status.HTTP_200_OK)
-    self.assertEqual(res.data, serializer.data)
+    self.assertEqual(res.data['results'], serializer.data)
+
+  @freeze_time("2020-01-14")
+  def test_list_all_transactions_ensure_deprecated(self):
+    """Test retrieving transactions results in deprecation warning."""
+    res = self.client.get(transaction_query_url({"item": self.item1.id}))
+
+    self.assertEqual(res.status_code, status.HTTP_200_OK)
+    self.assertEqual(res['Deprecation'], str(TRANSACTION_LIST_SUNSET))
+    self.assertEqual(res['Warning'], DEPRECATED_WARNING)
+    self.assertEqual(res['Sunset'], str(TRANSACTION_LIST_SUNSET))
 
   @freeze_time("2020-01-14")
   def test_list_transactions_by_item_filter(self):
@@ -140,7 +152,7 @@ class PrivateItemTest(TransactionTestHarness):
 
     assert len(items) == 2
     self.assertEqual(res.status_code, status.HTTP_200_OK)
-    self.assertEqual(res.data, serializer.data)
+    self.assertEqual(res.data['results'], serializer.data)
 
   @freeze_time("2020-01-14")
   def test_list_transactions_by_another_item_filter(self):
@@ -156,7 +168,7 @@ class PrivateItemTest(TransactionTestHarness):
 
     assert len(items) == 1
     self.assertEqual(res.status_code, status.HTTP_200_OK)
-    self.assertEqual(res.data, serializer.data)
+    self.assertEqual(res.data['results'], serializer.data)
 
   @freeze_time("2020-01-14")
   def test_list_transactions_by_history_manual_value(self):
@@ -171,7 +183,7 @@ class PrivateItemTest(TransactionTestHarness):
             "history": 10
         })
     )
-    self.assertEqual(len(res.data), 2)
+    self.assertEqual(len(res.data['results']), 2)
 
   @freeze_time("2020-01-14")
   def test_list_transactions_by_history_default_value(self):
@@ -183,7 +195,7 @@ class PrivateItemTest(TransactionTestHarness):
     res = self.client.get(transaction_query_url({
         "item": self.item1.id,
     }))
-    self.assertEqual(len(res.data), 3)
+    self.assertEqual(len(res.data['results']), 3)
 
   @freeze_time("2020-01-14")
   def test_list_transactions_by_history_invalid_value(self):
@@ -198,4 +210,16 @@ class PrivateItemTest(TransactionTestHarness):
             "history": "not a number"
         })
     )
-    self.assertEqual(len(res.data), 3)
+    self.assertEqual(len(res.data['results']), 3)
+
+  @freeze_time("2020-01-14")
+  def test_list_transactions_ensure_pagination_active(self):
+    """Test pagination is turned on for this endpoint"""
+    self.create_test_instance(**self.object_def1)
+
+    res = self.client.get(transaction_query_url({
+        "item": self.item1.id,
+    }))
+    self.assertIsNone(res.data['next'])
+    self.assertIsNone(res.data['previous'])
+    self.assertIsNotNone(res.data['results'])

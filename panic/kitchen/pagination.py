@@ -11,6 +11,10 @@ class PagePagination(PageNumberPagination):
   page_query_param = settings.PAGE_QUERY_PARAM
 
 
+class LegacyTransactionPagination(PagePagination):
+  page_size = settings.LEGACY_TRANSACTION_HISTORY_UPPER_BOUND
+
+
 class PagePaginationWithOverride(PagePagination):
   """Adds Page Pagination with an override feature."""
 
