@@ -8,13 +8,17 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 
 
 class JWTCookieAuthentication(JWTAuthentication):
-  """Extends the authenticate functionality of :class:`rest_framework_simplejwt
-  .authentication.JWTAuthentication`
+  """Extends the authenticate functionality of
+  :class:`rest_framework_simplejwt.authentication.JWTAuthentication`
   """
 
   def authenticate(self, request):
     """Determines if a request can proceed based on the presence of a valid JWT
     cookie.
+
+    Overrides:
+    :func:`rest_framework_simplejwt.authentication.JWTAuthentication.
+    authenticate`
     """
     cookie_name = getattr(settings, 'JWT_AUTH_COOKIE', None)
     raw_token = None
@@ -33,29 +37,110 @@ class JWTCookieAuthentication(JWTAuthentication):
 class SameSiteMiddleware(MiddlewareMixin):
   """Comply with the latest standard for samesite cookies."""
 
-  def process_response(self, request, response):
-    """Rewrites the response cookie values to ensure they are handled correctly
-    by browsers implementing this standard."""
-    csrf_cookie_name = settings.CSRF_COOKIE_NAME
-    jwt_auth_cookie = settings.JWT_AUTH_COOKIE
-    csrf_cookie_samesite = getattr(settings, "CSRF_COOKIE_SAMESITE", False)
-    rest_cookies_secure = getattr(settings, "REST_COOKIES_SECURE", False)
-    jwt_auth_cookie_samesite = getattr(
-        settings, "JWT_AUTH_COOKIE_SAMESITE", None
+  def __rewrite_cookie(self, cookie, samesite, secure):
+    """Rewrites a http cookie with compliant information.
+
+    :param cookie: A cookie object from a Django response
+    :type cookie: A Django Restframework Response Cookie Object
+    :param samesite: The samesite django config for this cookie
+    :type samesite: String, Bool or None
+    :param secure: The secure django config for this cookie
+    :type secure: Bool
+
+    :returns: A rewritten cookie object
+    :rtype: A Django Restframework Response Cookie Object
+    """
+    cookie['samesite'] = samesite
+    if samesite is None:
+      cookie['samesite'] = 'None'
+    cookie['secure'] = secure
+    return cookie
+
+  def __read_config_setting(self, setting_key, default):
+    """Reads a setting from the django config.
+
+    :param setting_key: The key of the setting to read
+    :type setting_key: String
+    :param default: The default value to use if not configured
+    :type setting_key: Any
+
+    :returns: The value of the key, or `default` accordingly
+    """
+    return getattr(settings, setting_key, default)
+
+  def __read_cookie_config(
+      self,
+      response,
+      cookie_name,
+      samesite_key,
+      secure_key,
+  ):
+    """Reads all config settings for a cookie..
+
+    :param response: A Django Rest Framework Response Object
+    :type response: :class:`rest_framework.response.Response`
+    :param setting_key: The key of the setting to read
+    :type setting_key: String
+    :param default: The default value to use if not configured
+    :type setting_key: Any
+
+    :returns: The value of the key, or `default` accordingly
+    """
+    samesite = self.__read_config_setting(samesite_key, None)
+    secure = self.__read_config_setting(secure_key, False)
+    return {
+        "cookie": response.cookies[cookie_name],
+        "samesite": samesite,
+        "secure": secure,
+    }
+
+  def __process_cookie(self, response, cookie_name, samesite_key, secure_key):
+    """Processes a Django cookie to correct if if needed.
+
+    :param response: A Django Rest Framework Response Object
+    :type response: :class:`rest_framework.response.Response`
+    :param cookie_name: The cookie name to process
+    :type cookie_name: String
+    :param samesite_key: The django setting for this cookie's samesite config
+    :type samesite_key: String
+    :param secure_key: The django setting for this cookie's secure config
+    :type secure_key: String
+
+    :returns: The modified response object.
+    :rtype: :class:`rest_framework.response.Response`
+    """
+
+    if cookie_name not in response.cookies:
+      return response
+
+    cookie_settings = self.__read_cookie_config(
+        response, cookie_name, samesite_key, secure_key
     )
 
-    if csrf_cookie_name in response.cookies:
-      if csrf_cookie_samesite is None:
-        response.cookies[csrf_cookie_name]['samesite'] = 'None'
-      if rest_cookies_secure:
-        response.cookies[csrf_cookie_name]['secure'] = True
-    if jwt_auth_cookie in response.cookies:
-      if jwt_auth_cookie_samesite is None:
-        response.cookies[jwt_auth_cookie]['samesite'] = 'None'
-      else:
-        response.cookies[jwt_auth_cookie]['samesite'] = jwt_auth_cookie_samesite
-      if rest_cookies_secure:
-        response.cookies[jwt_auth_cookie]['secure'] = True
+    self.__rewrite_cookie(**cookie_settings)
+    return response
+
+  def process_response(self, _, response):
+    """Rewrites the response cookie values to ensure they are handled correctly
+    by browsers implementing this standard.
+
+    Overrides:
+    :func:`django.contrib.sessions.middleware.MiddlewareMixin.process_response`
+    """
+
+    response = self.__process_cookie(
+        response,
+        settings.CSRF_COOKIE_NAME,
+        "CSRF_COOKIE_SAMESITE",
+        "CSRF_COOKIE_SECURE",
+    )
+    response = self.__process_cookie(
+        response,
+        settings.JWT_AUTH_COOKIE,
+        "JWT_AUTH_COOKIE_SAMESITE",
+        "REST_COOKIES_SECURE",
+    )
+
     return response
 
 
