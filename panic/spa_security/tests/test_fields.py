@@ -8,7 +8,7 @@ from ..fields import BlondeCharField
 class BleachFieldTest(TestCase):
   """Test the custom bleach field"""
 
-  def setUp(self) -> None:
+  def setUp(self):
 
     class EmptyObject:
       field_name = "Initial&Value"

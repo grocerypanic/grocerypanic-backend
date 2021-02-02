@@ -12,7 +12,7 @@ from ..views import csrf_error
 class PublicCSRFErrorTest(TestCase):
   """Test the public CSRF Error API"""
 
-  def setUp(self) -> None:
+  def setUp(self):
     self.factory = APIRequestFactory(enforce_csrf_checks=True)
     self.get = self.factory.get('/someView')
     self.post = self.factory.post('/someView')

@@ -32,7 +32,7 @@ class Ensured(CSRFMixin, APIView):
 
 class TestValidCSRF(TestCase):
 
-  def setUp(self) -> None:
+  def setUp(self):
     self.user = get_user_model().objects.create_user(
         username="testuser",
         email="test@niallbyrne.ca",

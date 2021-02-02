@@ -15,7 +15,7 @@ CSRF_URL = reverse("spa_security:csrf")
 class PublicCSRFTest(TestCase):
   """Test the public CSRF API"""
 
-  def setUp(self) -> None:
+  def setUp(self):
     self.client = APIClient()
 
   def test_login_required(self):

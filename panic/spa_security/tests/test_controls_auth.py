@@ -13,7 +13,7 @@ from ..auth_cookie import JWTCookieAuthentication
 class CookieAuthenticatorTest(TestCase):
   """Test the Cookie Authenticator"""
 
-  def setUp(self) -> None:
+  def setUp(self):
     self.factory = RequestFactory()
     self.request = self.factory.get('/fakeEndpoint')
     self.auth = JWTCookieAuthentication()
