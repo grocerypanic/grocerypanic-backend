@@ -1,6 +1,6 @@
 # Single Page Application Security App
 
-This Django app provides some mechanisms for protecting a DRF backed fronted by a SPA implementation.
+This Django app provides some mechanisms for protecting a DRF backed with a SPA frontend implementation.
 
 ## Pre-requisites
 
@@ -9,7 +9,7 @@ This was tested with the following libraries and versions:
 ```requirements.txt
 django>=3.0.4,<3.1.0
 djangorestframework>=3.11.0,<3.12.0
-djangorestframework_simplejwt>=4.4.0,<4.5.0
+djangorestframework_simplejwt>=4.6.0,<4.7.0
 django-bleach>=0.6.1,<0.7.0
 dj-rest-auth>=1.0.0,<1.1.0
 ```
@@ -22,7 +22,7 @@ This can surely work with a broader range of versions, YMMV.  Test!
     - protects char fields from javascript injection, has standard char field properties and validators
     - `spa_security.fields.BlondeCharField`
     - provides BLEACH_RESTORE_LIST, as a dictionary of key, value pairs that allow restoring specify bleached values
-2. **DRF Authentication via JWT over HTTP Cookies:**s
+2. **DRF Authentication via JWT over HTTP Cookies:**
     - allows use of http only cookies, which cannot be accessed client side
     - `spa-security.auth_cookie.JWTCookieAuthentication`
 3. **View CSRF Cookie Protection:**
@@ -146,4 +146,4 @@ The JWT Authentication Cookies are SameSite 'None' by default.
 
 
 Authenticated requests to this endpoint will be sent a cookie containing the CSRF value.
-Ensure you are configuring the cookie [name](https://docs.djangoproject.com/en/3.0/ref/settings/#std:setting-CSRF_COOKIE_NAME) you really want.
+Ensure you are configuring the cookie [name](https://docs.djangoproject.com/en/3.0/ref/settings/#std:setting-CSRF_COOKIE_NAME) to what you really want.
