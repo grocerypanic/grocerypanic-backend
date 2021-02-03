@@ -2,6 +2,7 @@
 
 from datetime import timedelta
 
+import pytz
 from django.conf import settings
 from django.db import models
 from django.db.models import Sum
@@ -159,41 +160,46 @@ class ExpiryManager(models.Manager):
 
 class ConsumptionHistoryManager(models.Manager):
 
-  def get_first_consumption(self, item_id):
+  def get_first_consumption(self, item_id, zone=pytz.utc.zone):
     """Searches for the first transaction for this item, and returns the date.
 
     :param item_id: The pk of the item model instance in question
     :type item_id: int
+    :param zone: A world timezone descriptor string (defaults to UTC)
+    :type item_id: str
 
     :returns: The datetime, or None
     :rtype: :class:`datetime.datetime`, None
     """
+    zone = pytz.timezone(zone)
     query_set = super().get_queryset().filter(
         quantity__lt=0,
         item=item_id,
     ).values('datetime').order_by('datetime').first()
     if query_set:
-      return query_set['datetime']
+      return query_set['datetime'].astimezone(zone)
     return None
 
-  def get_last_two_weeks(self, item_id):
+  def get_last_two_weeks(self, item_id, zone=pytz.utc.zone):
     """Retrieves the last two weeks of transaction activity.
 
     :param item_id: The pk of the item model instance in question
     :type item_id: int
+    :param zone: A world timezone descriptor string (defaults to UTC)
+    :type item_id: str
 
     :returns: A queryset representing the activity
     :rtype: :class:`django.db.models.QuerySet`, None
     """
+    zone = pytz.timezone(zone)
     start_of_window = now()
-    end_of_window = start_of_window - timedelta(
-        days=int(settings.TRANSACTION_HISTORY_MAX)
+    end_of_window = (
+        start_of_window.astimezone(zone) -
+        timedelta(days=int(settings.TRANSACTION_HISTORY_MAX))
     )
 
     return super().get_queryset().filter(
-        item=item_id,
-        datetime__date__lte=start_of_window,
-        datetime__date__gte=end_of_window
+        item=item_id, datetime__date__gte=end_of_window.date()
     ).order_by('-datetime')
 
   def get_total_consumption(self, item_id):

@@ -3,6 +3,7 @@
 from datetime import timedelta
 from unittest.mock import Mock, patch
 
+import pytz
 from django.conf import settings
 from django.utils import timezone
 from freezegun import freeze_time
@@ -352,6 +353,8 @@ class TestConsumptionHistoryManagerWithoutData(TestHarnessWithOutTestData):
 
 
 class TestConsumptionHistoryManagerTwoWeeks(TestHarnessWithTestData):
+  user2 = None
+  item2 = None
 
   @classmethod
   def setUpTestData(cls):
@@ -402,9 +405,26 @@ class TestConsumptionHistoryManagerTwoWeeks(TestHarnessWithTestData):
 
     received = Transaction.consumption.get_last_two_weeks(self.item1)
     expected = Transaction.objects.filter(
-        item=self.item1,
-        datetime__date__lte=start_of_window,
-        datetime__date__gte=end_of_window
+        item=self.item1, datetime__date__gte=end_of_window.date()
+    ).order_by('-datetime')
+
+    self.assertQuerysetEqual(received, map(repr, expected))
+
+  @freeze_time("2020-01-14")
+  def test_last_two_weeks_another_timezone(self):
+    zone = pytz.timezone("America/Toronto")
+    start_of_window = timezone.now()
+    end_of_window = (
+        start_of_window.astimezone(zone) -
+        timedelta(days=int(settings.TRANSACTION_HISTORY_MAX))
+    )
+
+    received = Transaction.consumption.get_last_two_weeks(
+        self.item1,
+        zone="America/Toronto",
+    )
+    expected = Transaction.objects.filter(
+        item=self.item1, datetime__date__gte=end_of_window.date()
     ).order_by('-datetime')
 
     self.assertQuerysetEqual(received, map(repr, expected))
@@ -470,6 +490,23 @@ class TestConsumptionHistoryManagerStats(TransactionTestHarness):
     self.assertEqual(
         first_consumption,
         Transaction.consumption.get_first_consumption(self.item1.id)
+    )
+
+  @freeze_time("2020-01-14")
+  def test_get_first_consumption_another_timezone(self):
+    zone = "America/Toronto"
+    first_consumption = Transaction.objects.filter(
+        item=self.item1.id,
+        quantity__lt=0,
+    ).order_by('datetime').first().datetime
+    first_consumption = first_consumption.astimezone(pytz.timezone(zone))
+
+    self.assertEqual(
+        first_consumption,
+        Transaction.consumption.get_first_consumption(
+            self.item1.id,
+            zone=zone,
+        )
     )
 
   @freeze_time("2020-01-14")
