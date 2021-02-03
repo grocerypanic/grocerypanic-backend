@@ -6,6 +6,7 @@ import pytz
 from django.conf import settings
 from django.db import models
 from django.db.models import Sum
+from django.db.models.functions import TruncDate
 from django.utils.timezone import now
 
 
@@ -197,10 +198,11 @@ class ConsumptionHistoryManager(models.Manager):
         start_of_window.astimezone(zone) -
         timedelta(days=int(settings.TRANSACTION_HISTORY_MAX))
     )
-
     return super().get_queryset().filter(
         item=item_id, datetime__date__gte=end_of_window.date()
-    ).order_by('-datetime')
+    ).order_by('-datetime').annotate(
+        date=TruncDate('datetime', tzinfo=zone)
+    ).values('date').annotate(quantity=Sum('quantity'))
 
   def get_total_consumption(self, item_id):
     """Retrieves the last two weeks of transaction activity.

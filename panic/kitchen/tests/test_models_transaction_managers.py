@@ -5,6 +5,8 @@ from unittest.mock import Mock, patch
 
 import pytz
 from django.conf import settings
+from django.db.models import Sum
+from django.db.models.functions import TruncDate
 from django.utils import timezone
 from freezegun import freeze_time
 
@@ -406,13 +408,16 @@ class TestConsumptionHistoryManagerTwoWeeks(TestHarnessWithTestData):
     received = Transaction.consumption.get_last_two_weeks(self.item1)
     expected = Transaction.objects.filter(
         item=self.item1, datetime__date__gte=end_of_window.date()
-    ).order_by('-datetime')
+    ).order_by('-datetime').annotate(
+        date=TruncDate('datetime', tzinfo=pytz.utc)
+    ).values('date').annotate(quantity=Sum('quantity'))
 
     self.assertQuerysetEqual(received, map(repr, expected))
 
   @freeze_time("2020-01-14")
   def test_last_two_weeks_another_timezone(self):
-    zone = pytz.timezone("America/Toronto")
+    test_tz = "America/Toronto"
+    zone = pytz.timezone(test_tz)
     start_of_window = timezone.now()
     end_of_window = (
         start_of_window.astimezone(zone) -
@@ -421,11 +426,13 @@ class TestConsumptionHistoryManagerTwoWeeks(TestHarnessWithTestData):
 
     received = Transaction.consumption.get_last_two_weeks(
         self.item1,
-        zone="America/Toronto",
+        zone=test_tz,
     )
     expected = Transaction.objects.filter(
         item=self.item1, datetime__date__gte=end_of_window.date()
-    ).order_by('-datetime')
+    ).order_by('-datetime').annotate(
+        date=TruncDate('datetime', tzinfo=zone)
+    ).values('date').annotate(quantity=Sum('quantity'))
 
     self.assertQuerysetEqual(received, map(repr, expected))
 
