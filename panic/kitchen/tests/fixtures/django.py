@@ -15,3 +15,7 @@ def deserialize_datetime(string):
   return pytz.utc.localize(
       datetime.datetime.strptime(string, "%Y-%m-%dT%H:%M:%SZ")
   )
+
+
+def deserialize_date(string):
+  return datetime.datetime.strptime(string, "%Y-%m-%d").date()
