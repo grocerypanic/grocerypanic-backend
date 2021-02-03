@@ -9,5 +9,6 @@ django-watchman>=1.1.1,<1.2.0
 dj-rest-auth[with_social]>=1.0.0,<1.1.0
 drf-yasg>=1.17.1,<1.18.0
 git+https://github.com/niall-byrne/django-naturalsortfield
+pendulum>=2.1.2,<2.2.0
 psycopg2>=2.8.4,<2.9.0
 pytz>=2019.3

@@ -3,10 +3,12 @@
 from datetime import timedelta
 from unittest.mock import Mock, patch
 
+import pendulum
 import pytz
 from django.conf import settings
 from django.db.models import Sum
 from django.db.models.functions import TruncDate
+from django.test import TestCase
 from django.utils import timezone
 from freezegun import freeze_time
 
@@ -14,6 +16,15 @@ import kitchen
 from ..models.transaction import Transaction
 from ..models.transaction_managers import ItemExpirationCalculator
 from .fixtures.transaction import TransactionTestHarness
+
+
+class TestWeekConfiguration(TestCase):
+
+  def test_start_of_week(self):
+    assert pendulum.now().start_of('week').day_of_week == pendulum.SUNDAY
+
+  def test_end_of_week(self):
+    assert pendulum.now().end_of('week').day_of_week == pendulum.SATURDAY
 
 
 class MockExpiryCalculator:
@@ -416,7 +427,7 @@ class TestConsumptionHistoryManagerTwoWeeks(TestHarnessWithTestData):
 
   @freeze_time("2020-01-14")
   def test_last_two_weeks_another_timezone(self):
-    test_tz = "America/Toronto"
+    test_tz = "Pacific/Honolulu"
     zone = pytz.timezone(test_tz)
     start_of_window = timezone.now()
     end_of_window = (
@@ -458,6 +469,7 @@ class TestConsumptionHistoryManagerStats(TransactionTestHarness):
     cls.dates['yesterday'] = timezone.now() + timedelta(days=-1)
     cls.dates['two_days_ago'] = timezone.now() + timedelta(days=-2)
     cls.dates['last_week'] = timezone.now() + timedelta(days=-4)
+    cls.dates['start_of_month'] = timezone.now() + timedelta(days=-13)
     cls.dates['last_month'] = timezone.now() + timedelta(days=-17)
     cls.dates['last_year'] = timezone.now() + timedelta(days=-27)
     cls.dates['two_months_ago'] = timezone.now() + timedelta(days=-67)
@@ -489,27 +501,17 @@ class TestConsumptionHistoryManagerStats(TransactionTestHarness):
 
   @freeze_time("2020-01-14")
   def test_get_first_consumption(self):
-    first_consumption = Transaction.objects.filter(
-        item=self.item1.id,
-        quantity__lt=0,
-    ).order_by('datetime',).first().datetime
-
     self.assertEqual(
-        first_consumption,
+        self.dates['two_months_ago'],
         Transaction.consumption.get_first_consumption(self.item1.id)
     )
 
   @freeze_time("2020-01-14")
   def test_get_first_consumption_another_timezone(self):
-    zone = "America/Toronto"
-    first_consumption = Transaction.objects.filter(
-        item=self.item1.id,
-        quantity__lt=0,
-    ).order_by('datetime').first().datetime
-    first_consumption = first_consumption.astimezone(pytz.timezone(zone))
+    zone = "Pacific/Honolulu"
 
     self.assertEqual(
-        first_consumption,
+        self.dates['two_months_ago'].astimezone(pytz.timezone(zone)),
         Transaction.consumption.get_first_consumption(
             self.item1.id,
             zone=zone,
@@ -534,4 +536,53 @@ class TestConsumptionHistoryManagerStats(TransactionTestHarness):
   def test_get_total_consumption_another_user(self):
     self.assertEqual(
         0, Transaction.consumption.get_total_consumption(self.item2.id)
+    )
+
+  @freeze_time("2020-01-14")
+  def test_get_current_week_consumption(self):
+    self.assertEqual(
+        6, Transaction.consumption.get_current_week_consumption(self.item1.id)
+    )
+
+  @freeze_time("2020-01-14")
+  def test_get_current_week_consumption_another_timezone(self):
+    zone = "Pacific/Honolulu"
+
+    self.assertEqual(
+        3,
+        Transaction.consumption.get_current_week_consumption(
+            self.item1.id,
+            zone=zone,
+        )
+    )
+
+  @freeze_time("2020-01-14")
+  def test_get_current_week_consumption_another_user(self):
+    self.assertEqual(
+        0, Transaction.consumption.get_current_week_consumption(self.item2.id)
+    )
+
+  @freeze_time("2020-01-14")
+  def test_get_current_month_consumption(self):
+    self.assertEqual(
+        12,
+        Transaction.consumption.get_current_month_consumption(self.item1.id)
+    )
+
+  @freeze_time("2020-01-14")
+  def test_get_current_month_consumption_another_timezone(self):
+    zone = "Pacific/Honolulu"
+
+    self.assertEqual(
+        9,
+        Transaction.consumption.get_current_month_consumption(
+            self.item1.id,
+            zone=zone,
+        )
+    )
+
+  @freeze_time("2020-01-14")
+  def test_get_current_month_consumption_another_user(self):
+    self.assertEqual(
+        0, Transaction.consumption.get_current_month_consumption(self.item2.id)
     )
