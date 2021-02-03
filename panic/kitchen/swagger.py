@@ -2,6 +2,7 @@
 
 import functools
 
+import pytz
 from drf_yasg import openapi
 
 
@@ -35,4 +36,12 @@ custom_transaction_view_parm = openapi.Parameter(
     description="the number of days to retrieve history for",
     type=openapi.TYPE_STRING,
     default=14
+)
+
+custom_item_consumption_view_parm = openapi.Parameter(
+    'timezone',
+    openapi.IN_QUERY,
+    description="The timezone of the client",
+    type=openapi.TYPE_STRING,
+    default=pytz.utc.zone,
 )

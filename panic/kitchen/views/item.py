@@ -1,14 +1,17 @@
 """Kitchen Item Views"""
 
+import pytz
 from django_filters import rest_framework as filters
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework import mixins, viewsets
+from rest_framework.response import Response
 
 from spa_security.auth_cookie import CSRFMixin
 from ..filters import ItemFilter
 from ..models.item import Item
 from ..pagination import PagePagination
 from ..serializers.item import ItemConsumptionHistorySerializer, ItemSerializer
-from ..swagger import openapi_ready
+from ..swagger import custom_item_consumption_view_parm, openapi_ready
 
 
 class ItemBaseViewSet(
@@ -64,3 +67,15 @@ class ItemConsumptionHistoryViewSet(
   """Item Consumption History API View"""
   serializer_class = ItemConsumptionHistorySerializer
   queryset = Item.objects.all()
+
+  @openapi_ready
+  @swagger_auto_schema(manual_parameters=[custom_item_consumption_view_parm])
+  def retrieve(self, request, *args, **kwargs):
+    timezone_query = self.request.GET.get('timezone', pytz.utc.zone)
+    instance = self.get_object()
+    serializer = self.get_serializer(
+        instance,
+        data={"timezone": timezone_query},
+    )
+    serializer.is_valid(raise_exception=True)
+    return Response(serializer.data)
