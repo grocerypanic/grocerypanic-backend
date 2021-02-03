@@ -2,7 +2,7 @@
 
 from django.urls import path
 
-from .social import FacebookConnect, FacebookLogin, GoogleConnect, GoogleLogin
+from .views import FacebookConnect, FacebookLogin, GoogleConnect, GoogleLogin
 
 app_name = "social_accounts"
 
