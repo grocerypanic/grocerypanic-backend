@@ -8,7 +8,6 @@ from rest_framework.validators import UniqueTogetherValidator
 from ..models.item import Item
 from ..models.transaction import Transaction
 from . import DUPLICATE_OBJECT_MESSAGE
-from .transaction import TransactionSerializer
 
 DEFAULT_TIMEZONE = pytz.utc.zone
 
@@ -35,8 +34,20 @@ class ItemSerializer(serializers.ModelSerializer):
     ]
 
 
+class ItemHistorySerializer(serializers.Serializer):
+  """Serializer for Item History"""
+  date = serializers.DateField(read_only=True)
+  quantity = serializers.IntegerField(read_only=True)
+
+  def create(self, validated_data):
+    pass
+
+  def update(self, instance, validated_data):
+    pass
+
+
 class ItemConsumptionHistorySerializer(serializers.ModelSerializer):
-  """Serializer for Transaction Consumption History"""
+  """Serializer for Item Consumption History"""
   timezone = serializers.CharField(
       write_only=True,
       max_length=255,
@@ -68,7 +79,7 @@ class ItemConsumptionHistorySerializer(serializers.ModelSerializer):
       })
 
   @swagger_serializer_method(
-      serializer_or_field=TransactionSerializer(many=True)
+      serializer_or_field=ItemHistorySerializer(many=True)
   )
   def get_consumption_last_two_weeks(self, obj):
     item_id = obj.id
@@ -77,7 +88,7 @@ class ItemConsumptionHistorySerializer(serializers.ModelSerializer):
         item_id,
         configured_timezone,
     )
-    return TransactionSerializer(query, many=True).data
+    return ItemHistorySerializer(query, many=True).data
 
   @swagger_serializer_method(serializer_or_field=serializers.DateTimeField)
   def get_first_consumption_date(self, obj):
