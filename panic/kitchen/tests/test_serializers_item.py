@@ -2,9 +2,10 @@
 
 import json
 
+import pytz
 from django.utils import timezone
 from freezegun import freeze_time
-from rest_framework.serializers import ValidationError
+from rest_framework.serializers import ErrorDetail, ValidationError
 
 from ..models.item import Item
 from ..serializers import DUPLICATE_OBJECT_MESSAGE
@@ -152,8 +153,28 @@ class TestItemConsumptionHistorySerializer(TransactionTestHarness):
 
     serialized = self.serializer(
         self.item1,
+        data={"timezone": pytz.utc.zone},
         context={'request': self.request},
     )
+    serialized.is_valid(raise_exception=True)
+    deserialized = serialized.data
+
+    self.assertEqual(
+        json.dumps(deserialized['consumption_last_two_weeks']),
+        json.dumps(deserialized_transaction.data),
+    )
+
+  @freeze_time("2020-01-14")
+  def test_deserialize_last_two_weeks_alternate_timezone(self):
+    transaction = self.create_test_instance(**self.data)
+    deserialized_transaction = TransactionSerializer([transaction], many=True)
+
+    serialized = self.serializer(
+        self.item1,
+        data={"timezone": "Asia/Hong_Kong"},
+        context={'request': self.request},
+    )
+    serialized.is_valid(raise_exception=True)
     deserialized = serialized.data
 
     self.assertEqual(
@@ -167,8 +188,10 @@ class TestItemConsumptionHistorySerializer(TransactionTestHarness):
 
     serialized = self.serializer(
         self.item1,
+        data={"timezone": pytz.utc.zone},
         context={'request': self.request},
     )
+    serialized.is_valid(raise_exception=True)
     deserialized = serialized.data
 
     self.assertEqual(
@@ -182,11 +205,45 @@ class TestItemConsumptionHistorySerializer(TransactionTestHarness):
 
     serialized = self.serializer(
         self.item1,
+        data={"timezone": pytz.utc.zone},
         context={'request': self.request},
     )
+    serialized.is_valid(raise_exception=True)
     deserialized = serialized.data
 
     self.assertEqual(
         deserialized['total_consumption'],
         3,
     )
+
+  @freeze_time("2020-01-14")
+  def test_deserialize_invalid_timezone(self):
+    serialized = self.serializer(
+        self.item1,
+        data={"timezone": "invalid timezone"},
+        context={'request': self.request},
+    )
+    with self.assertRaises(ValidationError) as err:
+      serialized.is_valid(raise_exception=True)
+
+    self.assertEqual(
+        err.exception.detail,
+        {
+            'timezone': {
+                'timezone':
+                    ErrorDetail(
+                        string='Please provide a valid timezone string.',
+                        code='invalid'
+                    ),
+            }
+        },
+    )
+
+  @freeze_time("2020-01-14")
+  def test_deserialize_default_timezone(self):
+    serialized = self.serializer(
+        self.item1,
+        data={},
+        context={'request': self.request},
+    )
+    serialized.is_valid(raise_exception=True)
