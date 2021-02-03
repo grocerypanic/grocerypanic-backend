@@ -8,4 +8,4 @@ class SocialAccountsConfig(AppConfig):
 
   def ready(self):
     # pylint: disable=W0611,C0415
-    from .signals import social_signup_handler  # noqa: F401
+    from .signals import presocial_login
