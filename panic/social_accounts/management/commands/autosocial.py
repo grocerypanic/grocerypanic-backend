@@ -9,13 +9,19 @@ class Command(BaseCommand):
   """Bootstraps Social Authentication by populating social logins based on
   environment variables.
 
-  - Generate Social Login Authorization:
+  - Generate Social Login Authorization::
 
     ./manage.py autosocial [PROVIDER]
 
-  - Credentials:
-    client_id: ENV -> %PROVIDER%_ID
-    secret:    ENV -> %PROVIDER%_SECRET_KEY
+  - Credentials::
+
+    - client_id ENV_VAR -> %PROVIDER%_ID
+    - secret    ENV_VAR -> %PROVIDER%_SECRET_KEY
+
+  - Supported Providers::
+
+    - google
+    - facebook
  """
   help = 'Adds social app configuration without user interaction.'
 
