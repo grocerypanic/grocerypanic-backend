@@ -142,7 +142,9 @@ class ExpiryManager(models.Manager):
     :rtype: :class:`django.db.models.query.QuerySet`
     """
 
-    return super().get_queryset().filter(item=item).order_by("-datetime")
+    return super().get_queryset().\
+        filter(item=item).\
+        order_by("-datetime")
 
   def update(self, transaction):
     """Updates the expiry data for an item associated to a transaction.
@@ -175,11 +177,13 @@ class ConsumptionHistoryManager(models.Manager):
     """
     start_of_week = pendulum.now(zone).start_of('week')
 
-    quantity = super().get_queryset().filter(
-        item=item_id,
-        quantity__lt=0,
-        datetime__gte=start_of_week,
-    ).aggregate(quantity=Sum('quantity'),)['quantity']
+    quantity = super().get_queryset().\
+        filter(
+          item=item_id,
+          quantity__lt=0,
+          datetime__gte=start_of_week,
+        ).\
+        aggregate(quantity=Sum('quantity'))['quantity']
 
     if quantity:
       return abs(quantity)
@@ -198,11 +202,13 @@ class ConsumptionHistoryManager(models.Manager):
     """
     start_of_month = pendulum.now(zone).start_of('month')
 
-    quantity = super().get_queryset().filter(
-        item=item_id,
-        quantity__lt=0,
-        datetime__gte=start_of_month,
-    ).aggregate(quantity=Sum('quantity'),)['quantity']
+    quantity = super().get_queryset().\
+        filter(
+          item=item_id,
+          quantity__lt=0,
+          datetime__gte=start_of_month,
+        ).\
+        aggregate(quantity=Sum('quantity'))['quantity']
 
     if quantity:
       return abs(quantity)
@@ -220,10 +226,14 @@ class ConsumptionHistoryManager(models.Manager):
     :rtype: :class:`datetime.datetime`, None
     """
     zone = pytz.timezone(zone)
-    query_set = super().get_queryset().filter(
-        quantity__lt=0,
-        item=item_id,
-    ).values('datetime').order_by('datetime').first()
+    query_set = super().get_queryset().\
+        filter(
+          quantity__lt=0,
+          item=item_id,
+        ).\
+        values('datetime').\
+        order_by('datetime').\
+        first()
     if query_set:
       return query_set['datetime'].astimezone(zone)
     return None
@@ -246,12 +256,14 @@ class ConsumptionHistoryManager(models.Manager):
         start_of_window.astimezone(zone) -
         timedelta(days=int(settings.TRANSACTION_HISTORY_MAX))
     )
-    return super().get_queryset().filter(
-        item=item_id,
-        datetime__date__gte=end_of_window.date(),
-    ).order_by('-datetime').annotate(
-        date=TruncDate('datetime', tzinfo=zone)
-    ).values('date').annotate(quantity=Sum('quantity'))
+    return super().get_queryset().\
+        filter(
+          item=item_id,
+          datetime__date__gte=end_of_window.date(),
+        ).\
+        order_by('-datetime').\
+        annotate(date=TruncDate('datetime', tzinfo=zone)).\
+        values('date').annotate(quantity=Sum('quantity'))
 
   def get_total_consumption(self, item_id):
     """Retrieves the last two weeks of transaction activity.
@@ -262,10 +274,12 @@ class ConsumptionHistoryManager(models.Manager):
     :returns: The total count of cumulative consumption
     :rtype: int
     """
-    quantity = super().get_queryset().filter(
-        quantity__lt=0,
-        item=item_id,
-    ).aggregate(quantity=Sum('quantity'))['quantity']
+    quantity = super().get_queryset().\
+        filter(
+          quantity__lt=0,
+          item=item_id,
+        ).\
+        aggregate(quantity=Sum('quantity'))['quantity']
     if quantity:
       return abs(quantity)
     return 0

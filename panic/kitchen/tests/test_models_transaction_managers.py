@@ -417,11 +417,17 @@ class TestConsumptionHistoryManagerTwoWeeks(TestHarnessWithTestData):
     )
 
     received = Transaction.consumption.get_last_two_weeks(self.item1)
-    expected = Transaction.objects.filter(
-        item=self.item1, datetime__date__gte=end_of_window.date()
-    ).order_by('-datetime').annotate(
-        date=TruncDate('datetime', tzinfo=pytz.utc)
-    ).values('date').annotate(quantity=Sum('quantity'))
+    expected = Transaction.objects.\
+        filter(
+          item=self.item1,
+          datetime__date__gte=end_of_window.date(),
+        ).\
+        order_by('-datetime').\
+        annotate(
+          date=TruncDate('datetime', tzinfo=pytz.utc),
+        ).\
+        values('date').\
+        annotate(quantity=Sum('quantity'))
 
     self.assertQuerysetEqual(received, map(repr, expected))
 
@@ -439,11 +445,16 @@ class TestConsumptionHistoryManagerTwoWeeks(TestHarnessWithTestData):
         self.item1,
         zone=test_tz,
     )
-    expected = Transaction.objects.filter(
-        item=self.item1, datetime__date__gte=end_of_window.date()
-    ).order_by('-datetime').annotate(
-        date=TruncDate('datetime', tzinfo=zone)
-    ).values('date').annotate(quantity=Sum('quantity'))
+
+    expected = Transaction.objects.\
+        filter(
+          item=self.item1,
+          datetime__date__gte=end_of_window.date(),
+        ).\
+        order_by('-datetime').\
+        annotate(date=TruncDate('datetime', tzinfo=zone)).\
+        values('date').\
+        annotate(quantity=Sum('quantity'))
 
     self.assertQuerysetEqual(received, map(repr, expected))
 
