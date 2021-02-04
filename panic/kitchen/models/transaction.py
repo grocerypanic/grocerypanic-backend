@@ -6,7 +6,7 @@ from django.db import models, transaction
 from django.utils.timezone import now
 
 from .item import Item
-from .transaction_managers import ConsumptionHistoryManager, ExpiryManager
+from .managers.transaction import ConsumptionHistoryManager, ExpiryManager
 
 User = get_user_model()
 

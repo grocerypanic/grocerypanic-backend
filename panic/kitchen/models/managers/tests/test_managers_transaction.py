@@ -12,10 +12,10 @@ from django.test import TestCase
 from django.utils import timezone
 from freezegun import freeze_time
 
-import kitchen
-from ..models.transaction import Transaction
-from ..models.transaction_managers import ItemExpirationCalculator
-from .fixtures.transaction import TransactionTestHarness
+from ....tests.fixtures.transaction import TransactionTestHarness
+from ...transaction import Transaction
+from .. import transaction as transaction_manager
+from ..transaction import ItemExpirationCalculator
 
 
 class TestWeekConfiguration(TestCase):
@@ -149,8 +149,7 @@ class TestIECWithoutTransactions(TestHarnessWithOutTestData):
   def test_reconcile_transaction_history(self):
 
     with patch(
-        kitchen.__name__ +
-        '.models.transaction_managers.ItemExpirationCalculator'
+        transaction_manager.__name__ + '.ItemExpirationCalculator'
         '.reconcile_single_transaction'
     ) as reconciler:
 
@@ -170,8 +169,7 @@ class TestIECWithoutTransactions(TestHarnessWithOutTestData):
   @freeze_time("2020-01-14")
   def test_reconcile_transaction_history_with_expired(self):
     with patch(
-        kitchen.__name__ +
-        '.models.transaction_managers.ItemExpirationCalculator'
+        transaction_manager.__name__ + '.ItemExpirationCalculator'
         '.reconcile_single_transaction'
     ) as reconciler:
 
@@ -307,14 +305,12 @@ class TestExpiryManager(TestHarnessWithTestData):
     mock_query_set = [1, 2, 3]
 
     with patch(
-        kitchen.__name__ +
-        '.models.transaction_managers.ItemExpirationCalculator'
+        transaction_manager.__name__ + '.ItemExpirationCalculator'
     ) as calculator:
       calculator.return_value = MockExpiryCalculator
 
       with patch(
-          kitchen.__name__ +
-          '.models.transaction_managers.ExpiryManager.get_item_history'
+          transaction_manager.__name__ + '.ExpiryManager.get_item_history'
       ) as mock_get_item_history:
 
         mock_get_item_history.return_value = mock_query_set
@@ -330,8 +326,7 @@ class TestExpiryManager(TestHarnessWithTestData):
     MockExpiryCalculator.configure(self.item1, 0)
 
     with patch(
-        kitchen.__name__ +
-        '.models.transaction_managers.ItemExpirationCalculator'
+        transaction_manager.__name__ + '.ItemExpirationCalculator'
     ) as calculator:
 
       calculator.return_value = MockExpiryCalculator

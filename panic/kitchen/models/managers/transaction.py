@@ -163,6 +163,7 @@ class ExpiryManager(models.Manager):
 
 
 class ConsumptionHistoryManager(models.Manager):
+  """Provides reporting around the consumption patterns of Items"""
 
   def get_current_week_consumption(self, item_id, zone=pytz.utc.zone):
     """Retrieves the sum of the current week of transaction activity.

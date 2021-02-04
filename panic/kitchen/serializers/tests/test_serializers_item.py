@@ -8,17 +8,17 @@ from django.utils import timezone
 from freezegun import freeze_time
 from rest_framework.serializers import ErrorDetail, ValidationError
 
-from ..models.item import Item
-from ..models.transaction import Transaction
-from ..serializers import DUPLICATE_OBJECT_MESSAGE
-from ..serializers.item import (
+from ...models.item import Item
+from ...models.transaction import Transaction
+from ...tests.fixtures.django import MockRequest, deserialize_date
+from ...tests.fixtures.item import ItemTestHarness
+from ...tests.fixtures.transaction import TransactionTestHarness
+from .. import DUPLICATE_OBJECT_MESSAGE
+from ..item import (
     ItemConsumptionHistorySerializer,
     ItemHistorySerializer,
     ItemSerializer,
 )
-from .fixtures.django import MockRequest, deserialize_date
-from .fixtures.item import ItemTestHarness
-from .fixtures.transaction import TransactionTestHarness
 
 
 class TestItem(ItemTestHarness):

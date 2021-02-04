@@ -4,10 +4,10 @@ from django.utils import timezone
 from freezegun import freeze_time
 from rest_framework.serializers import ValidationError
 
-from ..models.transaction import Transaction
-from ..serializers.transaction import TransactionSerializer
-from .fixtures.django import MockRequest, deserialize_datetime
-from .fixtures.transaction import TransactionTestHarness
+from ...models.transaction import Transaction
+from ...tests.fixtures.django import MockRequest, deserialize_datetime
+from ...tests.fixtures.transaction import TransactionTestHarness
+from ..transaction import TransactionSerializer
 
 
 class TestTransactionSerializer(TransactionTestHarness):

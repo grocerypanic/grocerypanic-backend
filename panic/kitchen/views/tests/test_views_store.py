@@ -7,9 +7,9 @@ from django.utils.http import urlencode
 from rest_framework import status
 from rest_framework.test import APIClient
 
-from ..models.store import Store
-from ..serializers.store import StoreSerializer
-from .fixtures.store import StoreTestHarness
+from ...models.store import Store
+from ...serializers.store import StoreSerializer
+from ...tests.fixtures.store import StoreTestHarness
 
 STORE_URL = reverse("v1:stores-list")
 

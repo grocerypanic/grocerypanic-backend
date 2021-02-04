@@ -6,7 +6,7 @@ from unittest import TestCase
 from rest_framework import status
 from rest_framework.response import Response
 
-from ..views.deprecation import (
+from ..deprecation import (
     DEPRECATED_WARNING,
     deprecated_response,
     deprecated_warning,

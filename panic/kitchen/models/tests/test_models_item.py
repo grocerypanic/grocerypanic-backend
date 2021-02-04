@@ -2,14 +2,14 @@
 
 from django.core.exceptions import ValidationError
 
-from ..models.item import (
+from ...tests.fixtures.item import ItemTestHarness
+from ..item import (
     MAXIMUM_QUANTITY,
     MAXIMUM_SHELF_LIFE,
     MINIMUM_QUANTITY,
     MINIMUM_SHELF_LIFE,
     Item,
 )
-from .fixtures.item import ItemTestHarness
 
 
 class TestItem(ItemTestHarness):

@@ -8,7 +8,7 @@ from django_filters import rest_framework as filters
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import mixins, viewsets
 
-from spa_security.auth_cookie import CSRFMixin
+from spa_security.mixins import CSRFMixin
 from ..filters import TransactionFilter
 from ..models.transaction import Transaction
 from ..pagination import LegacyTransactionPagination

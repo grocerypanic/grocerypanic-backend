@@ -3,9 +3,9 @@
 from django.test import TestCase
 from rest_framework.serializers import ValidationError
 
-from ..models.suggested import SuggestedItem
-from ..serializers import DUPLICATE_OBJECT_MESSAGE
-from ..serializers.suggested import SuggestedItemSerializer
+from ...models.suggested import SuggestedItem
+from .. import DUPLICATE_OBJECT_MESSAGE
+from ..suggested import SuggestedItemSerializer
 
 
 class TestItemList(TestCase):

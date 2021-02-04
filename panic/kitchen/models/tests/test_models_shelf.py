@@ -1,12 +1,12 @@
-"""Test the Store Model."""
+"""Test the Shelf Model."""
 
 from django.core.exceptions import ValidationError
 
-from ..models.store import Store
-from .fixtures.store import StoreTestHarness
+from ...tests.fixtures.shelf import ShelfTestHarness
+from ..shelf import Shelf
 
 
-class TestStore(StoreTestHarness):
+class TestShelf(ShelfTestHarness):
 
   @classmethod
   def create_data_hook(cls):
@@ -19,47 +19,44 @@ class TestStore(StoreTestHarness):
       return_value.append({key: "abc" * value})
     return return_value
 
-  def testAddStore(self):
-    test_name = "Loblaws"
-    _ = self.create_test_instance(user=self.user1, name=test_name)
+  def testAddShelf(self):
+    test_name = "Refrigerator"
+    shelf = self.create_test_instance(user=self.user1, name=test_name)
 
-    query = Store.objects.filter(name=test_name)
-
-    assert len(query) == 1
-    self.assertEqual(query[0].index, test_name.lower())
-    self.assertEqual(query[0].name, test_name)
-    self.assertEqual(query[0].user.id, self.user1.id)
+    query = Shelf.objects.filter(name=test_name)
+    self.assertQuerysetEqual(query, [repr(shelf)])
 
   def testUnique(self):
-    test_name = "Loblaws"
+    test_name = "Above Sink"
     _ = self.create_test_instance(user=self.user1, name=test_name)
 
     with self.assertRaises(ValidationError):
       _ = self.create_test_instance(user=self.user1, name=test_name)
 
-    count = Store.objects.filter(name=test_name).count()
+    count = Shelf.objects.filter(name=test_name).count()
     assert count == 1
 
-  def testAddStoreInjection(self):
-    test_name = "Loblaws<script>alert('hi');</script>"
-    sanitized_name = "Loblaws&lt;script&gt;alert('hi');&lt;/script&gt;"
+  def testAddShelfInjection(self):
+    test_name = "Refrigerator<script>alert('hi');</script>"
+    sanitized_name = "Refrigerator&lt;script&gt;alert('hi');&lt;/script&gt;"
     _ = self.create_test_instance(user=self.user1, name=test_name)
 
-    query = Store.objects.filter(name=sanitized_name)
+    query = Shelf.objects.filter(name=sanitized_name)
 
     assert len(query) == 1
+    self.assertEqual(query[0].index, sanitized_name.lower())
     self.assertEqual(query[0].name, sanitized_name)
     self.assertEqual(query[0].user.id, self.user1.id)
 
   def testStr(self):
-    test_name = "Shoppers Drugmart"
+    test_name = "Pantry"
     item = self.create_test_instance(user=self.user1, name=test_name)
 
     self.assertEqual(test_name, str(item))
 
   def testFieldLengths(self):
     for overloaded_field in self.generate_overload(self.fields):
-      local_data = {"user": self.user1, "name": "Loblaws"}
+      local_data = {"user": self.user1, "name": "Refrigerator"}
       local_data.update(overloaded_field)
       with self.assertRaises(ValidationError):
         _ = self.create_test_instance(**local_data)

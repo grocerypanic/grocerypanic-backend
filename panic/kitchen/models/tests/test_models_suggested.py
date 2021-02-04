@@ -3,7 +3,7 @@
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 
-from ..models.suggested import SuggestedItem
+from ..suggested import SuggestedItem
 
 
 class TestItemList(TestCase):

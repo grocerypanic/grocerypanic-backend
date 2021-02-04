@@ -6,7 +6,7 @@ from drf_yasg.utils import swagger_auto_schema
 from rest_framework import mixins, viewsets
 from rest_framework.response import Response
 
-from spa_security.auth_cookie import CSRFMixin
+from spa_security.mixins import CSRFMixin
 from ..filters import ItemFilter
 from ..models.item import Item
 from ..pagination import PagePagination

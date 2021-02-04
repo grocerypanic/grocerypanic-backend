@@ -7,7 +7,7 @@ from django.contrib.auth import get_user_model
 from django.core.management import call_command
 from django.test import TestCase
 
-import kitchen
+from .... import management
 
 
 class CommandTestInvalid(TestCase):
@@ -44,7 +44,7 @@ class CommandTestValid(TestCase):
   def setUp(self):
 
     with patch(
-        kitchen.__name__ + '.management.commands.load_testdata.DataGenerator'
+        management.__name__ + '.commands.load_testdata.DataGenerator'
     ) as generator:
 
       self.mock_generator = Mock()

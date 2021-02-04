@@ -2,7 +2,7 @@
 
 from rest_framework import mixins, viewsets
 
-from spa_security.auth_cookie import CSRFMixin
+from spa_security.mixins import CSRFMixin
 from ..models.shelf import Shelf
 from ..pagination import PagePaginationWithOverride
 from ..serializers.shelf import ShelfSerializer

@@ -2,11 +2,11 @@
 
 from rest_framework.serializers import ValidationError
 
-from ..models.shelf import Shelf
-from ..serializers import DUPLICATE_OBJECT_MESSAGE
-from ..serializers.shelf import ShelfSerializer
-from .fixtures.django import MockRequest
-from .fixtures.shelf import ShelfTestHarness
+from ...models.shelf import Shelf
+from ...tests.fixtures.django import MockRequest
+from ...tests.fixtures.shelf import ShelfTestHarness
+from .. import DUPLICATE_OBJECT_MESSAGE
+from ..shelf import ShelfSerializer
 
 
 class TestShelf(ShelfTestHarness):

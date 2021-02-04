@@ -2,11 +2,11 @@
 
 from rest_framework.serializers import ValidationError
 
-from ..models.store import Store
-from ..serializers import DUPLICATE_OBJECT_MESSAGE
-from ..serializers.store import StoreSerializer
-from .fixtures.django import MockRequest
-from .fixtures.store import StoreTestHarness
+from ...models.store import Store
+from ...tests.fixtures.django import MockRequest
+from ...tests.fixtures.store import StoreTestHarness
+from .. import DUPLICATE_OBJECT_MESSAGE
+from ..store import StoreSerializer
 
 
 class TestStore(StoreTestHarness):

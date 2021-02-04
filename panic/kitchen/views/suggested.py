@@ -2,7 +2,7 @@
 
 from rest_framework import mixins, viewsets
 
-from spa_security.auth_cookie import CSRFMixin
+from spa_security.mixins import CSRFMixin
 from ..models.suggested import SuggestedItem
 from ..pagination import PagePagination
 from ..serializers.suggested import SuggestedItemSerializer

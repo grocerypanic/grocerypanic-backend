@@ -7,9 +7,9 @@ from django.utils.http import urlencode
 from rest_framework import status
 from rest_framework.test import APIClient
 
-from ..models.shelf import Shelf
-from ..serializers.shelf import ShelfSerializer
-from .fixtures.shelf import ShelfTestHarness
+from ...models.shelf import Shelf
+from ...serializers.shelf import ShelfSerializer
+from ...tests.fixtures.shelf import ShelfTestHarness
 
 SHELF_URL = reverse("v1:shelves-list")
 

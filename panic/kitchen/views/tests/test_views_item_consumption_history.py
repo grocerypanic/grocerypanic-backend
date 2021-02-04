@@ -9,9 +9,9 @@ from freezegun import freeze_time
 from rest_framework import status
 from rest_framework.test import APIClient
 
-from ..serializers.item import ItemConsumptionHistorySerializer
-from .fixtures.django import MockRequest
-from .fixtures.transaction import TransactionTestHarness
+from ...serializers.item import ItemConsumptionHistorySerializer
+from ...tests.fixtures.django import MockRequest
+from ...tests.fixtures.transaction import TransactionTestHarness
 
 CONSUMPTION_HISTORY_VIEW = "v1:item-consumption-detail"
 

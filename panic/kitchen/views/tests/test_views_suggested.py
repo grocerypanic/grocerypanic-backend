@@ -7,8 +7,8 @@ from django.utils.http import urlencode
 from rest_framework import status
 from rest_framework.test import APIClient
 
-from ..models.suggested import SuggestedItem
-from ..serializers.suggested import SuggestedItemSerializer
+from ...models.suggested import SuggestedItem
+from ...serializers.suggested import SuggestedItemSerializer
 
 LIST_URL = reverse("v1:suggestions-list")
 
