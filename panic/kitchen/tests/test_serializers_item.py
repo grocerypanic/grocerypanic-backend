@@ -1,6 +1,7 @@
 """Test the Item Serializer."""
 
 import json
+from datetime import timedelta
 
 import pytz
 from django.utils import timezone
@@ -130,6 +131,9 @@ class TestItemConsumptionHistorySerializer(TransactionTestHarness):
   def create_data_hook(cls):
     cls.serializer = ItemConsumptionHistorySerializer
     cls.today = timezone.now()
+    cls.two_days_ago = timezone.now() + timedelta(days=-2)
+    cls.start_of_month = timezone.now() + timedelta(days=-13)
+
     cls.fields = {"name": 255}
 
     cls.data = {
@@ -138,6 +142,21 @@ class TestItemConsumptionHistorySerializer(TransactionTestHarness):
         'user': cls.user1,
         'quantity': -3
     }
+
+    cls.week_border = {
+        'item': cls.item1,
+        'date_object': cls.two_days_ago,
+        'user': cls.user1,
+        'quantity': -3
+    }
+
+    cls.month_border = {
+        'item': cls.item1,
+        'date_object': cls.start_of_month,
+        'user': cls.user1,
+        'quantity': -3
+    }
+
     cls.request = MockRequest(cls.user1)
 
   def setUp(self):
@@ -192,7 +211,7 @@ class TestItemConsumptionHistorySerializer(TransactionTestHarness):
     )
 
   @freeze_time("2020-01-14")
-  def test_deserialize_consumption_per_week(self):
+  def test_deserialize_first_consumption_date(self):
     self.create_test_instance(**self.data)
 
     serialized = self.serializer(
@@ -209,7 +228,7 @@ class TestItemConsumptionHistorySerializer(TransactionTestHarness):
     )
 
   @freeze_time("2020-01-14")
-  def test_deserialize_consumption_per_month(self):
+  def test_deserialize_total_consumption(self):
     self.create_test_instance(**self.data)
 
     serialized = self.serializer(
@@ -223,6 +242,76 @@ class TestItemConsumptionHistorySerializer(TransactionTestHarness):
     self.assertEqual(
         deserialized['total_consumption'],
         3,
+    )
+
+  @freeze_time("2020-01-14")
+  def test_deserialize_consumption_this_week(self):
+    self.create_test_instance(**self.data)
+
+    serialized = self.serializer(
+        self.item1,
+        data={"timezone": pytz.utc.zone},
+        context={'request': self.request},
+    )
+    serialized.is_valid(raise_exception=True)
+    deserialized = serialized.data
+
+    self.assertEqual(
+        deserialized['consumption_this_week'],
+        3,
+    )
+
+  @freeze_time("2020-01-14")
+  def test_deserialize_consumption_this_week_tz(self):
+    zone = "Pacific/Honolulu"
+    self.create_test_instance(**self.week_border)
+
+    serialized = self.serializer(
+        self.item1,
+        data={"timezone": zone},
+        context={'request': self.request},
+    )
+    serialized.is_valid(raise_exception=True)
+    deserialized = serialized.data
+
+    self.assertEqual(
+        deserialized['consumption_this_week'],
+        0,
+    )
+
+  @freeze_time("2020-01-14")
+  def test_deserialize_consumption_this_month(self):
+    self.create_test_instance(**self.data)
+
+    serialized = self.serializer(
+        self.item1,
+        data={"timezone": pytz.utc.zone},
+        context={'request': self.request},
+    )
+    serialized.is_valid(raise_exception=True)
+    deserialized = serialized.data
+
+    self.assertEqual(
+        deserialized['consumption_this_month'],
+        3,
+    )
+
+  @freeze_time("2020-01-14")
+  def test_deserialize_consumption_this_month_tz(self):
+    zone = "Pacific/Honolulu"
+    self.create_test_instance(**self.month_border)
+
+    serialized = self.serializer(
+        self.item1,
+        data={"timezone": zone},
+        context={'request': self.request},
+    )
+    serialized.is_valid(raise_exception=True)
+    deserialized = serialized.data
+
+    self.assertEqual(
+        deserialized['consumption_this_week'],
+        0,
     )
 
   @freeze_time("2020-01-14")

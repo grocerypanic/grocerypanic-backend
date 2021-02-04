@@ -54,6 +54,8 @@ class ItemConsumptionHistorySerializer(serializers.ModelSerializer):
       default=DEFAULT_TIMEZONE,
   )
   consumption_last_two_weeks = serializers.SerializerMethodField(read_only=True)
+  consumption_this_month = serializers.SerializerMethodField(read_only=True)
+  consumption_this_week = serializers.SerializerMethodField(read_only=True)
   first_consumption_date = serializers.SerializerMethodField(read_only=True)
   total_consumption = serializers.SerializerMethodField(read_only=True)
 
@@ -62,6 +64,8 @@ class ItemConsumptionHistorySerializer(serializers.ModelSerializer):
     fields = (
         "timezone",
         "consumption_last_two_weeks",
+        "consumption_this_month",
+        "consumption_this_week",
         "first_consumption_date",
         "total_consumption",
     )
@@ -89,6 +93,24 @@ class ItemConsumptionHistorySerializer(serializers.ModelSerializer):
         configured_timezone,
     )
     return ItemHistorySerializer(query, many=True).data
+
+  @swagger_serializer_method(serializer_or_field=serializers.IntegerField)
+  def get_consumption_this_month(self, obj):
+    item_id = obj.id
+    configured_timezone = self.get_initial_timezone_value()
+    return Transaction.consumption.get_current_month_consumption(
+        item_id,
+        configured_timezone,
+    )
+
+  @swagger_serializer_method(serializer_or_field=serializers.IntegerField)
+  def get_consumption_this_week(self, obj):
+    item_id = obj.id
+    configured_timezone = self.get_initial_timezone_value()
+    return Transaction.consumption.get_current_week_consumption(
+        item_id,
+        configured_timezone,
+    )
 
   @swagger_serializer_method(serializer_or_field=serializers.DateTimeField)
   def get_first_consumption_date(self, obj):
