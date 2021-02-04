@@ -24,13 +24,13 @@ This can surely work with a broader range of versions, YMMV.  Test!
     - provides BLEACH_RESTORE_LIST, as a dictionary of key, value pairs that allow restoring specify bleached values
 2. **DRF Authentication via JWT over HTTP Cookies:**
     - allows use of http only cookies, which cannot be accessed client side
-    - `spa-security.auth_cookie.JWTCookieAuthentication`
+    - `spa-security.auth.JWTCookieAuthentication`
 3. **View CSRF Cookie Protection:**
     - add this mixin to the leftmost baseclass of your view to ensure it performs CSRF validation
-    - `spa-security.auth_cookie.CSRFMixin`
+    - `spa-security.mixins.CSRFMixin`
 4. **CSRF Token Generation View:**
     - presents an authenticated view which returns a CSRF token as a cookie
-    - `spa-security.views.CSRFview`
+    - `spa-security.views.CSRFView`
 5. **Compliant SameSite Cookies:**
     - Correctly sets the SameSite "None" option on reponses
     - the "Secure" cookie flag can be toggled on and off via the setting "REST_COOKIES_SECURE"
@@ -73,7 +73,7 @@ JWT_AUTH_COOKIE = 'panic-auth'
 
 REST_FRAMEWORK ={
   'DEFAULT_AUTHENTICATION_CLASSES': [
-    'spa_security.auth_cookie.JWTCookieAuthentication',
+    'spa_security.auth.JWTCookieAuthentication',
   ],
     'DEFAULT_PERMISSION_CLASSES': [
     'rest_framework.permissions.IsAuthenticated',
@@ -98,17 +98,17 @@ Then construct your views like this:
 ```python
 from rest_framework import mixins, viewsets
 
-from spa_security.auth_cookie import CSRFMixin
-from kitchen.models.itemlist import ItemList
-from kitchen.serializers.itemlist import ItemListSerializer
+from spa_security.mixins import CSRFMixin
+from kitchen.models.item import Item
+from kitchen.serializers.item import ItemSerializer
 
 class ListItemsViewSet(
     CSRFMixin,
     mixins.ListModelMixin,
     viewsets.GenericViewSet,
 ):
-  serializer_class = ItemListSerializer
-  queryset = ItemList.objects.all()
+  serializer_class = ItemSerializer
+  queryset = Item.objects.all()
 
   def get_queryset(self):
     return self.queryset.order_by("-name")

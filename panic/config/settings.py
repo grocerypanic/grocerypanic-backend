@@ -68,7 +68,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    'spa_security.auth_cookie.SameSiteMiddleware',
+    'spa_security.mixins.SameSiteMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'corsheaders.middleware.CorsMiddleware',

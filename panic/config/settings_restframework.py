@@ -4,7 +4,7 @@ REST_FRAMEWORK_AVAILABLE = {
     'test': {},
     'local': {
         'DEFAULT_AUTHENTICATION_CLASSES': [
-            'spa_security.auth_cookie.JWTCookieAuthentication',
+            'spa_security.auth.JWTCookieAuthentication',
             'rest_framework.authentication.BasicAuthentication',
         ],
         'DEFAULT_PERMISSION_CLASSES': [
@@ -18,7 +18,7 @@ REST_FRAMEWORK_AVAILABLE = {
     },
     'stage': {
         'DEFAULT_AUTHENTICATION_CLASSES': [
-            'spa_security.auth_cookie.JWTCookieAuthentication',
+            'spa_security.auth.JWTCookieAuthentication',
         ],
         'DEFAULT_PERMISSION_CLASSES': [
             'rest_framework.permissions.IsAuthenticated',
@@ -40,7 +40,7 @@ REST_FRAMEWORK_AVAILABLE = {
     },
     'prod': {
         'DEFAULT_AUTHENTICATION_CLASSES': [
-            'spa_security.auth_cookie.JWTCookieAuthentication',
+            'spa_security.auth.JWTCookieAuthentication',
         ],
         'DEFAULT_PERMISSION_CLASSES': [
             'rest_framework.permissions.IsAuthenticated',
@@ -62,7 +62,7 @@ REST_FRAMEWORK_AVAILABLE = {
     },
     'admin': {
         'DEFAULT_AUTHENTICATION_CLASSES': [
-            'spa_security.auth_cookie.JWTCookieAuthentication',
+            'spa_security.auth.JWTCookieAuthentication',
             'rest_framework.authentication.BasicAuthentication',
         ],
         'DEFAULT_PERMISSION_CLASSES': [

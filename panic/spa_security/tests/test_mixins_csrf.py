@@ -9,10 +9,10 @@ from rest_framework.status import HTTP_200_OK
 from rest_framework.test import APIRequestFactory, force_authenticate
 from rest_framework.views import APIView
 
-from ..auth_cookie import CSRFMixin
+from ..mixins import CSRFMixin
 
 
-class Placebo(APIView):
+class PlaceboTest(APIView):
 
   def get(self, request):
     return Response({}, status=HTTP_200_OK)
@@ -41,7 +41,7 @@ class TestValidCSRF(TestCase):
     self.factory = APIRequestFactory(enforce_csrf_checks=True)
     self.get = self.factory.get('/someView')
     self.post = self.factory.post('/someView')
-    self.placebo = Placebo.as_view()
+    self.placebo = PlaceboTest.as_view()
     self.ensured = Ensured.as_view()
     force_authenticate(self.get, user=self.user)
     force_authenticate(self.post, user=self.user)

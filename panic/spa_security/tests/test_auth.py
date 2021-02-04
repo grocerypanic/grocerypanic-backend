@@ -7,7 +7,7 @@ from django.test import TestCase
 from django.test.client import RequestFactory
 from rest_framework_simplejwt.exceptions import InvalidToken
 
-from ..auth_cookie import JWTCookieAuthentication
+from ..auth import JWTCookieAuthentication
 
 
 class CookieAuthenticatorTest(TestCase):
