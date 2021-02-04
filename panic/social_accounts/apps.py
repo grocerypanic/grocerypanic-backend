@@ -4,6 +4,7 @@ from django.apps import AppConfig
 
 
 class SocialAccountsConfig(AppConfig):
+  """Social Accounts App Configuration"""
   name = 'social_accounts'
 
   def ready(self):

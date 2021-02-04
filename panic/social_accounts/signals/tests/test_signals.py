@@ -6,8 +6,8 @@ from allauth.account.models import EmailAddress
 from allauth.socialaccount.signals import pre_social_login
 from django.test import override_settings
 
-from ..signals import presocial_login
-from .fixtures.signals import SignalsTestHarness, get_mock_social_login
+from ...tests.fixtures.signals import SignalsTestHarness, get_mock_social_login
+from .. import presocial_login
 
 
 class TestSocialConnect(SignalsTestHarness):

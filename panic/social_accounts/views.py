@@ -2,7 +2,7 @@
 
 from allauth.socialaccount.providers.facebook.views import FacebookOAuth2Adapter
 from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
-from dj_rest_auth.registration.views import SocialConnectView, SocialLoginView
+from dj_rest_auth.registration.views import SocialLoginView
 
 
 class FacebookLogin(SocialLoginView):
@@ -14,20 +14,6 @@ class FacebookLogin(SocialLoginView):
 
 class GoogleLogin(SocialLoginView):
   """Google Login Adapter"""
-  authentication_classes = ()
-  permission_classes = ()
-  adapter_class = GoogleOAuth2Adapter
-
-
-class FacebookConnect(SocialConnectView):
-  """Facebook Connect Adapter"""
-  authentication_classes = ()
-  permission_classes = ()
-  adapter_class = FacebookOAuth2Adapter
-
-
-class GoogleConnect(SocialConnectView):
-  """Google Connect Adapter"""
   authentication_classes = ()
   permission_classes = ()
   adapter_class = GoogleOAuth2Adapter
