@@ -61,6 +61,7 @@ class TestHarnessWithTestData(TransactionTestHarness):
     cls.tomorrow = timezone.now() + timedelta(days=1)
     cls.yesterday = timezone.now() + timedelta(days=-1)
     cls.last_year = timezone.now() + timedelta(days=-365)
+
     cls.transaction1 = {
         'item': cls.item1,
         'date_object': cls.today,
@@ -226,6 +227,44 @@ class TestIECWithoutTransactions(TestHarnessWithOutTestData):
 
 class TestIECWithTransactions(TestHarnessWithTestData):
 
+  @classmethod
+  @freeze_time("2020-01-14")
+  def create_data_hook(cls):
+    super().create_data_hook()
+
+    cls.positive_past = {
+        'item': cls.item1,
+        'date_object': cls.yesterday,
+        'user': cls.user1,
+        'quantity': 3
+    }
+    cls.positive_future = {
+        'item': cls.item1,
+        'date_object': cls.tomorrow,
+        'user': cls.user1,
+        'quantity': 3
+    }
+
+    cls.negative_past = {
+        'item': cls.item1,
+        'date_object': cls.yesterday,
+        'user': cls.user1,
+        'quantity': -3
+    }
+    cls.negative_future = {
+        'item': cls.item1,
+        'date_object': cls.tomorrow,
+        'user': cls.user1,
+        'quantity': -3
+    }
+
+    cls.expired = {
+        'item': cls.item1,
+        'date_object': cls.last_year,
+        'user': cls.user1,
+        'quantity': 3
+    }
+
   def create_timebatch(self):
     t_today = self.create_test_instance(**self.transaction1)
     t_yesterday = self.create_test_instance(**self.transaction2)
@@ -233,6 +272,7 @@ class TestIECWithTransactions(TestHarnessWithTestData):
     return {"today": t_today, "yesterday": t_yesterday, "tomorrow": t_tomorrow}
 
   def create_batch_with_total(self):
+    self.reset_item1()
     batch = self.create_timebatch()
 
     total_quantity = 0
@@ -243,45 +283,60 @@ class TestIECWithTransactions(TestHarnessWithTestData):
 
   @freeze_time("2020-01-14")
   def test_reconcile_single_transaction_pos_qty(self):
-    batch, total_quantity = self.create_batch_with_total()
+    _, total_quantity = self.create_batch_with_total()
+
+    transaction = self.create_test_instance(**self.positive_past)
 
     calculator = ItemExpirationCalculator(self.item1)
-    result = calculator.reconcile_single_transaction(batch['yesterday'])
-    self.assertEqual(result, total_quantity)
+    remaining = calculator.reconcile_single_transaction(transaction)
+    self.assertEqual(remaining, total_quantity)
     self.assertEqual(calculator.expired, 0)
 
-  @freeze_time("2021-01-14")
+  @freeze_time("2020-01-14")
   def test_reconcile_single_transaction_pos_qty_future(self):
-    batch, total_quantity = self.create_batch_with_total()
+    _, total_quantity = self.create_batch_with_total()
+
+    transaction = self.create_test_instance(**self.positive_future)
 
     calculator = ItemExpirationCalculator(self.item1)
-    result = calculator.reconcile_single_transaction(batch['yesterday'])
-    self.assertEqual(result, total_quantity)
-    self.assertEqual(calculator.expired, batch['yesterday'].quantity)
+    remaining = calculator.reconcile_single_transaction(transaction)
+    self.assertEqual(remaining, total_quantity)
+    self.assertEqual(calculator.expired, 0)
 
   @freeze_time("2020-01-14")
   def test_reconcile_single_transaction_neg_qty(self):
-    batch, total_quantity = self.create_batch_with_total()
+    _, total_quantity = self.create_batch_with_total()
 
-    batch['yesterday'].quantity = -3
-    batch['yesterday'].save()
+    transaction = self.create_test_instance(**self.negative_past)
 
     calculator = ItemExpirationCalculator(self.item1)
-    result = calculator.reconcile_single_transaction(batch['yesterday'])
-    self.assertEqual(result, total_quantity)
+    remaining = calculator.reconcile_single_transaction(transaction)
+    self.assertEqual(remaining, total_quantity + transaction.quantity)
+
     self.assertEqual(calculator.expired, -3)
 
-  @freeze_time("2021-01-14")
+  @freeze_time("2020-01-14")
   def test_reconcile_single_transaction_neg_qty_future(self):
-    batch, total_quantity = self.create_batch_with_total()
+    _, total_quantity = self.create_batch_with_total()
 
-    batch['yesterday'].quantity = -3
-    batch['yesterday'].save()
+    transaction = self.create_test_instance(**self.negative_future)
 
     calculator = ItemExpirationCalculator(self.item1)
-    result = calculator.reconcile_single_transaction(batch['yesterday'])
-    self.assertEqual(result, total_quantity)
+    remaining = calculator.reconcile_single_transaction(transaction)
+    self.assertEqual(remaining, total_quantity + transaction.quantity)
+
     self.assertEqual(calculator.expired, -3)
+
+  @freeze_time("2020-01-14")
+  def test_reconcile_single_transaction_expired(self):
+    _, total_quantity = self.create_batch_with_total()
+
+    transaction = self.create_test_instance(**self.expired)
+
+    calculator = ItemExpirationCalculator(self.item1)
+    remaining = calculator.reconcile_single_transaction(transaction)
+    self.assertEqual(remaining, total_quantity)
+    self.assertEqual(calculator.expired, 3)
 
 
 class TestExpiryManager(TestHarnessWithTestData):

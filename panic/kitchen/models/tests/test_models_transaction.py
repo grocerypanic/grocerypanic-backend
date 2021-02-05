@@ -37,10 +37,18 @@ class TestTransaction(TransactionTestHarness):
         'quantity': 0
     }
 
-  def setUp(self):
-    self.item1.quantity = 3
-    self.item1.save()
-    super().setUp()
+  def testTransactionAppliedOnlyOnce(self):
+
+    instance = self.create_test_instance(**self.positive_data)
+    self.assertEqual(
+        instance.item.quantity,
+        self.positive_data['quantity'] + self.initial_quantity
+    )
+    instance.save()
+    self.assertEqual(
+        instance.item.quantity,
+        self.positive_data['quantity'] + self.initial_quantity,
+    )
 
   def testPositiveTransaction(self):
     self.create_test_instance(**self.positive_data)
@@ -53,7 +61,10 @@ class TestTransaction(TransactionTestHarness):
     self.assertEqual(transaction.datetime, self.today)
     self.assertEqual(transaction.user.id, self.user1.id)
     self.assertEqual(transaction.quantity, self.positive_data['quantity'])
-    assert transaction.item.quantity == 6  # The modified value
+    self.assertEqual(
+        transaction.item.quantity,
+        self.initial_quantity + self.positive_data['quantity']
+    )
 
   def testOperationPositive(self):
     transaction = self.create_test_instance(**self.positive_data)
@@ -67,8 +78,11 @@ class TestTransaction(TransactionTestHarness):
     self.assertEqual(string, str(transaction))
 
   def testNegativeTransaction(self):
-    self.create_test_instance(**self.negative_data)
 
+    self.item1.quantity = 3
+    self.item1.save()
+
+    self.create_test_instance(**self.negative_data)
     query = Transaction.objects.filter(item=self.item1)
 
     assert len(query) == 1
@@ -77,13 +91,21 @@ class TestTransaction(TransactionTestHarness):
     self.assertEqual(transaction.datetime, self.today)
     self.assertEqual(transaction.user.id, self.user1.id)
     self.assertEqual(transaction.quantity, self.negative_data['quantity'])
-    assert transaction.item.quantity == 0  # The modified value
+    assert transaction.item.quantity == 3 + self.negative_data['quantity']
 
   def testOperationNegative(self):
+
+    self.item1.quantity = 3
+    self.item1.save()
+
     transaction = self.create_test_instance(**self.negative_data)
     self.assertEqual("Consumption", transaction.operation)
 
   def testStrNegative(self):
+
+    self.item1.quantity = 3
+    self.item1.save()
+
     transaction = self.create_test_instance(**self.negative_data)
     string = "Consumption: %s units of %s" % (
         transaction.quantity, transaction.item.name
@@ -97,7 +119,7 @@ class TestTransaction(TransactionTestHarness):
     query = Transaction.objects.filter(item=self.item1)
     assert len(query) == 0
     self.item1.refresh_from_db()
-    assert self.item1.quantity == 3  # The original value
+    assert self.item1.quantity == self.initial_quantity
 
   def testNeutralTransaction(self):
     with self.assertRaises(ValidationError):
@@ -106,9 +128,13 @@ class TestTransaction(TransactionTestHarness):
     query = Transaction.objects.filter(item=self.item1)
     assert len(query) == 0
     self.item1.refresh_from_db()
-    assert self.item1.quantity == 3  # The original value
+    assert self.item1.quantity == self.initial_quantity
 
   def testOperationNeutral(self):
+
+    self.item1.quantity = 3
+    self.item1.save()
+
     transaction = self.create_test_instance(**self.negative_data)
     transaction.quantity = 0
     self.assertIsNone(transaction.operation)
@@ -116,6 +142,10 @@ class TestTransaction(TransactionTestHarness):
     self.assertIsNone(transaction.operation)
 
   def testStrNeutral(self):
+
+    self.item1.quantity = 3
+    self.item1.save()
+
     transaction = self.create_test_instance(**self.negative_data)
     transaction.quantity = 0
     self.assertEqual("Invalid Transaction", str(transaction))

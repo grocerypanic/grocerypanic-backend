@@ -16,6 +16,7 @@ class TransactionTestHarness(KitchenModelTestFixture, TestCase):
   user1 = None
   objects = None
   today = None
+  initial_quantity = 0
 
   @staticmethod
   def create_instance(**kwargs):
@@ -49,7 +50,7 @@ class TransactionTestHarness(KitchenModelTestFixture, TestCase):
         user=user,
         shelf=shelf,
         price=2.00,
-        quantity=3,
+        quantity=0,
     )
     item.preferred_stores.add(store)
     item.save()
@@ -90,7 +91,13 @@ class TransactionTestHarness(KitchenModelTestFixture, TestCase):
     cls.item1 = test_data['item']
     cls.create_data_hook()
 
+  def reset_item1(self):
+    self.item1.quantity = self.initial_quantity
+    self.item1.expired = 0
+    self.item1.save()
+
   def setUp(self):
+    self.reset_item1()
     self.objects = list()
 
   def tearDown(self):

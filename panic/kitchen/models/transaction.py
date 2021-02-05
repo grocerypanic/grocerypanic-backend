@@ -66,10 +66,6 @@ class Transaction(models.Model):
       )
     return "Invalid Transaction"
 
-  def update_related_item_quantity(self):
-    """Updates the quantity of the related item instance."""
-    self.item.quantity = self.item.quantity + self.quantity
-
   def clean(self):
     if (self.item.quantity + self.quantity) < 0:
       raise ValidationError([{
@@ -77,11 +73,16 @@ class Transaction(models.Model):
       }])
     super().clean()
 
+  def apply_transaction(self):
+    """Updates the related item quantity, and it's expiry."""
+    if self.id is None:
+      self.item.quantity = self.item.quantity + self.quantity
+      Transaction.expiration.update(self)
+
   # pylint: disable=W0222
   def save(self, *args, **kwargs):
     with transaction.atomic():
       self.full_clean()
+      self.apply_transaction()
       super(Transaction, self).save(*args, **kwargs)
-      self.update_related_item_quantity()
-      Transaction.expiration.update(self)
       self.item.save()
