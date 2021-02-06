@@ -10,8 +10,6 @@ from django.utils.timezone import now
 from naturalsortfield import NaturalSortField
 
 from spa_security.fields import BlondeCharField
-from .shelf import Shelf
-from .store import Store
 
 User = get_user_model()
 
@@ -35,21 +33,23 @@ def default_expiry():
 
 class Item(models.Model):
   """Items used for Kitchen Inventory"""
+  has_partial_quantities = models.BooleanField(default=False)
+
   index = NaturalSortField(
       for_field="name",
       max_length=MAX_LENGTH,
   )  # Pagination Index
   name = BlondeCharField(max_length=MAX_LENGTH)
-  preferred_stores = models.ManyToManyField(Store)
+  preferred_stores = models.ManyToManyField('Store')
   price = models.DecimalField(max_digits=10, decimal_places=2)
-  quantity = models.IntegerField(
+  quantity = models.FloatField(
       default=0,
       validators=[
           MinValueValidator(MINIMUM_QUANTITY),
           MaxValueValidator(MAXIMUM_QUANTITY),
       ],
   )
-  shelf = models.ForeignKey(Shelf, on_delete=models.CASCADE)
+  shelf = models.ForeignKey('Shelf', on_delete=models.CASCADE)
   shelf_life = models.IntegerField(
       default=DEFAULT_SHELF_LIFE,
       validators=[
@@ -63,14 +63,14 @@ class Item(models.Model):
 
   # These 3 fields are recalculated on each transaction
   next_expiry_date = models.DateField(default=default_expiry)
-  next_expiry_quantity = models.IntegerField(
+  next_expiry_quantity = models.FloatField(
       default=0,
       validators=[
           MinValueValidator(MINIMUM_QUANTITY),
           MaxValueValidator(MAXIMUM_QUANTITY)
       ],
   )
-  expired = models.IntegerField(
+  expired = models.FloatField(
       default=0,
       validators=[
           MinValueValidator(MINIMUM_QUANTITY),

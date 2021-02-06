@@ -29,6 +29,7 @@ class Shelf(models.Model):
     indexes = [
         models.Index(fields=['index']),
     ]
+    verbose_name_plural = "Shelves"
 
   def __str__(self):
     return str(self.name)

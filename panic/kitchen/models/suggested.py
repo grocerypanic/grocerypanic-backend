@@ -1,4 +1,4 @@
-"""SuggestedItem Model for AutoCompletion"""
+"""Suggested Item Model for AutoCompletion"""
 
 from django.db import models
 

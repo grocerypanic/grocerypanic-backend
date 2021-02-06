@@ -126,7 +126,7 @@ class Migration(migrations.Migration):
                   models.IntegerField(
                       validators=[
                           kitchen.models.validators.transaction.
-                          validate_transaction_quantity
+                          TransactionQuantityValidator(10000)
                       ]
                   )
               ),

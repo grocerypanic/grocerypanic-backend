@@ -89,6 +89,7 @@ class TestItem(ItemTestHarness):
     price = '2.00'
 
     self.assertEqual(deserialized['name'], self.data['name'])
+    self.assertFalse(deserialized['has_partial_quantities'])
     self.assertEqual(deserialized['shelf_life'], self.data['shelf_life'])
     self.assertEqual(deserialized['shelf'], self.shelf1.id)
     self.assertEqual(deserialized['price'], price)
@@ -116,6 +117,27 @@ class TestItem(ItemTestHarness):
     self.assertEqual(item.shelf.id, self.shelf1.id)
     self.assertEqual(item.price, self.serializer_data['price'])
     self.assertEqual(item.quantity, self.serializer_data['quantity'])
+    self.assertFalse(item.has_partial_quantities)
+
+  def testSerialize_fractional_quantities(self):
+    fractional_quantities = dict(self.serializer_data)
+    fractional_quantities.update({
+        "has_partial_quantities": True,
+    },)
+
+    serialized = self.serializer(
+        context={'request': self.request},
+        data=fractional_quantities,
+    )
+    serialized.is_valid(raise_exception=True)
+    serialized.save()
+
+    query = Item.objects.filter(name=fractional_quantities['name'])
+
+    assert len(query) == 1
+    item = query[0]
+
+    self.assertTrue(item.has_partial_quantities)
 
   def testSerialize_wrong_shelf(self):
     serialized = self.serializer(

@@ -84,57 +84,49 @@ class TestItem(ItemTestHarness):
 
   def testNegativeQuantity(self):
     item = self.create_test_instance(**self.data)
-    item.quantity = -5
-    assert item.quantity < MINIMUM_QUANTITY
+    item.quantity = MINIMUM_QUANTITY - 1
     with self.assertRaises(ValidationError):
       item.save()
 
   def testEnormousQuantity(self):
     item = self.create_test_instance(**self.data)
-    item.quantity = 9000000
-    assert item.quantity > MAXIMUM_QUANTITY
+    item.quantity = MAXIMUM_QUANTITY + 1
     with self.assertRaises(ValidationError):
       item.save()
 
   def testShelfLifeRestrictionsLow(self):
     item = self.create_test_instance(**self.data)
-    item.shelf_life = 0
-    assert item.shelf_life < MINIMUM_SHELF_LIFE
+    item.shelf_life = MINIMUM_SHELF_LIFE - 1
     with self.assertRaises(ValidationError):
       item.save()
 
   def testShelfLifeRestrictionsHigh(self):
     item = self.create_test_instance(**self.data)
-    item.shelf_life = 9000
-    assert item.shelf_life > MAXIMUM_SHELF_LIFE
+    item.shelf_life = MAXIMUM_SHELF_LIFE + 1
     with self.assertRaises(ValidationError):
       item.save()
 
   def test_next_expiry_quantity_low(self):
     item = self.create_test_instance(**self.data)
-    item.next_expiry_quantity = -5
-    assert item.next_expiry_quantity < MINIMUM_QUANTITY
+    item.next_expiry_quantity = MINIMUM_QUANTITY - 1
     with self.assertRaises(ValidationError):
       item.save()
 
   def test_next_expiry_quantity_high(self):
     item = self.create_test_instance(**self.data)
-    item.next_expiry_quantity = 9000000
-    assert item.next_expiry_quantity > MAXIMUM_QUANTITY
+    item.next_expiry_quantity = MAXIMUM_QUANTITY + 1
     with self.assertRaises(ValidationError):
       item.save()
 
   def test_expired_low(self):
     item = self.create_test_instance(**self.data)
-    item.expired = -5
-    assert item.expired < MINIMUM_QUANTITY
+    item.expired = MINIMUM_QUANTITY - 1
     with self.assertRaises(ValidationError):
       item.save()
 
   def test_expired_high(self):
     item = self.create_test_instance(**self.data)
-    item.expired = 9000000
-    assert item.expired > MAXIMUM_QUANTITY
+    item.expired = MAXIMUM_QUANTITY + 1
     with self.assertRaises(ValidationError):
       item.save()
 
@@ -150,3 +142,13 @@ class TestItem(ItemTestHarness):
 
     self.assertEqual(item1.name, item2.name)
     self.assertNotEqual(item1, item2)
+
+  def test_default_fraction_bool(self):
+    item1 = self.create_test_instance(**self.data)
+    self.assertFalse(item1.has_partial_quantities)
+
+  def test_toggle_fraction_bool(self):
+    item1 = self.create_test_instance(**self.data)
+    item1.has_partial_quantities = True
+    item1.save()
+    self.assertTrue(item1.has_partial_quantities)

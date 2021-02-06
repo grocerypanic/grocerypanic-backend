@@ -4,4 +4,5 @@ models
    :glob:
 
    managers/index.rst
+   validators/index.rst
    *

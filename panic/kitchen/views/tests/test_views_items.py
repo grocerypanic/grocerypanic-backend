@@ -211,6 +211,7 @@ class PrivateItemTest(PrivateItemTestHarness):
     self.assertEqual(item.shelf.id, self.shelf1.id)
     self.assertEqual(item.price, self.serializer_data['price'])
     self.assertEqual(item.quantity, self.serializer_data['quantity'])
+    self.assertFalse(item.has_partial_quantities)
 
     preferred_stores = item.preferred_stores.all()
     assert len(preferred_stores) == 1
@@ -239,6 +240,7 @@ class PrivateItemTest(PrivateItemTestHarness):
     self.assertEqual(item.shelf.id, self.shelf1.id)
     self.assertEqual(item.price, self.serializer_data['price'])
     self.assertEqual(item.quantity, self.serializer_data['quantity'])
+    self.assertFalse(item.has_partial_quantities)
 
     preferred_stores = item.preferred_stores.all()
     assert len(preferred_stores) == 1
