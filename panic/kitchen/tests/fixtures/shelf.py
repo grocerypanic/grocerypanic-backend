@@ -5,7 +5,7 @@ from django.test import TestCase
 from django.utils import timezone
 
 from ...models.shelf import Shelf
-from .abc_model_fixture import KitchenModelTestFixture
+from .bases import KitchenModelTestFixture
 
 
 class ShelfTestHarness(KitchenModelTestFixture, TestCase):

@@ -1,4 +1,4 @@
-"""Abstract Base Class for Kitchen Model Test Fixtures"""
+"""Base Classes for Kitchen Model Test Fixtures"""
 
 from abc import ABC, abstractmethod
 
