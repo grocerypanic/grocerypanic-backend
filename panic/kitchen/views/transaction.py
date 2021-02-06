@@ -59,8 +59,3 @@ class TransactionViewSet(
         datetime__date__lte=timezone.now(),
         datetime__date__gt=timezone.now() - datetime.timedelta(days=history)
     ).order_by('-datetime')
-
-  @openapi_ready
-  def perform_create(self, serializer):
-    """Create a new Transaction"""
-    serializer.save()
