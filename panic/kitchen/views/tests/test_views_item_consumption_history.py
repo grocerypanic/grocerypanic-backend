@@ -134,12 +134,6 @@ class PrivateTCHTest(PrivateTCHTestHarness):
             query_kwargs={"timezone": test_timezone},
         )
     )
-    print(res.data['first_consumption_date'])
-    print(
-        self.object_def3['date_object'].astimezone(
-            pytz.timezone(test_timezone)
-        )
-    )
 
     self.assertEqual(
         res.data['first_consumption_date'],

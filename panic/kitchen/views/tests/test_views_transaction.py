@@ -112,7 +112,7 @@ class PrivateItemTest(TransactionTestHarness):
         data=self.serializer_data_wrong_item,
     )
 
-    self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+    self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
 
   def test_list_all_transactions_without_item_filter(self):
     """Test retrieving a list of all user transactions."""

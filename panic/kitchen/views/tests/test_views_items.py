@@ -48,6 +48,24 @@ class PrivateItemTestHarness(ItemTestHarness):
         'name': "Microwave Dinner",
         'shelf_life': 109,
         'user': cls.user1.id,
+        'shelf': cls.shelf1.id,
+        'preferred_stores': [cls.store1.id],
+        'price': 2.00,
+        'quantity': 3
+    }
+    cls.serializer_data_wrong_shelf = {
+        'name': "Japanese Ramen",
+        'shelf_life': 110,
+        'user': cls.user2.id,
+        'shelf': cls.shelf1.id,
+        'preferred_stores': [cls.store2.id],
+        'price': 2.00,
+        'quantity': 3
+    }
+    cls.serializer_data_wrong_store = {
+        'name': "Japanese Ramen",
+        'shelf_life': 110,
+        'user': cls.user2.id,
         'shelf': cls.shelf2.id,
         'preferred_stores': [cls.store1.id],
         'price': 2.00,
@@ -190,7 +208,7 @@ class PrivateItemTest(PrivateItemTestHarness):
     self.assertEqual(item.name, self.serializer_data['name'])
     self.assertEqual(item.shelf_life, self.serializer_data['shelf_life'])
     self.assertEqual(item.user.id, self.user1.id)
-    self.assertEqual(item.shelf.id, self.shelf2.id)
+    self.assertEqual(item.shelf.id, self.shelf1.id)
     self.assertEqual(item.price, self.serializer_data['price'])
     self.assertEqual(item.quantity, self.serializer_data['quantity'])
 
@@ -218,7 +236,7 @@ class PrivateItemTest(PrivateItemTestHarness):
     self.assertEqual(item.name, self.serializer_data['name'])
     self.assertEqual(item.shelf_life, self.serializer_data['shelf_life'])
     self.assertEqual(item.user.id, self.user1.id)
-    self.assertEqual(item.shelf.id, self.shelf2.id)
+    self.assertEqual(item.shelf.id, self.shelf1.id)
     self.assertEqual(item.price, self.serializer_data['price'])
     self.assertEqual(item.quantity, self.serializer_data['quantity'])
 
@@ -302,5 +320,23 @@ class PrivateItemTestAnotherUser(PrivateItemTestHarness):
     res = self.client.put(
         ITEM_URL + str(original.id) + '/', data=self.serializer_data
     )
+
+    self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
+
+  def test_create_item_wrong_user(self):
+    """Test creating a item."""
+    res = self.client.post(ITEM_URL, data=self.serializer_data)
+
+    self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
+
+  def test_create_item_wrong_shelf(self):
+    """Test creating a item."""
+    res = self.client.post(ITEM_URL, data=self.serializer_data_wrong_shelf)
+
+    self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
+
+  def test_create_item_wrong_store(self):
+    """Test creating a item."""
+    res = self.client.post(ITEM_URL, data=self.serializer_data_wrong_store)
 
     self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)

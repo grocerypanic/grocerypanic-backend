@@ -2,8 +2,9 @@
 
 from django.utils import timezone
 from freezegun import freeze_time
-from rest_framework.serializers import ValidationError
+from rest_framework.serializers import ErrorDetail, ValidationError
 
+from ...exceptions import ValidationPermissionError
 from ...models.transaction import Transaction
 from ...tests.fixtures.django import MockRequest, deserialize_datetime
 from ...tests.fixtures.transaction import TransactionTestHarness
@@ -25,7 +26,21 @@ class TestTransactionSerializer(TransactionTestHarness):
         'datetime': cls.today,
         'quantity': 3
     }
+    cls.serializer_data_wrong_item = {
+        'item': cls.item2.id,
+        'datetime': cls.today,
+        'quantity': 3
+    }
     cls.request = MockRequest(cls.user1)
+
+  @classmethod
+  def setUpTestData(cls):
+    test_data2 = cls.create_dependencies(2)
+    cls.user2 = test_data2['user']
+    cls.store2 = test_data2['store']
+    cls.shelf2 = test_data2['shelf']
+    cls.item2 = test_data2['item']
+    super().setUpTestData()
 
   @staticmethod
   def generate_overload(fields):
@@ -82,3 +97,24 @@ class TestTransactionSerializer(TransactionTestHarness):
             data=local_data,
         )
         serialized.is_valid(raise_exception=True)
+
+  def testSerialize_wrong_item(self):
+    serialized = self.serializer(
+        context={'request': self.request},
+        data=self.serializer_data_wrong_item,
+    )
+
+    with self.assertRaises(ValidationError) as raised:
+      serialized.is_valid(raise_exception=True)
+
+    self.assertEqual(
+        raised.exception.detail,
+        {
+            'item': [
+                ErrorDetail(
+                    string="Please provide a valid item.",
+                    code=ValidationPermissionError.default_code
+                ),
+            ],
+        },
+    )

@@ -8,6 +8,7 @@ from django.utils import timezone
 from freezegun import freeze_time
 from rest_framework.serializers import ErrorDetail, ValidationError
 
+from ...exceptions import ValidationPermissionError
 from ...models.item import Item
 from ...models.transaction import Transaction
 from ...tests.fixtures.django import MockRequest, deserialize_date
@@ -46,6 +47,30 @@ class TestItem(ItemTestHarness):
         'price': 2.00,
         'quantity': 3
     }
+    cls.serializer_data_wrong_shelf = {
+        'name': "Canned Beans",
+        'shelf_life': 109,
+        'shelf': cls.shelf2.id,
+        'preferred_stores': [cls.store1.id],
+        'price': 2.00,
+        'quantity': 3
+    }
+    cls.serializer_data_wrong_store = {
+        'name': "Canned Beans",
+        'shelf_life': 109,
+        'shelf': cls.shelf1.id,
+        'preferred_stores': [cls.store2.id],
+        'price': 2.00,
+        'quantity': 3
+    }
+
+  @classmethod
+  def setUpTestData(cls):
+    test_data1 = cls.create_dependencies(2)
+    cls.user2 = test_data1['user']
+    cls.store2 = test_data1['store']
+    cls.shelf2 = test_data1['shelf']
+    super().setUpTestData()
 
   @staticmethod
   def generate_overload(fields):
@@ -92,6 +117,46 @@ class TestItem(ItemTestHarness):
     self.assertEqual(item.price, self.serializer_data['price'])
     self.assertEqual(item.quantity, self.serializer_data['quantity'])
 
+  def testSerialize_wrong_shelf(self):
+    serialized = self.serializer(
+        context={'request': self.request},
+        data=self.serializer_data_wrong_shelf,
+    )
+    with self.assertRaises(ValidationError) as raised:
+      serialized.is_valid(raise_exception=True)
+
+    self.assertEqual(
+        raised.exception.detail,
+        {
+            'shelf': [
+                ErrorDetail(
+                    string="Please provide a valid shelf.",
+                    code=ValidationPermissionError.default_code
+                ),
+            ],
+        },
+    )
+
+  def testSerialize_wrong_store(self):
+    serialized = self.serializer(
+        context={'request': self.request},
+        data=self.serializer_data_wrong_store,
+    )
+    with self.assertRaises(ValidationError) as raised:
+      serialized.is_valid(raise_exception=True)
+
+    self.assertEqual(
+        raised.exception.detail,
+        {
+            'preferred_stores': [
+                ErrorDetail(
+                    string="Please provide valid preferred_stores.",
+                    code=ValidationPermissionError.default_code
+                ),
+            ],
+        },
+    )
+
   def testUniqueConstraint(self):
     serialized = self.serializer(
         context={'request': self.request},
@@ -108,7 +173,8 @@ class TestItem(ItemTestHarness):
       serialized2.is_valid(raise_exception=True)
 
     self.assertEqual(
-        str(serialized2.errors['non_field_errors'][0]), DUPLICATE_OBJECT_MESSAGE
+        str(serialized2.errors['non_field_errors'][0]),
+        DUPLICATE_OBJECT_MESSAGE,
     )
 
   def testFieldLengths(self):
@@ -321,19 +387,18 @@ class TestItemConsumptionHistorySerializer(TransactionTestHarness):
         data={"timezone": "invalid timezone"},
         context={'request': self.request},
     )
-    with self.assertRaises(ValidationError) as err:
+    with self.assertRaises(ValidationError) as raised:
       serialized.is_valid(raise_exception=True)
 
     self.assertEqual(
-        err.exception.detail,
+        raised.exception.detail,
         {
-            'timezone': {
-                'timezone':
-                    ErrorDetail(
-                        string='Please provide a valid timezone string.',
-                        code='invalid'
-                    ),
-            }
+            'timezone': [
+                ErrorDetail(
+                    string='Please provide a valid timezone string.',
+                    code='invalid'
+                ),
+            ],
         },
     )
 

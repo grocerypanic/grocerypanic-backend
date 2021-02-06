@@ -1,11 +1,10 @@
 """Serializer for the Transaction Model"""
 
-from rest_framework import serializers
-
 from ..models.transaction import Transaction
+from .bases import RelatedValidatorModelSerializer
 
 
-class TransactionSerializer(serializers.ModelSerializer):
+class TransactionSerializer(RelatedValidatorModelSerializer):
   """Serializer for Transactions"""
 
   class Meta:
@@ -13,10 +12,6 @@ class TransactionSerializer(serializers.ModelSerializer):
     fields = '__all__'
     read_only_fields = ("id", "date")
 
-  def validate_item(self, value):
-    user = self.context['request'].user
-    if value.user != user:
-      raise serializers.ValidationError({
-          'item': "Please provide a valid item."
-      })
-    return value
+  def validate_item(self, item):
+    self.related_validator(item, "item")
+    return item
