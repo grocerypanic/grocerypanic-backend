@@ -19,12 +19,7 @@ class TestTransactionSerializer(TransactionTestHarness):
     cls.today = timezone.now()
     cls.fields = {"name": 255}
 
-    cls.data = {
-        'item': cls.item1,
-        'date_object': cls.today,
-        'user': cls.user1,
-        'quantity': 3
-    }
+    cls.data = {'item': cls.item1, 'date_object': cls.today, 'quantity': 3}
     cls.serializer_data = {
         'item': cls.item1.id,
         'datetime': cls.today,
@@ -58,7 +53,6 @@ class TestTransactionSerializer(TransactionTestHarness):
     self.assertEqual(deserialize_datetime(deserialized['datetime']), self.today)
     self.assertEqual(deserialized['item'], self.item1.id)
     self.assertEqual(deserialized['quantity'], self.data['quantity'])
-    assert 'user' not in deserialized
 
   def testSerialize(self):
     serialized = self.serializer(
@@ -68,12 +62,11 @@ class TestTransactionSerializer(TransactionTestHarness):
     serialized.is_valid(raise_exception=True)
     serialized.save()
 
-    query = Transaction.objects.filter(user=self.user1.id)
+    query = Transaction.objects.filter(item__user=self.user1.id)
 
     assert len(query) == 1
     transaction = query[0]
 
-    self.assertEqual(transaction.user.id, self.user1.id)
     self.assertEqual(transaction.item.id, self.item1.id)
     self.assertEqual(transaction.datetime, self.today)
     self.assertEqual(transaction.quantity, self.serializer_data['quantity'])

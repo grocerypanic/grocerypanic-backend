@@ -54,7 +54,8 @@ class TransactionViewSet(
   def get_queryset(self):
     history = self.parse_history_querystring()
 
-    return self.queryset.filter(user=self.request.user).filter(
+    return self.queryset.filter(
+        item__user=self.request.user,
         datetime__date__lte=timezone.now(),
         datetime__date__gt=timezone.now() - datetime.timedelta(days=history)
     ).order_by('-datetime')
@@ -62,4 +63,4 @@ class TransactionViewSet(
   @openapi_ready
   def perform_create(self, serializer):
     """Create a new Transaction"""
-    serializer.save(user=self.request.user)
+    serializer.save()

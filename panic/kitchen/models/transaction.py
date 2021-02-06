@@ -7,31 +7,16 @@ from django.utils.timezone import now
 
 from .item import Item
 from .managers.transaction import ConsumptionHistoryManager, ExpiryManager
+from .validators.transaction import validate_transaction_quantity
 
 User = get_user_model()
-
-
-def validate_quantity(value):
-  """Validator for Transaction Quantity.
-
-  :param value: The quantity to be validated
-  :type value: int
-
-  :returns: The validated value
-  :rtype: value
-  :raises: :class:`django.core.exceptions.ValidationError`
-  """
-  if value == 0:
-    raise ValidationError([{'quantity': "Must not be equal to 0"}])
-  return value
 
 
 class Transaction(models.Model):
   """Inventory Transaction Model"""
   datetime = models.DateTimeField(default=now)
   item = models.ForeignKey(Item, on_delete=models.CASCADE)
-  quantity = models.IntegerField(validators=[validate_quantity])
-  user = models.ForeignKey(User, on_delete=models.CASCADE)
+  quantity = models.IntegerField(validators=[validate_transaction_quantity])
 
   consumption = ConsumptionHistoryManager()
   expiration = ExpiryManager()

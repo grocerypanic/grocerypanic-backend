@@ -23,7 +23,6 @@ class TransactionTestHarness(KitchenModelTestFixture, TestCase):
     """Create a test item."""
     transaction = Transaction.objects.create(
         item=kwargs['item'],
-        user=kwargs['user'],
         datetime=kwargs['date_object'],
         quantity=kwargs['quantity'],
     )

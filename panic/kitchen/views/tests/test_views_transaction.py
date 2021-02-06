@@ -45,6 +45,8 @@ class PrivateItemTest(TransactionTestHarness):
     cls.today = timezone.now()
 
     cls.serializer_data = {'item': cls.item1.id, 'quantity': 3}
+    cls.serializer_data_wrong_item = {'item': cls.item2.id, 'quantity': 3}
+
     cls.object_def1 = {
         'user': cls.user1,
         'date_object': timezone.now(),
@@ -58,7 +60,7 @@ class PrivateItemTest(TransactionTestHarness):
         'quantity': 5
     }
     cls.object_def3 = {
-        'user': cls.user1,
+        'user': cls.user2,
         'date_object': timezone.now() + timezone.timedelta(seconds=2),
         'item': cls.item2,
         'quantity': 5
@@ -97,11 +99,20 @@ class PrivateItemTest(TransactionTestHarness):
     assert len(items) == 1
     transaction = items[0]
 
-    self.assertEqual(transaction.user.id, self.user1.id)
     self.assertEqual(transaction.item.id, self.item1.id)
     self.assertEqual(transaction.datetime, timezone.now())
     self.assertEqual(transaction.quantity, self.serializer_data['quantity'])
     assert transaction.item.quantity == 6  # The modified value
+
+  @freeze_time("2014-01-01")
+  def test_create_transaction_item_owned_by_another_user(self):
+    """Test creating a transaction, but current user does not own the item."""
+    res = self.client.post(
+        TRANSACTION_URL,
+        data=self.serializer_data_wrong_item,
+    )
+
+    self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
 
   def test_list_all_transactions_without_item_filter(self):
     """Test retrieving a list of all user transactions."""
@@ -156,7 +167,10 @@ class PrivateItemTest(TransactionTestHarness):
 
   @freeze_time("2020-01-14")
   def test_list_transactions_by_another_item_filter(self):
-    """Test retrieving a list of transactions by item id."""
+    """Test retrieving a list of transactions by item id, from another item."""
+    self.item2.user = self.user1
+    self.item2.save()
+
     self.create_test_instance(**self.object_def1)
     self.create_test_instance(**self.object_def2)
     self.create_test_instance(**self.object_def3)
@@ -169,6 +183,21 @@ class PrivateItemTest(TransactionTestHarness):
     assert len(items) == 1
     self.assertEqual(res.status_code, status.HTTP_200_OK)
     self.assertEqual(res.data['results'], serializer.data)
+
+    self.item2.user = self.user2
+    self.item2.save()
+
+  @freeze_time("2020-01-14")
+  def test_list_transactions_by_item_of_different_user(self):
+    """Test retrieving a list of transactions by item id, from another user"""
+    self.create_test_instance(**self.object_def1)
+    self.create_test_instance(**self.object_def2)
+    self.create_test_instance(**self.object_def3)
+
+    res = self.client.get(transaction_query_url({"item": self.item2.id}))
+
+    self.assertEqual(res.status_code, status.HTTP_200_OK)
+    self.assertEqual(res.data['results'], [])
 
   @freeze_time("2020-01-14")
   def test_list_transactions_by_history_manual_value(self):

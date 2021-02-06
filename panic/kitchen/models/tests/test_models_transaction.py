@@ -59,7 +59,6 @@ class TestTransaction(TransactionTestHarness):
     transaction = query[0]
     self.assertEqual(transaction.item.id, self.item1.id)
     self.assertEqual(transaction.datetime, self.today)
-    self.assertEqual(transaction.user.id, self.user1.id)
     self.assertEqual(transaction.quantity, self.positive_data['quantity'])
     self.assertEqual(
         transaction.item.quantity,
@@ -89,7 +88,6 @@ class TestTransaction(TransactionTestHarness):
     transaction = query[0]
     self.assertEqual(transaction.item.id, self.item1.id)
     self.assertEqual(transaction.datetime, self.today)
-    self.assertEqual(transaction.user.id, self.user1.id)
     self.assertEqual(transaction.quantity, self.negative_data['quantity'])
     assert transaction.item.quantity == 3 + self.negative_data['quantity']
 
