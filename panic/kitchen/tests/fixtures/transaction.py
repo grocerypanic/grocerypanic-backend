@@ -20,7 +20,7 @@ class TransactionTestHarness(KitchenModelTestFixture, TestCase):
 
   @staticmethod
   def create_instance(**kwargs):
-    """Create a test item."""
+    """Create a test transaction."""
     transaction = Transaction.objects.create(
         item=kwargs['item'],
         datetime=kwargs['date_object'],
@@ -75,7 +75,7 @@ class TransactionTestHarness(KitchenModelTestFixture, TestCase):
     return new_user
 
   def create_test_instance(self, **kwargs):
-    """Create a test item."""
+    """Create a test transaction."""
     transaction = self.__class__.create_instance(**kwargs)
     self.objects.append(transaction)
     return transaction
