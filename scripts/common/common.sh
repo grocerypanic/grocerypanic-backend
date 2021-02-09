@@ -33,7 +33,7 @@ lint_check() {
 
   pushd "${PROJECT_HOME}"  > /dev/null
     isort -c
-    pytest --pylint --pylint-rcfile=.pylint.rc --pylint-jobs=2 "${ARGS[@]}"
+    pytest --pylint -m pylint --pylint-rcfile=.pylint.rc --pylint-jobs=2 "${ARGS[@]}"
     shellcheck -x scripts/*.sh
     shellcheck -x scripts/common/*.sh
   popd  > /dev/null
