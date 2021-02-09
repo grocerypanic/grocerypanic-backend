@@ -41,7 +41,10 @@ class InventoryTestHarness(KitchenModelTestFixture, TestCase):
     return transaction
 
   @staticmethod
-  def create_dependencies(seed, datetime_object, quantity):
+  def create_dependencies(seed, **kwargs):
+    datetime_object = kwargs['datetime_object']
+    quantity = kwargs['quantity']
+
     user = get_user_model().objects.create_user(
         username=f"testuser{seed}",
         email=f"test{seed}@niallbyrne.ca",
@@ -99,11 +102,17 @@ class InventoryTestHarness(KitchenModelTestFixture, TestCase):
   @classmethod
   def setUpTestData(cls):
     cls.today = timezone.now()
-    test_data = cls.create_dependencies(1, cls.today, cls.initial_quantity)
+
+    dependency_kwargs = {
+        'datetime_object': cls.today,
+        'quantity': cls.initial_quantity
+    }
+    test_data = cls.create_dependencies(1, **dependency_kwargs)
     cls.user1 = test_data['user']
     cls.store1 = test_data['store']
     cls.shelf1 = test_data['shelf']
     cls.item1 = test_data['item']
+
     cls.transaction1 = test_data['transaction']
     cls.create_data_hook()
 

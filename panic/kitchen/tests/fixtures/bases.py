@@ -12,7 +12,7 @@ class KitchenModelTestFixture(ABC):
 
   @staticmethod
   @abstractmethod
-  def create_dependencies(seed):
+  def create_dependencies(seed, **kwargs):
     pass
 
   @classmethod

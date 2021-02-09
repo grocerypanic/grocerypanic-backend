@@ -21,7 +21,7 @@ class StoreTestHarness(KitchenModelTestFixture, TestCase):
     return store
 
   @staticmethod
-  def create_dependencies(seed):
+  def create_dependencies(seed, **kwargs):
     user = get_user_model().objects.create_user(
         username=f"testuser{seed}",
         email=f"test{seed}@niallbyrne.ca",
