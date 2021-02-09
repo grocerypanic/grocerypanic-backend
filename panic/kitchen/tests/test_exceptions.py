@@ -9,9 +9,42 @@ from rest_framework.response import Response
 from .. import exceptions
 from ..exceptions import (
     CustomValidationExceptionHandler,
+    ProcessingError,
     ValidationPermissionError,
     kitchen_exception_handler,
 )
+
+
+class TestCustomExceptions(TestCase):
+
+  def test_validation_permission_error(self):
+    with self.assertRaises(ValidationPermissionError) as raised:
+      raise ValidationPermissionError()
+
+    self.assertListEqual(
+        raised.exception.detail, [
+            serializers.ErrorDetail(
+                string=ValidationPermissionError.default_detail,
+                code=ValidationPermissionError.default_code
+            )
+        ]
+    )
+
+    assert ValidationPermissionError.status_code == status.HTTP_403_FORBIDDEN
+
+  def test_processing_error(self):
+    with self.assertRaises(ProcessingError) as raised:
+      raise ProcessingError()
+
+    self.assertEqual(
+        raised.exception.detail,
+        serializers.ErrorDetail(
+            string=ProcessingError.default_detail,
+            code=ProcessingError.default_code
+        )
+    )
+
+    assert ProcessingError.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
 
 
 class ExceptionTestHarness(TestCase):

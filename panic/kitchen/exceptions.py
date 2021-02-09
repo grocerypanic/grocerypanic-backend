@@ -1,12 +1,17 @@
 """Exceptions and Exception Handling"""
 
 from django.contrib.admin.utils import flatten
-from rest_framework import serializers, status, views
+from rest_framework import exceptions, serializers, status, views
 
 
 class ValidationPermissionError(serializers.ValidationError):
   default_code = "permission_denied"
   status_code = status.HTTP_403_FORBIDDEN
+
+
+class ProcessingError(exceptions.APIException):
+  default_detail = 'An error occurred during processing.'
+  default_code = 'processing_error'
 
 
 CUSTOM_VALIDATION_CLASSES = (ValidationPermissionError,)

@@ -108,6 +108,8 @@ class InventoryTestHarness(KitchenModelTestFixture, TestCase):
     cls.create_data_hook()
 
   def setUp(self):
+    self.item1.quantity = self.initial_quantity
+    self.item1.save()
     self.objects = list()
 
   def tearDown(self):
