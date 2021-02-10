@@ -1,4 +1,4 @@
-"""Test the SuggestedItem Serializer."""
+"""Test the Suggested Item Serializer."""
 
 from django.test import TestCase
 from rest_framework.serializers import ValidationError

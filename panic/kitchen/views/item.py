@@ -9,7 +9,10 @@ from rest_framework.response import Response
 from ..filters import ItemFilter
 from ..models.item import Item
 from ..pagination import PagePagination
-from ..serializers.item import ItemConsumptionHistorySerializer, ItemSerializer
+from ..serializers.item import ItemSerializer
+from ..serializers.reports.item_consumption_history import (
+    ItemConsumptionHistorySerializer,
+)
 from ..swagger import custom_item_consumption_view_parm, openapi_ready
 from .bases import KitchenBaseView
 

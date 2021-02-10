@@ -7,8 +7,8 @@ from rest_framework import status
 from rest_framework.test import APIClient
 
 from ...models.item import Item
-from ...serializers.item import ItemSerializer
 from ...tests.fixtures.item import ItemTestHarness
+from ..item import ItemSerializer
 
 ITEM_URL = reverse("v1:items-list")
 
