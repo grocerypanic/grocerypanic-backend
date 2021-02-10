@@ -3,7 +3,7 @@
 from django.urls import include, path
 from rest_framework import routers
 
-from kitchen.views import item, shelf, store, suggested, transaction
+from ..views import item, shelf, store, suggested, transaction
 
 v1_router = routers.SimpleRouter()
 v1_router.register(
