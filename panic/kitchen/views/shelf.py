@@ -2,15 +2,15 @@
 
 from rest_framework import mixins, viewsets
 
-from spa_security.mixins import CSRFMixin
 from ..models.shelf import Shelf
 from ..pagination import PagePaginationWithOverride
 from ..serializers.shelf import ShelfSerializer
 from ..swagger import openapi_ready
+from .bases import KitchenBaseView
 
 
 class BaseShelfView(
-    CSRFMixin,
+    KitchenBaseView,
 ):
   """Shelf Base API View"""
   serializer_class = ShelfSerializer

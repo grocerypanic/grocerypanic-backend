@@ -2,15 +2,15 @@
 
 from rest_framework import mixins, viewsets
 
-from spa_security.mixins import CSRFMixin
 from ..models.store import Store
 from ..pagination import PagePaginationWithOverride
 from ..serializers.store import StoreSerializer
 from ..swagger import openapi_ready
+from .bases import KitchenBaseView
 
 
-class BaseStoreView(
-    CSRFMixin,
+class StoreBaseView(
+    KitchenBaseView,
 ):
   """Store Base API View"""
   serializer_class = StoreSerializer
@@ -18,7 +18,7 @@ class BaseStoreView(
 
 
 class StoreViewSet(
-    BaseStoreView,
+    StoreBaseView,
     mixins.DestroyModelMixin,
     viewsets.GenericViewSet,
 ):
@@ -26,7 +26,7 @@ class StoreViewSet(
 
 
 class StoreListCreateViewSet(
-    BaseStoreView,
+    StoreBaseView,
     mixins.CreateModelMixin,
     mixins.ListModelMixin,
     viewsets.GenericViewSet,

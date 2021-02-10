@@ -6,16 +6,16 @@ from drf_yasg.utils import swagger_auto_schema
 from rest_framework import mixins, viewsets
 from rest_framework.response import Response
 
-from spa_security.mixins import CSRFMixin
 from ..filters import ItemFilter
 from ..models.item import Item
 from ..pagination import PagePagination
 from ..serializers.item import ItemConsumptionHistorySerializer, ItemSerializer
 from ..swagger import custom_item_consumption_view_parm, openapi_ready
+from .bases import KitchenBaseView
 
 
 class ItemBaseViewSet(
-    CSRFMixin,
+    KitchenBaseView,
 ):
   """Item Base API View"""
   serializer_class = ItemSerializer
@@ -60,13 +60,12 @@ class ItemListCreateViewSet(
 
 
 class ItemConsumptionHistoryViewSet(
-    CSRFMixin,
+    ItemBaseViewSet,
     mixins.RetrieveModelMixin,
     viewsets.GenericViewSet,
 ):
   """Item Consumption History API View"""
   serializer_class = ItemConsumptionHistorySerializer
-  queryset = Item.objects.all()
 
   @openapi_ready
   @swagger_auto_schema(manual_parameters=[custom_item_consumption_view_parm])
