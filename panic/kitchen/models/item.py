@@ -35,8 +35,6 @@ class Item(models.Model):
       max_length=MAX_LENGTH,
   )  # Pagination Index
   name = BlondeCharField(max_length=MAX_LENGTH)
-  user = models.ForeignKey(User, on_delete=models.CASCADE)
-  shelf = models.ForeignKey(Shelf, on_delete=models.CASCADE)
   preferred_stores = models.ManyToManyField(Store)
   price = models.DecimalField(max_digits=10, decimal_places=2)
   quantity = models.IntegerField(
@@ -46,6 +44,7 @@ class Item(models.Model):
           MaxValueValidator(MAXIMUM_QUANTITY),
       ],
   )
+  shelf = models.ForeignKey(Shelf, on_delete=models.CASCADE)
   shelf_life = models.IntegerField(
       default=DEFAULT_SHELF_LIFE,
       validators=[
@@ -53,6 +52,8 @@ class Item(models.Model):
           MaxValueValidator(MAXIMUM_SHELF_LIFE),
       ],
   )
+  user = models.ForeignKey(User, on_delete=models.CASCADE)
+
   objects = models.Manager()
 
   # These 3 fields are recalculated on each transaction

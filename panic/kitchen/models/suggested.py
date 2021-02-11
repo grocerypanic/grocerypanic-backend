@@ -11,6 +11,8 @@ class SuggestedItem(models.Model):
   """Suggested Item Names used for AutoCompletion"""
   name = BlondeCharField(max_length=MAX_LENGTH, unique=True)
 
+  objects = models.Manager()
+
   def __str__(self):
     return str(self.name)
 

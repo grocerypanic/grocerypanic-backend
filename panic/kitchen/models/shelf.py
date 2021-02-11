@@ -17,8 +17,10 @@ class Shelf(models.Model):
       for_field="name",
       max_length=MAX_LENGTH,
   )  # Pagination Index
-  user = models.ForeignKey(User, on_delete=models.CASCADE)
   name = BlondeCharField(max_length=MAX_LENGTH)
+  user = models.ForeignKey(User, on_delete=models.CASCADE)
+
+  objects = models.Manager()
 
   class Meta:
     constraints = [

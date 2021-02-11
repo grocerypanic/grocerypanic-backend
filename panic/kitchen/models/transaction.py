@@ -19,13 +19,14 @@ def validate_quantity(value):
 
 class Transaction(models.Model):
   """Inventory Transaction Model"""
-  user = models.ForeignKey(User, on_delete=models.CASCADE)
-  item = models.ForeignKey(Item, on_delete=models.CASCADE)
   datetime = models.DateTimeField(default=now)
+  item = models.ForeignKey(Item, on_delete=models.CASCADE)
   quantity = models.IntegerField(validators=[validate_quantity])
-  objects = models.Manager()
-  expiration = ExpiryManager()
+  user = models.ForeignKey(User, on_delete=models.CASCADE)
+
   consumption = ConsumptionHistoryManager()
+  expiration = ExpiryManager()
+  objects = models.Manager()
 
   class Meta:
     indexes = [
