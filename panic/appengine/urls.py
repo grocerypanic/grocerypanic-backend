@@ -1,4 +1,4 @@
-"""Urls for the Appengine App."""
+"""Urls for the appengine app."""
 
 from django.conf.urls import url
 

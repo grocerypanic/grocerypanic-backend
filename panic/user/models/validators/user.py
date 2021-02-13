@@ -1,4 +1,4 @@
-"""Custom User Model Validators"""
+"""Custom user model validators."""
 
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
@@ -7,7 +7,7 @@ from langcodes.tag_parser import LanguageTagError
 
 
 def validate_language(value):
-  """Validates a given language code.
+  """Validate a given language code.
 
   :param value: A string containing a language code.
   :type value: str

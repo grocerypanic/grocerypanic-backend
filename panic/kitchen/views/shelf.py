@@ -1,4 +1,4 @@
-"""Kitchen Shelf Views"""
+"""Kitchen shelf views."""
 
 from rest_framework import mixins, viewsets
 
@@ -12,7 +12,8 @@ from .bases import KitchenBaseView
 class BaseShelfView(
     KitchenBaseView,
 ):
-  """Shelf Base API View"""
+  """Shelf base API view."""
+
   serializer_class = ShelfSerializer
   queryset = Shelf.objects.all()
 
@@ -22,7 +23,7 @@ class ShelfViewSet(
     mixins.DestroyModelMixin,
     viewsets.GenericViewSet,
 ):
-  """Shelf API View"""
+  """Shelf API view."""
 
 
 class ShelfListCreateViewSet(
@@ -31,15 +32,17 @@ class ShelfListCreateViewSet(
     mixins.ListModelMixin,
     viewsets.GenericViewSet,
 ):
-  """Shelf List and Create API View"""
+  """Shelf list and create API view."""
+
   pagination_class = PagePaginationWithOverride
 
   @openapi_ready
   def get_queryset(self):
+    """Retrieve the view queryset."""
     queryset = self.queryset
     return queryset.filter(user=self.request.user).order_by("index")
 
   @openapi_ready
   def perform_create(self, serializer):
-    """Create a new Shelf"""
+    """Create a new shelf."""
     serializer.save(user=self.request.user)

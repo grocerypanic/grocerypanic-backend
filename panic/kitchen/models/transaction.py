@@ -1,4 +1,4 @@
-"""Inventory Transaction Model"""
+"""Inventory transaction model."""
 
 from django.contrib.auth import get_user_model
 from django.db import models, transaction
@@ -15,7 +15,8 @@ User = get_user_model()
 
 
 class Transaction(models.Model):
-  """Inventory Transaction Model"""
+  """Transaction model."""
+
   datetime = models.DateTimeField(default=now)
   item = models.ForeignKey('Item', on_delete=models.CASCADE)
   quantity = models.FloatField(
@@ -33,7 +34,7 @@ class Transaction(models.Model):
 
   @property
   def operation(self):
-    """Returns a string indicating if the quantity is consumption or purchase.
+    """Return a string indicating if the quantity is consumption or purchase.
 
     :returns: A string describing the transaction
     :rtype: str
@@ -56,18 +57,20 @@ class Transaction(models.Model):
     return "Invalid Transaction"
 
   def clean(self):
+    """Validate the related item quantity changes we're about to make."""
     proposed_item_quantity = self.item.quantity + self.quantity
     related_item_quantity_validator(proposed_item_quantity)
     super().clean()
 
   def apply_transaction(self):
-    """Updates the related item quantity, and it's expiry."""
+    """Update the related item quantity, and it's expiry."""
     if self.id is None:
       self.item.quantity = self.item.quantity + self.quantity
       Transaction.expiration.update(self)
 
   # pylint: disable=W0222
   def save(self, *args, **kwargs):
+    """Clean and save model."""
     with transaction.atomic():
       self.full_clean()
       self.apply_transaction()

@@ -1,4 +1,4 @@
-"""Kitchen Transaction Views"""
+"""Kitchen transaction views."""
 
 import datetime
 
@@ -22,7 +22,8 @@ TRANSACTION_LIST_SUNSET = datetime.date(year=2021, month=3, day=1)
 class BaseTransactionView(
     KitchenBaseView,
 ):
-  """Base Transaction View"""
+  """Base transaction view."""
+
   queryset = Transaction.objects.all()
   serializer_class = TransactionSerializer
 
@@ -33,12 +34,14 @@ class TransactionViewSet(
     mixins.ListModelMixin,
     viewsets.GenericViewSet,
 ):
-  """Transaction API View"""
+  """Transaction API view."""
+
   filter_backends = (filters.DjangoFilterBackend,)
   filterset_class = TransactionFilter
   pagination_class = LegacyTransactionPagination
 
   def parse_history_querystring(self):
+    """Extract the history setting from the request querystring."""
     try:
       return int(
           self.request.GET.get('history', settings.TRANSACTION_HISTORY_MAX)
@@ -51,6 +54,7 @@ class TransactionViewSet(
       manual_parameters=[custom_transaction_view_parm],
   )
   def list(self, request, *args, **kwargs):
+    """List a queryset."""
     return deprecated_warning(
         super().list(request, *args, **kwargs),
         TRANSACTION_LIST_SUNSET,
@@ -58,6 +62,7 @@ class TransactionViewSet(
 
   @openapi_ready
   def get_queryset(self):
+    """Retrieve the view queryset."""
     history = self.parse_history_querystring()
 
     return self.queryset.filter(

@@ -1,8 +1,9 @@
-"""Security App AppConfig"""
+"""Security app AppConfig."""
 
 from django.apps import AppConfig
 
 
 class SecurityConfig(AppConfig):
-  """SPA Security App Configuration"""
+  """Security app AppConfig."""
+
   name = 'spa_security'

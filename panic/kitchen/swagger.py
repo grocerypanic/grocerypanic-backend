@@ -1,4 +1,4 @@
-"""Tools to support OpenApi Documentation"""
+"""Tools to support OpenApi documentation."""
 
 import functools
 

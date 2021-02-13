@@ -32,10 +32,13 @@ lint_check() {
   fi
 
   pushd "${PROJECT_HOME}"  > /dev/null
+
+    pydocstyle "${PROJECT_NAME}"
     isort -c
     pytest --pylint -m pylint --pylint-rcfile=.pylint.rc --pylint-jobs=2 "${ARGS[@]}"
     shellcheck -x scripts/*.sh
     shellcheck -x scripts/common/*.sh
+
   popd  > /dev/null
 
 }

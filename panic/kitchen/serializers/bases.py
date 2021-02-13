@@ -7,13 +7,10 @@ from ..exceptions import ValidationPermissionError
 
 
 class RelatedValidatorModelSerializer(serializers.ModelSerializer):
-  """Model Serializer with helper method for validating related models are
-  owned by the current user.
-  """
+  """Base class with methods to help validate permissions on related objects."""
 
   def __to_iterable(self, related_instance):
-    """A helper function that converts any related_instance model to a iterable
-    and returns a english particle to indicate if it's singular or not.
+    """Convert the model instance into an iterable, if it is not already.
 
     :param related_instance: A django model instance being validated
     :type related_instance: :class:`django.db.models.Model`, List[
@@ -27,12 +24,11 @@ class RelatedValidatorModelSerializer(serializers.ModelSerializer):
     return related_instance, ""
 
   def related_validator(self, related_instance, field, user_field="user"):
-    """A helper function that can be called to ensure the 'user' field of any
-    related instance being validated matches the current user.
+    """Require the 'user' field of a related instance to match request user.
 
     :param related_instance: A django model instance being validated
-    :type related_instance: :class:`django.db.models.Model`, List[
-    :class:`django.db.models.Model`]
+    :type related_instance: :class:`django.db.models.Model`,
+      List[:class:`django.db.models.Model`]
     :param field: The field name storing the model that is being validated
     :type field: str
     :param user_field: The related instance's field that stores the user

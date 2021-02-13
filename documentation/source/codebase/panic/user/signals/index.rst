@@ -1,0 +1,6 @@
+signals
+=======
+.. toctree::
+   :glob:
+
+   *

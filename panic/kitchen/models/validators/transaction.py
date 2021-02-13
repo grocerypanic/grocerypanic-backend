@@ -1,4 +1,4 @@
-"""Custom Item Quantity Validators"""
+"""Custom transaction validators."""
 
 from django.core.exceptions import ValidationError
 from django.core.validators import BaseValidator
@@ -19,11 +19,12 @@ class TransactionQuantityValidator(BaseValidator):
   code = 'invalid_quantity'
 
   def compare(self, a, b):
+    """Perform the bounds calculation."""
     return abs(a) >= abs(b) or a == 0
 
 
 def related_item_quantity_validator(value):
-  """Performs validation of a the related item's quantity field.
+  """Perform validation of a the related item's quantity field.
   This validator produces a more useful error message for end users.
 
   :param value: The quantity to be validated

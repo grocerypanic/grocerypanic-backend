@@ -1,4 +1,4 @@
-"""Serializer for the SuggestedItem Model"""
+"""Serializer for the suggested item model."""
 
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
@@ -8,7 +8,8 @@ from . import DUPLICATE_OBJECT_MESSAGE
 
 
 class SuggestedItemSerializer(serializers.ModelSerializer):
-  """Serializer for SuggestedItem"""
+  """Serializer for SuggestedItem."""
+
   name = serializers.CharField(
       max_length=255,
       validators=[

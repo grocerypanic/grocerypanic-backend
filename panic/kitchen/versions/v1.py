@@ -1,4 +1,4 @@
-"""Kitchen App V1 Urls"""
+"""Kitchen V1 urls."""
 
 from django.urls import include, path
 from rest_framework import routers

@@ -1,4 +1,4 @@
-"""Kitchen Store Views"""
+"""Kitchen store views."""
 
 from rest_framework import mixins, viewsets
 
@@ -12,7 +12,8 @@ from .bases import KitchenBaseView
 class StoreBaseView(
     KitchenBaseView,
 ):
-  """Store Base API View"""
+  """Store base API view."""
+
   serializer_class = StoreSerializer
   queryset = Store.objects.all()
 
@@ -22,7 +23,7 @@ class StoreViewSet(
     mixins.DestroyModelMixin,
     viewsets.GenericViewSet,
 ):
-  """Store API View"""
+  """Store API view."""
 
 
 class StoreListCreateViewSet(
@@ -31,11 +32,13 @@ class StoreListCreateViewSet(
     mixins.ListModelMixin,
     viewsets.GenericViewSet,
 ):
-  """Store List and Create API View"""
+  """Store list and create API views"""
+
   pagination_class = PagePaginationWithOverride
 
   @openapi_ready
   def get_queryset(self):
+    """Retrieve the view queryset."""
     queryset = self.queryset
     return queryset.filter(user=self.request.user).order_by("index")
 

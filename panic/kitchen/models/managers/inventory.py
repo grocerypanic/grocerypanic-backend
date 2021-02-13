@@ -6,15 +6,17 @@ from ...exceptions import ProcessingError
 
 
 class InventoryTransactionManager(models.Manager):
-  """Provides Methods to Modify Inventory Based on Incoming Transaction"""
+  """Update the inventory based on transaction events."""
 
   def process(self, transaction):
+    """Adjust a related item's inventory based on the transaction's quantity."""
     if transaction.quantity > 0:
       self.credit(transaction)
     else:
       self.debit(transaction)
 
   def credit(self, transaction):
+    """Handle a positive inventory transaction."""
     super().get_queryset().create(
         transaction=transaction,
         item=transaction.item,
@@ -22,6 +24,7 @@ class InventoryTransactionManager(models.Manager):
     )
 
   def debit(self, transaction):
+    """Handle a negative inventory transaction."""
     remaining = abs(transaction.quantity)
     inventory = super().get_queryset().\
         filter(item=transaction.item).\

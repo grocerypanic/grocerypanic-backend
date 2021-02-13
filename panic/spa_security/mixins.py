@@ -1,4 +1,4 @@
-"""Custom Security Mixins"""
+"""Custom security mixins."""
 
 from django.conf import settings
 from django.contrib.sessions.middleware import MiddlewareMixin
@@ -10,10 +10,10 @@ class SameSiteMiddleware(MiddlewareMixin):
   """Comply with the latest standard for samesite cookies."""
 
   def __rewrite_cookie(self, cookie, samesite, secure):
-    """Rewrites a http cookie with compliant information.
+    """Rewrite a http cookie with compliant information.
 
-    :param cookie: A cookie object from a Django response
-    :type cookie: A Django Restframework Response Cookie Object
+    :param cookie: A cookie object from a rest_framework response object
+    :type cookie: :class:`django.http.SimpleCookie`
     :param samesite: The samesite django config for this cookie
     :type samesite: string, bool, None
     :param secure: The secure django config for this cookie
@@ -29,9 +29,9 @@ class SameSiteMiddleware(MiddlewareMixin):
     return cookie
 
   def __read_config_setting(self, setting_key, default):
-    """Reads a setting from the django config.
+    """Read a setting from the django config.
 
-    :param setting_key: The key of the setting to read
+    :param setting_key: The key of the django setting to read
     :type setting_key: string
     :param default: The default value to use if not configured
     :type setting_key: any
@@ -47,14 +47,16 @@ class SameSiteMiddleware(MiddlewareMixin):
       samesite_key,
       secure_key,
   ):
-    """Reads all config settings for a cookie..
+    """Read all config settings for a cookie.
 
-    :param response: A Django Rest Framework Response Object
+    :param response: A rest_framework response object
     :type response: :class:`rest_framework.response.Response`
-    :param setting_key: The key of the setting to read
-    :type setting_key: string
-    :param default: The default value to use if not configured
-    :type setting_key: any
+    :param cookie_name: The name of the cookie being processed
+    :type cookie_name: str
+    :param samesite_key: The settings key for this cookie's samesite setting
+    :type samesite_key: str
+    :param secure_key: The settings key for this cookie's secure setting
+    :type secure_key: str
 
     :returns: The value of the key, or `default` accordingly
     """
@@ -67,9 +69,9 @@ class SameSiteMiddleware(MiddlewareMixin):
     }
 
   def __process_cookie(self, response, cookie_name, samesite_key, secure_key):
-    """Processes a Django cookie to correct if if needed.
+    """Process a django cookie to correct it if needed.
 
-    :param response: A Django Rest Framework Response Object
+    :param response: A rest_framework response object
     :type response: :class:`rest_framework.response.Response`
     :param cookie_name: The cookie name to process
     :type cookie_name: string
@@ -93,8 +95,7 @@ class SameSiteMiddleware(MiddlewareMixin):
     return response
 
   def process_response(self, _, response):
-    """Rewrites the response cookie values to ensure they are handled correctly
-    by browsers implementing this standard.
+    """Process the incoming response object.
 
     Overrides:
     :func:`django.contrib.sessions.middleware.MiddlewareMixin.process_response`
@@ -117,8 +118,9 @@ class SameSiteMiddleware(MiddlewareMixin):
 
 
 class CSRFMixin:
-  """Ensures the endpoint performs CSRF validation, or returns an error."""
+  """Ensure the endpoint performs CSRF validation, or returns an error."""
 
   @method_decorator(csrf_protect)
   def dispatch(self, *args, **kwargs):
+    """Override the dispatch implementation in the view."""
     return super(CSRFMixin, self).dispatch(*args, **kwargs)

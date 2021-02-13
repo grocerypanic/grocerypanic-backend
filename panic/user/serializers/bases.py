@@ -9,6 +9,7 @@ from .validators.user import validate_language
 
 class CustomUserBase(serializers.Serializer):
   """Custom user serializer base class to add additional fields."""
+
   language_code = serializers.CharField(
       max_length=20,
       default=User.DEFAULT_LANGUAGE_CODE,

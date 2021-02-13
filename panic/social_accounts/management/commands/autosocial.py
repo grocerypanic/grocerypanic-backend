@@ -1,4 +1,5 @@
-"""Django Automated Social App Creation."""
+"""A django admin command to create add a social login provider."""
+
 import os
 
 from allauth.socialaccount.models import SocialApp
@@ -6,8 +7,7 @@ from django.core.management.base import BaseCommand
 
 
 class Command(BaseCommand):
-  """Bootstraps Social Authentication by populating social logins based on
-  environment variables.
+  """Bootstrap creating a social login provider via environment variables.
 
   - Generate Social Login Authorization::
 
@@ -22,15 +22,18 @@ class Command(BaseCommand):
 
     - google
     - facebook
- """
+  """
+
   help = 'Adds social app configuration without user interaction.'
 
   def add_arguments(self, parser):
+    """Add argument to the parser."""
     parser.add_argument(
         'provider', nargs=1, type=str, choices=['google', 'facebook']
     )
 
   def handle(self, *args, **options):
+    """Command implementation."""
     provider = options['provider'][0]
 
     client_id = os.getenv(('%s_ID' % provider).upper(), None)

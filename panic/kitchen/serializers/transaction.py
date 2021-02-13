@@ -1,11 +1,11 @@
-"""Serializer for the Transaction Model"""
+"""Serializer for the transaction model."""
 
 from ..models.transaction import Transaction
 from .bases import RelatedValidatorModelSerializer
 
 
 class TransactionSerializer(RelatedValidatorModelSerializer):
-  """Serializer for Transactions"""
+  """Serializer for Transaction."""
 
   class Meta:
     model = Transaction
@@ -13,5 +13,12 @@ class TransactionSerializer(RelatedValidatorModelSerializer):
     read_only_fields = ("id", "date")
 
   def validate_item(self, item):
+    """Ensure item is owned by the current request user.
+
+    :param item: A related item instance for this model.
+    :type item: :class:`panic.kitchen.models.item.Item`
+
+    :raises: :class:`rest_framework.serializers.ValidationError`
+    """
     self.related_validator(item, "item")
     return item

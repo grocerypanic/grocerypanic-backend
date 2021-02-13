@@ -1,4 +1,4 @@
-"""Sign Up Signal Handler"""
+"""Handles the django-allauth `user_signed_up` signal."""
 
 from allauth.account.signals import user_signed_up
 from django.dispatch import receiver
@@ -11,7 +11,7 @@ def user_signed_up_handler(request, user, **kwargs):
 
   :param request: A rest_framework request object
   :type request: :class:`rest_framework.request.Request`
-  :param user: A django allauth sociallogin object
+  :param user: A django user object
   :type user: :class:`user.models.user.User`
   """
   user_signed_up_event(request, user)

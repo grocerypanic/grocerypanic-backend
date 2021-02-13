@@ -1,4 +1,4 @@
-"""Admin Command to Wait for the Database to be Accessible"""
+"""A django admin command to wait for the database to be accessible."""
 
 import time
 
@@ -8,11 +8,12 @@ from django.db.utils import OperationalError
 
 
 class Command(BaseCommand):
-  """Django command that waits for database to be available"""
+  """Django command that waits for the database to be available."""
+
   help = 'Pauses for database connectivity before proceeding.'
 
   def handle(self, *args, **options):
-    """Handle the command"""
+    """Command implementation."""
     self.stdout.write("Waiting for database...")
     while True:
       try:

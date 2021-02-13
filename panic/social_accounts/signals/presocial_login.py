@@ -1,4 +1,4 @@
-"""Pre Social Login Signal Handler"""
+"""Handles the `pre_social_login` signal from django-allauth."""
 
 from allauth.account.models import EmailAddress
 from allauth.socialaccount.signals import pre_social_login
@@ -10,21 +10,24 @@ from django.dispatch import receiver
 # pylint: disable=unused-argument
 @receiver(pre_social_login)
 def pre_social_login_handler(request, sociallogin, **kwargs):
-  """Responds the Django Allauth pre_social_login signal"""
+  """Receive the django-allauth `pre_social_login` signal.
+
+  :param request: A rest_framework request object
+  :type request: :class:`rest_framework.request.Request`
+  :param sociallogin: A django allauth sociallogin object
+  :type sociallogin: :class:`allauth.socialaccount.models.SocialLogin`
+  """
+
   process_social_connect(request, sociallogin)
 
 
 def process_social_connect(request, sociallogin):
-  """Searches for unconnected existing users, and attempts to match
-  them to the social login being used.
+  """Connect am existing social account to a new provider, if prudent.
 
-  :param request: A restframework request object
+  :param request: A rest_framework request object
   :type request: :class:`rest_framework.request.Request`
   :param sociallogin: A django allauth sociallogin object
   :type sociallogin: :class:`allauth.socialaccount.models.SocialLogin`
-
-  :returns: None
-  :rtype: None
   """
   pre_social_connector = PreSocialConnector(sociallogin)
   user = pre_social_connector.get_user_for_connection()
@@ -34,15 +37,15 @@ def process_social_connect(request, sociallogin):
 
 
 class PreSocialConnector:
-  """Finds existing users, for connecting to social accounts."""
+  """Connection between social logins and existing django user accounts."""
 
   def __init__(self, sociallogin):
     self.sociallogin = sociallogin
-    querymanager = EmailAddressQuery()
-    self.query = querymanager.query
+    query_manager = EmailAddressQuery()
+    self.query = query_manager.query
 
   def search_for_user(self):
-    """Iterates through attached email addresses and queries for existing users.
+    """Iterate through attached email addresses and query for existing users.
 
     :returns: A django user object, or None
     :rtype: :class:`django.contrib.auth.models.User`, None
@@ -54,7 +57,7 @@ class PreSocialConnector:
     return None
 
   def get_user_for_connection(self):
-    """Determines if a connectable user is present, and returns the user if so.
+    """Determine if a connectable user is present, and returns the user if so.
 
     :returns: A django user object, or None
     :rtype: :class:`django.contrib.auth.models.User`, None
@@ -67,7 +70,7 @@ class PreSocialConnector:
 
 
 class EmailAddressQuery:
-  """Provides an common interface to multiple user queries."""
+  """Provide an common interface to multiple user queries."""
 
   def __init__(self):
     if settings.SOCIALACCOUNT_EMAIL_VERIFICATION:
@@ -77,7 +80,8 @@ class EmailAddressQuery:
 
   @staticmethod
   def __unverified_user_query(email_address_object):
-    """Performs a query over all allauth email addresses to find matching users.
+    """Perform a query over all django-allauth email addresses to find matching
+    django users.
 
     :param email_address_object: The allauth email address object to search for
     :type email_address_object: :class:`allauth.account.models.EmailAddress`
@@ -93,8 +97,8 @@ class EmailAddressQuery:
 
   @staticmethod
   def __verified_user_query(email_address_object):
-    """Performs a query over verified allauth email addresses to find matching
-    users.
+    """Perform a query over all verified django-allauth email addresses to find
+    matching django users.
 
     :param email_address_object: The allauth email address object to search for
     :type email_address_object: :class:`allauth.account.models.EmailAddress`

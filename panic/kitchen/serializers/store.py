@@ -1,4 +1,4 @@
-"""Serializer for the Store Model"""
+"""Serializer for the store model."""
 
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
@@ -8,7 +8,8 @@ from . import DUPLICATE_OBJECT_MESSAGE
 
 
 class StoreSerializer(serializers.ModelSerializer):
-  """Serializer for Store"""
+  """Serializer for Store."""
+
   user = serializers.HiddenField(default=serializers.CurrentUserDefault())
 
   class Meta:

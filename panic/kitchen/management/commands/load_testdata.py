@@ -1,4 +1,4 @@
-"""Loads Test Data into the Database"""
+"""A django admin command to create test data."""
 
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ObjectDoesNotExist
@@ -8,10 +8,12 @@ from .utils.generate_testdata import DataGenerator
 
 
 class Command(BaseCommand):
-  """Django command that loads data for functional testing."""
+  """Django command that loads test data into the database."""
+
   help = 'Loads sets of pre-defined test data into the database'
 
   def add_arguments(self, parser):
+    """Entry point for subclassed commands to add custom arguments."""
     parser.add_argument(
         'user',
         nargs=1,
@@ -25,7 +27,7 @@ class Command(BaseCommand):
       return None
 
   def handle(self, *args, **options):
-    """Handle the command"""
+    """Command implementation."""
     username = options['user'][0]
     user = self.__get_user(username)
     if user:

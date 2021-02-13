@@ -1,0 +1,6 @@
+decorators
+==========
+.. toctree::
+   :glob:
+
+   *

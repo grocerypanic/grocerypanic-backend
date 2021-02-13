@@ -1,4 +1,4 @@
-"""User Shelf Model"""
+"""Shelf model."""
 
 from django.contrib.auth import get_user_model
 from django.db import models
@@ -12,7 +12,8 @@ MAX_LENGTH = 255
 
 
 class Shelf(models.Model):
-  """User Shelf Model"""
+  """Shelf model."""
+
   index = NaturalSortField(
       for_field="name",
       max_length=MAX_LENGTH,
@@ -36,5 +37,6 @@ class Shelf(models.Model):
 
   # pylint: disable=W0222
   def save(self, *args, **kwargs):
+    """Clean and save model."""
     self.full_clean()
     return super(Shelf, self).save(*args, **kwargs)

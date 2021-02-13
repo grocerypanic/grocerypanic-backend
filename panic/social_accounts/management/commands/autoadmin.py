@@ -1,4 +1,4 @@
-"""Django Automated Admin User Creation."""
+"""A django admin command to create a default admin user."""
 
 from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand
@@ -7,7 +7,7 @@ User = get_user_model()
 
 
 class Command(BaseCommand):
-  """Bootstraps the Django Admin, by creating a user with a set of credentials.
+  """Bootstrap the django admin, by creating a user with a set of credentials.
 
   - Generate Admin Account::
 
@@ -16,11 +16,12 @@ class Command(BaseCommand):
   - Credentials:
     Username: admin
     Password: admin
- """
+  """
+
   help = 'Adds a default admin user without user interaction.'
 
   def handle(self, *args, **options):
-
+    """Command implementation."""
     query = User.objects.all().filter(username="admin").count()
     if query > 0:
       self.stdout.write(self.style.ERROR('The admin user already exists.'))

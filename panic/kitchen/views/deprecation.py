@@ -1,4 +1,4 @@
-"""Tools for Deprecating API Endpoints"""
+"""Tools for deprecating API endpoints."""
 
 from rest_framework import status
 from rest_framework.response import Response
@@ -7,7 +7,7 @@ DEPRECATED_WARNING = '299 - Planned Deprecation'
 
 
 def deprecated_warning(response, sunset):
-  """Sets deprecation warning headers on a response.
+  """Set deprecation warning headers on a response.
 
   :param response: A rest framework response object
   :type response: :class:`rest_framework.response.Response`
@@ -24,7 +24,7 @@ def deprecated_warning(response, sunset):
 
 
 def deprecated_response(message):
-  """Returns a deprecation error.
+  """Return a deprecation error.
 
   :param message: The message content to return
   :type message: str

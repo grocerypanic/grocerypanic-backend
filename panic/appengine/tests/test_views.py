@@ -1,4 +1,4 @@
-"""Test the Appengine App Views"""
+"""Test the appengine app views."""
 
 from django.http import HttpRequest
 from django.test import TestCase

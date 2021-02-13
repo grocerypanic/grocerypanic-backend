@@ -1,17 +1,16 @@
-"""Custom Authentication"""
+"""Custom rest_framework authentication."""
 
 from django.conf import settings
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
 
 class JWTCookieAuthentication(JWTAuthentication):
-  """Extends the authenticate functionality of
+  """Extend the authenticate functionality of
   :class:`rest_framework_simplejwt.authentication.JWTAuthentication`
   """
 
   def authenticate(self, request):
-    """Determines if a request can proceed based on the presence of a valid JWT
-    cookie.
+    """Validate requests based on the presence of a valid JWT cookie.
 
     Overrides:
     :func:`rest_framework_simplejwt.authentication.JWTAuthentication.

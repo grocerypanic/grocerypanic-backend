@@ -21,7 +21,7 @@ os.environ['DJANGO_SETTINGS_MODULE'] = 'config.settings'
 django.setup()
 
 # -- Project information -----------------------------------------------------
-project = 'Don\'t Panic!'
+project = 'Grocery Panic: Pandemic Shopping Planner'
 copyright = '2020, Niall Byrne'
 author = 'Niall Byrne'
 

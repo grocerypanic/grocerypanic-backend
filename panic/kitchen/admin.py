@@ -1,4 +1,4 @@
-"""Kitchen Admin Models"""
+"""Kitchen admin models."""
 
 from django.contrib import admin
 

@@ -1,4 +1,4 @@
-"""Test the Appengine App Configuration."""
+"""Test the appengine app vonfiguration."""
 
 from django.test import TestCase
 

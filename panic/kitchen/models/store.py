@@ -1,4 +1,4 @@
-"""User Stores Model"""
+"""Store model."""
 
 from django.contrib.auth import get_user_model
 from django.db import models
@@ -12,7 +12,8 @@ MAX_LENGTH = 255
 
 
 class Store(models.Model):
-  """User Store Model"""
+  """Store model."""
+
   index = NaturalSortField(
       for_field="name",
       max_length=MAX_LENGTH,
@@ -35,5 +36,6 @@ class Store(models.Model):
 
   # pylint: disable=W0222
   def save(self, *args, **kwargs):
+    """Clean and save model."""
     self.full_clean()
     return super(Store, self).save(*args, **kwargs)

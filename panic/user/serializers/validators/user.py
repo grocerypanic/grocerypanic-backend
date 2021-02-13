@@ -1,4 +1,4 @@
-"""Custom User Serializer Validators"""
+"""Custom user serializer validators."""
 
 from langcodes import Language
 from langcodes.tag_parser import LanguageTagError
@@ -6,7 +6,7 @@ from rest_framework import serializers
 
 
 def validate_language(value):
-  """Validates a given language code.
+  """Validate a given language code.
 
   :param value: A string containing a language code.
   :type value: str

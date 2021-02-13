@@ -1,4 +1,4 @@
-"""Inventory Model"""
+"""Inventory model."""
 
 from django.contrib.auth import get_user_model
 from django.core.validators import MaxValueValidator, MinValueValidator
@@ -11,7 +11,8 @@ User = get_user_model()
 
 
 class Inventory(models.Model):
-  """Inventory Model"""
+  """Inventory model."""
+
   item = models.ForeignKey('Item', on_delete=models.CASCADE)
   remaining = models.FloatField(
       validators=[
@@ -35,5 +36,6 @@ class Inventory(models.Model):
 
   # pylint: disable=W0222
   def save(self, *args, **kwargs):
+    """Clean and save model."""
     self.full_clean()
     super().save(*args, **kwargs)

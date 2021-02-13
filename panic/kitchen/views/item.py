@@ -1,4 +1,4 @@
-"""Kitchen Item Views"""
+"""Kitchen item views."""
 
 import pytz
 from django_filters import rest_framework as filters
@@ -8,7 +8,7 @@ from rest_framework.response import Response
 
 from ..filters import ItemFilter
 from ..models.item import Item
-from ..pagination import PagePagination
+from ..pagination import BasePagePagination
 from ..serializers.item import ItemSerializer
 from ..serializers.reports.item_consumption_history import (
     ItemConsumptionHistorySerializer,
@@ -20,7 +20,8 @@ from .bases import KitchenBaseView
 class ItemBaseViewSet(
     KitchenBaseView,
 ):
-  """Item Base API View"""
+  """Item base API view."""
+
   serializer_class = ItemSerializer
   queryset = Item.objects.all()
 
@@ -32,11 +33,11 @@ class ItemViewSet(
     mixins.UpdateModelMixin,
     viewsets.GenericViewSet,
 ):
-  """Item API View"""
+  """Item API view."""
 
   @openapi_ready
   def perform_update(self, serializer):
-    """Update a Item"""
+    """Update a Item."""
     serializer.save(user=self.request.user)
 
 
@@ -46,19 +47,21 @@ class ItemListCreateViewSet(
     mixins.ListModelMixin,
     viewsets.GenericViewSet,
 ):
-  """Item List and Create API View"""
+  """Item list and create API view."""
+
   filter_backends = (filters.DjangoFilterBackend,)
   filterset_class = ItemFilter
-  pagination_class = PagePagination
+  pagination_class = BasePagePagination
 
   @openapi_ready
   def get_queryset(self):
+    """Retrieve the view queryset."""
     queryset = self.queryset
     return queryset.filter(user=self.request.user).order_by("index")
 
   @openapi_ready
   def perform_create(self, serializer):
-    """Create a new Item"""
+    """Create a new item."""
     serializer.save(user=self.request.user)
 
 
@@ -67,12 +70,14 @@ class ItemConsumptionHistoryViewSet(
     mixins.RetrieveModelMixin,
     viewsets.GenericViewSet,
 ):
-  """Item Consumption History API View"""
+  """Item consumption history API view."""
+
   serializer_class = ItemConsumptionHistorySerializer
 
   @openapi_ready
   @swagger_auto_schema(manual_parameters=[custom_item_consumption_view_parm])
   def retrieve(self, request, *args, **kwargs):
+    """Retrieve a model instance."""
     timezone_query = self.request.GET.get('timezone', pytz.utc.zone)
     instance = self.get_object()
     serializer = self.get_serializer(

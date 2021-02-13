@@ -1,4 +1,4 @@
-"""Security App Urls"""
+"""Security app urls."""
 
 from django.urls import path
 

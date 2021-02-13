@@ -1,4 +1,4 @@
-"""Items used for Kitchen Inventory"""
+"""Item model."""
 
 from datetime import timedelta
 from decimal import Decimal
@@ -23,7 +23,7 @@ MAX_LENGTH = 255
 
 
 def default_expiry():
-  """Calculates the default expiry for an Item.
+  """Calculate the default expiry for an Item.
 
   :returns: A datetime in the future
   :rtype: :class:`datetime.datetime`
@@ -32,7 +32,8 @@ def default_expiry():
 
 
 class Item(models.Model):
-  """Items used for Kitchen Inventory"""
+  """Item model."""
+
   has_partial_quantities = models.BooleanField(default=False)
 
   index = NaturalSortField(
@@ -91,5 +92,6 @@ class Item(models.Model):
 
   # pylint: disable=W0222
   def save(self, *args, **kwargs):
+    """Clean and save model."""
     self.full_clean()
     return super(Item, self).save(*args, **kwargs)

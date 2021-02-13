@@ -1,4 +1,4 @@
-"""Serializer for the Item Consumption Report"""
+"""Serializer for the item consumption report."""
 
 import pytz
 from drf_yasg.utils import swagger_serializer_method
@@ -12,7 +12,8 @@ DEFAULT_TIMEZONE = pytz.utc.zone
 
 
 class ItemConsumptionHistorySerializer(serializers.ModelSerializer):
-  """Serializer for Item Consumption History"""
+  """Serializer for Item Consumption History."""
+
   timezone = serializers.CharField(
       write_only=True,
       max_length=255,
@@ -36,6 +37,13 @@ class ItemConsumptionHistorySerializer(serializers.ModelSerializer):
     )
 
   def validate_timezone(self, value):
+    """Ensure the timezone field is a valid timezone string.
+
+    :param value: The value expected to be a valid timezone string
+    :type value: str
+
+    :raises: :class:`rest_framework.serializers.ValidationError`
+    """
     try:
       pytz.timezone(value)
     except pytz.exceptions.UnknownTimeZoneError:
@@ -47,6 +55,7 @@ class ItemConsumptionHistorySerializer(serializers.ModelSerializer):
       serializer_or_field=ItemHistorySerializer(many=True)
   )
   def get_consumption_last_two_weeks(self, obj):
+    """Trigger the transaction consumption report for the past two weeks."""
     item_id = obj.id
     configured_timezone = self.__get_initial_timezone_value()
     query = Transaction.consumption.get_last_two_weeks(
@@ -57,6 +66,7 @@ class ItemConsumptionHistorySerializer(serializers.ModelSerializer):
 
   @swagger_serializer_method(serializer_or_field=serializers.IntegerField)
   def get_consumption_this_month(self, obj):
+    """Trigger the transaction consumption report for the current month."""
     item_id = obj.id
     configured_timezone = self.__get_initial_timezone_value()
     return Transaction.consumption.get_current_month_consumption(
@@ -66,6 +76,7 @@ class ItemConsumptionHistorySerializer(serializers.ModelSerializer):
 
   @swagger_serializer_method(serializer_or_field=serializers.IntegerField)
   def get_consumption_this_week(self, obj):
+    """Trigger the transaction consumption report for the current week."""
     item_id = obj.id
     configured_timezone = self.__get_initial_timezone_value()
     return Transaction.consumption.get_current_week_consumption(
@@ -75,6 +86,7 @@ class ItemConsumptionHistorySerializer(serializers.ModelSerializer):
 
   @swagger_serializer_method(serializer_or_field=serializers.DateTimeField)
   def get_first_consumption_date(self, obj):
+    """Retrieve the first consumption date for this item, if any."""
     item_id = obj.id
     configured_timezone = self.__get_initial_timezone_value()
     return Transaction.consumption.get_first_consumption(
@@ -84,6 +96,7 @@ class ItemConsumptionHistorySerializer(serializers.ModelSerializer):
 
   @swagger_serializer_method(serializer_or_field=serializers.IntegerField)
   def get_total_consumption(self, obj):
+    """Trigger the transaction consumption report for total consumption."""
     item_id = obj.id
     return Transaction.consumption.get_total_consumption(item_id)
 

@@ -1,4 +1,4 @@
-"""Custom User Model"""
+"""Custom user model."""
 
 import pytz
 from django.contrib.auth.models import AbstractUser
@@ -15,7 +15,7 @@ CUSTOM_USER_MODEL_FIELDS = (
 
 
 class User(AbstractUser):
-  """Custom User Model for Kitchen"""
+  """Custom user model."""
 
   DEFAULT_TIMEZONE = pytz.utc.zone
   DEFAULT_LANGUAGE_CODE = 'en'
@@ -33,5 +33,6 @@ class User(AbstractUser):
 
   # pylint: disable=W0222
   def save(self, *args, **kwargs):
+    """Clean and save model."""
     self.full_clean()
     return super(User, self).save(*args, **kwargs)

@@ -1,4 +1,4 @@
-"""User Admin Models"""
+"""Custom user admin integration."""
 
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as DjangoUserAdmin
@@ -8,6 +8,8 @@ from .models.user import User
 
 
 class UserAdmin(DjangoUserAdmin):
+  """Custom user admin integration."""
+
   list_display = [
       "email",
       "username",
