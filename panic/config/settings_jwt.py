@@ -1,4 +1,8 @@
-"""Json Web Token Configuration"""
+"""Panic JWT configuration.
+
+Please see the related libraries:
+    - https://github.com/iMerica/dj-rest-auth
+"""
 
 import os
 from datetime import timedelta

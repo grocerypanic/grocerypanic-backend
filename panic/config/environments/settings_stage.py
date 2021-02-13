@@ -1,12 +1,11 @@
-"""Stage Settings Overrides"""
+"""Panic `stage` environment configuration."""
 
 import os
 
 from corsheaders.defaults import default_headers
 from django.contrib.messages import constants as message_constants
 
-# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+from .. import BASE_DIR
 
 ALLOWED_HOSTS = ['*']
 DEBUG = False

@@ -1,12 +1,7 @@
-"""Admin Settings Overrides"""
-
-import os
+"""Panic `admin` environment settings."""
 
 from corsheaders.defaults import default_headers
 from django.contrib.messages import constants as message_constants
-
-# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 ALLOWED_HOSTS = ['*']
 DEBUG = True

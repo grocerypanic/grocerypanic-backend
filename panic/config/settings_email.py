@@ -1,4 +1,4 @@
-"""Django Email Configuration"""
+"""Panic email configuration."""
 
 import os
 

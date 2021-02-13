@@ -1,4 +1,4 @@
-"""Database settings"""
+"""Panic database settings per environments."""
 
 import os
 

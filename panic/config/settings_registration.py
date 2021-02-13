@@ -1,4 +1,9 @@
-"""User Registration Configuration"""
+"""Panic user registration configuration.
+
+Please see the related libraries:
+    - https://github.com/pennersr/django-allauth
+    - https://github.com/iMerica/dj-rest-auth
+"""
 
 OLD_PASSWORD_FIELD_ENABLED = True
 

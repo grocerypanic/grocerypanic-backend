@@ -4,10 +4,8 @@ omit =
     */test*,
     */apps.py,
     */urls.py,
-    */migrations/*.py
-    panic/config/settings_stage.py
-    panic/config/settings_prod.py
-    panic/config/settings_admin.py
+    */migrations/*.py,
+    panic/config/environments/*.py,
     panic/setup.py,
     panic/manage.py,
     panic/root/asgi.py,

@@ -1,4 +1,8 @@
-"""Throttling Settings"""
+"""Panic DRF settings.
+
+Please see the related libraries:
+    - https://www.django-rest-framework.org/api-guide/settings/
+"""
 
 REST_FRAMEWORK_AVAILABLE = {
     'test': {},
