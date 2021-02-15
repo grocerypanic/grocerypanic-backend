@@ -75,6 +75,19 @@ class PrivateListItemsTest(TestCase):
     self.assertEqual(res.status_code, status.HTTP_200_OK)
     self.assertEqual(res.data['results'], serializer.data)
 
+  def test_list_items_order(self):
+    c_item = self.create_item(name="CCCCC")
+    b_item = self.create_item(name="BBBBB")
+    a_item = self.create_item(name="AAAAA")
+
+    res = self.client.get(LIST_URL)
+
+    self.assertEqual(res.status_code, status.HTTP_200_OK)
+    assert len(res.data['results']) == 3
+    self.assertEqual(res.data['results'][0]['name'], a_item.name)
+    self.assertEqual(res.data['results'][1]['name'], b_item.name)
+    self.assertEqual(res.data['results'][2]['name'], c_item.name)
+
   def test_list_items_paginated_correctly(self):
     for index in range(0, 11):
       data = "name" + str(index)

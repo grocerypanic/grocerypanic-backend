@@ -66,6 +66,17 @@ class PrivateStoreTest(StoreTestHarness):
     self.assertEqual(res.status_code, status.HTTP_200_OK)
     self.assertEqual(res.data['results'], serializer.data)
 
+  def test_list_stores_order(self):
+    item1 = self.create_test_instance(name="ZZZZZ", user=self.user1)
+    item2 = self.create_test_instance(name="AAAAA", user=self.user1)
+
+    res = self.client.get(STORE_URL)
+
+    self.assertEqual(res.status_code, status.HTTP_200_OK)
+    assert len(res.data['results']) == 2
+    self.assertEqual(res.data['results'][0]['name'], item2.name)
+    self.assertEqual(res.data['results'][1]['name'], item1.name)
+
   def test_list_stores_paginated_correctly(self):
     for index in range(0, 11):
       data = "storename" + str(index)

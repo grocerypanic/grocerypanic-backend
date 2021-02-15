@@ -9,7 +9,7 @@ from freezegun import freeze_time
 from rest_framework import status
 from rest_framework.test import APIClient
 
-from ...tests.fixtures.fixtures_django import MockRequest
+from ...tests.fixtures.fixtures_django import MockRequest, deserialize_date
 from ...tests.fixtures.fixtures_transaction import TransactionTestHarness
 from ..item import ItemConsumptionHistorySerializer
 
@@ -24,21 +24,24 @@ class PrivateTCHTestHarness(TransactionTestHarness):
   def create_data_hook(cls):
     cls.serializer_data = {'item': cls.item1.id, 'quantity': 3}
     cls.today = timezone.now()
-    cls.object_def1 = {
+    cls.five_days_ago = cls.today - timezone.timedelta(days=5)
+    cls.sixteen_days_ago = cls.today - timezone.timedelta(days=16)
+
+    cls.transaction_today = {
         'user': cls.user1,
         'date_object': cls.today,
         'item': cls.item1,
         'quantity': -5
     }
-    cls.object_def2 = {
+    cls.transaction_5_days_ago = {
         'user': cls.user1,
-        'date_object': cls.today - timezone.timedelta(days=5),
+        'date_object': cls.five_days_ago,
         'item': cls.item1,
         'quantity': -5
     }
-    cls.object_def3 = {
+    cls.transaction_16_days_ago = {
         'user': cls.user1,
-        'date_object': cls.today - timezone.timedelta(days=16),
+        'date_object': cls.sixteen_days_ago,
         'item': cls.item1,
         'quantity': -5
     }
@@ -52,9 +55,9 @@ class PrivateTCHTestHarness(TransactionTestHarness):
     self.populate_history()
 
   def populate_history(self):
-    self.create_test_instance(**self.object_def1)
-    self.create_test_instance(**self.object_def2)
-    self.create_test_instance(**self.object_def3)
+    self.create_test_instance(**self.transaction_today)
+    self.create_test_instance(**self.transaction_5_days_ago)
+    self.create_test_instance(**self.transaction_16_days_ago)
 
 
 def item_pk_url(item):
@@ -105,20 +108,38 @@ class PrivateTCHTest(PrivateTCHTestHarness):
     )
 
   @freeze_time("2020-01-14")
+  def test_get_item_history_order(self):
+    res = self.client.get(item_pk_url(self.item1.id))
+    self.assertEqual(res.status_code, status.HTTP_200_OK)
+
+    assert len(res.data['consumption_last_two_weeks']) == 2
+
+    self.assertEqual(
+        deserialize_date(res.data['consumption_last_two_weeks'][0]['date']),
+        self.today.date()
+    )
+    self.assertEqual(
+        deserialize_date(res.data['consumption_last_two_weeks'][1]['date']),
+        self.five_days_ago.date()
+    )
+
+  @freeze_time("2020-01-14")
   def test_first_transaction(self):
     res = self.client.get(item_pk_url(self.item1.id))
 
     self.assertEqual(res.status_code, status.HTTP_200_OK)
     self.assertEqual(
-        res.data['first_consumption_date'], self.object_def3['date_object']
+        res.data['first_consumption_date'],
+        self.transaction_16_days_ago['date_object']
     )
 
   @freeze_time("2020-01-14")
   def test_total_consumption(self):
     res = self.client.get(item_pk_url(self.item1.id))
     total_consumption = abs(
-        self.object_def1['quantity'] + self.object_def2['quantity'] +
-        self.object_def3['quantity']
+        self.transaction_today['quantity'] +
+        self.transaction_5_days_ago['quantity'] +
+        self.transaction_16_days_ago['quantity']
     )
 
     self.assertEqual(res.status_code, status.HTTP_200_OK)
@@ -135,7 +156,7 @@ class PrivateTCHTest(PrivateTCHTestHarness):
 
     self.assertEqual(
         res.data['first_consumption_date'],
-        self.object_def3['date_object'].astimezone(
+        self.transaction_16_days_ago['date_object'].astimezone(
             pytz.timezone(test_timezone)
         )
     )

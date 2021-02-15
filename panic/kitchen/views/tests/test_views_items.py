@@ -123,6 +123,16 @@ class PrivateItemTest(PrivateItemTestHarness):
     self.assertEqual(res.status_code, status.HTTP_200_OK)
     self.assertEqual(res.data['results'], serializer.data)
 
+  def test_list_items_order(self):
+    item1 = self.create_test_instance(**self.data1)
+    item2 = self.create_test_instance(**self.data2)
+
+    res = self.client.get(ITEM_URL)
+
+    self.assertEqual(res.status_code, status.HTTP_200_OK)
+    self.assertEqual(res.data['results'][0]['name'], item1.name)
+    self.assertEqual(res.data['results'][1]['name'], item2.name)
+
   def test_retrieve_single_item(self):
     item = self.create_test_instance(**self.data1)
     self.create_test_instance(**self.data2)
