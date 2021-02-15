@@ -1,4 +1,4 @@
-"""Test the Cookie Authentication"""
+"""Test custom authorizations."""
 
 from unittest.mock import patch
 
@@ -11,7 +11,7 @@ from ..auth import JWTCookieAuthentication
 
 
 class CookieAuthenticatorTest(TestCase):
-  """Test the Cookie Authenticator"""
+  """Test the JWTCookieAuthentication class."""
 
   def setUp(self):
     self.factory = RequestFactory()
@@ -24,8 +24,6 @@ class CookieAuthenticatorTest(TestCase):
       'get_validated_token'
   )
   def test_authentication_fails_by_default(self, validate):
-    """Test that login is required for retrieving shelves."""
-
     self.request.COOKIES = {}
     self.request.headers = {}
     self.assertIsNone(self.auth.authenticate(self.request))
@@ -36,7 +34,6 @@ class CookieAuthenticatorTest(TestCase):
       'get_user'
   )
   def test_authentication_validates_cookie_invalid(self, validate):
-
     validate.return_value = "Validated"
 
     self.request.COOKIES[self.cookie_name] = "Random String"
@@ -53,7 +50,6 @@ class CookieAuthenticatorTest(TestCase):
       'get_user'
   )
   def test_authentication_validates_cookie_valid(self, user, validate):
-
     user.return_value = "User"
     validate.return_value = "Validated"
 
@@ -68,7 +64,6 @@ class CookieAuthenticatorTest(TestCase):
       'get_validated_token'
   )
   def test_authentication_another_cookie(self, validate):
-
     self.request.COOKIES["ANOTHER_COOKIE"] = "Random String"
     self.assertIsNone(self.auth.authenticate(self.request))
     assert not validate.called
@@ -78,7 +73,6 @@ class CookieAuthenticatorTest(TestCase):
       'get_validated_token'
   )
   def test_authentication_no_auth_cookie(self, validate):
-
     with self.settings(JWT_AUTH_COOKIE=None):
       self.assertIsNone(self.auth.authenticate(self.request))
       assert not validate.called

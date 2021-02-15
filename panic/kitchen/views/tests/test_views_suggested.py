@@ -18,13 +18,12 @@ def item_url_with_params(query_kwargs):
 
 
 class PublicListItemsTest(TestCase):
-  """Test the public Suggested Items API"""
+  """Test the public Suggested Items API."""
 
   def setUp(self):
     self.client = APIClient()
 
   def test_login_required(self):
-    """Test that login is required for retrieving items."""
     res = self.client.get(LIST_URL)
 
     self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
@@ -37,7 +36,7 @@ class PublicListItemsTest(TestCase):
 
 
 class PrivateListItemsTest(TestCase):
-  """Test the authorized Suggested Items API"""
+  """Test the authorized Suggested Items API."""
 
   def create_item(self, name):
     item = SuggestedItem.objects.create(name=name)
@@ -65,7 +64,6 @@ class PrivateListItemsTest(TestCase):
       obj.delete()
 
   def test_list_items(self):
-    """Test retrieving item names."""
     self.create_item(name="Red Bean Dessert")
     self.create_item(name="Tofu")
 
@@ -78,7 +76,6 @@ class PrivateListItemsTest(TestCase):
     self.assertEqual(res.data['results'], serializer.data)
 
   def test_list_items_paginated_correctly(self):
-    """Test that retrieving a list of item names is paginated correctly."""
     for index in range(0, 11):
       data = "name" + str(index)
       self.create_item(name=data)

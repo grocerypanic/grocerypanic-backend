@@ -9,12 +9,13 @@ from rest_framework.test import APIClient
 
 from ...models.shelf import Shelf
 from ...serializers.shelf import ShelfSerializer
-from ...tests.fixtures.shelf import ShelfTestHarness
+from ...tests.fixtures.fixtures_shelf import ShelfTestHarness
 
 SHELF_URL = reverse("v1:shelves-list")
 
 
 class AnotherUserTestHarness(ShelfTestHarness):
+  """Extend the test harness by adding an additional user."""
 
   @classmethod
   def create_data_hook(cls):
@@ -27,13 +28,12 @@ def shelf_url_with_params(query_kwargs):
 
 
 class PublicShelfTest(TestCase):
-  """Test the public Shelf API"""
+  """Test the public Shelf API."""
 
   def setUp(self):
     self.client = APIClient()
 
   def test_login_required(self):
-    """Test that login is required for retrieving shelves."""
     res = self.client.get(SHELF_URL)
 
     self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
@@ -46,7 +46,7 @@ class PublicShelfTest(TestCase):
 
 
 class PrivateShelfTest(ShelfTestHarness):
-  """Test the authorized Shelf API"""
+  """Test the private Shelf API."""
 
   def setUp(self):
     super().setUp()
@@ -54,7 +54,6 @@ class PrivateShelfTest(ShelfTestHarness):
     self.client.force_authenticate(self.user1)
 
   def test_list_shelves(self):
-    """Test retrieving a list of shelves."""
     self.create_test_instance(user=self.user1, name="Refrigerator")
     self.create_test_instance(user=self.user1, name="Pantry")
 
@@ -68,7 +67,6 @@ class PrivateShelfTest(ShelfTestHarness):
     self.assertEqual(res.data['results'], serializer.data)
 
   def test_list_shelves_paginated_correctly(self):
-    """Test retrieving a list of shelves is paginated correctly."""
     for index in range(0, 11):
       data = 'shelfname' + str(index)
       self.create_test_instance(user=self.user1, name=data)
@@ -78,8 +76,7 @@ class PrivateShelfTest(ShelfTestHarness):
     self.assertIsNotNone(res.data['next'])
     self.assertIsNone(res.data['previous'])
 
-  def test_list_shelves_paginated_overidden_correctly(self):
-    """Test retrieving a the full list of shelves."""
+  def test_list_shelves_paginated_overridden_correctly(self):
     for index in range(0, 11):
       data = 'shelfname' + str(index)
       self.create_test_instance(user=self.user1, name=data)
@@ -93,7 +90,6 @@ class PrivateShelfTest(ShelfTestHarness):
     self.assertEqual(len(res.data), 11)
 
   def test_delete_shelf(self):
-    """Test deleting a shelf."""
     delete = self.create_test_instance(user=self.user1, name="Refrigerator")
     self.create_test_instance(user=self.user1, name="Pantry")
 
@@ -109,7 +105,6 @@ class PrivateShelfTest(ShelfTestHarness):
     self.assertEqual(res_get.data['results'], serializer.data)
 
   def test_create_shelf(self):
-    """Test creating a shelf."""
     data = {"name": "Refrigerator"}
 
     res = self.client.post(SHELF_URL, data=data)
@@ -122,7 +117,7 @@ class PrivateShelfTest(ShelfTestHarness):
 
 
 class PrivateShelfTestAnotherUser(AnotherUserTestHarness):
-  """Test the authorized Shelf API from Another User"""
+  """Test the authorized Shelf API from another user."""
 
   def setUp(self):
     super().setUp()
@@ -130,7 +125,6 @@ class PrivateShelfTestAnotherUser(AnotherUserTestHarness):
     self.client.force_authenticate(self.user2)
 
   def test_list_shelves(self):
-    """Test retrieving a list of shelves."""
     self.create_test_instance(user=self.user1, name="Refrigerator")
     self.create_test_instance(user=self.user1, name="Pantry")
 
@@ -140,7 +134,6 @@ class PrivateShelfTestAnotherUser(AnotherUserTestHarness):
     self.assertEqual(res.data['results'], [])
 
   def test_list_shelves_paginated_correctly(self):
-    """Test retrieving a list of shelves is paginated correctly."""
     for index in range(0, 11):
       data = 'shelfname' + str(index)
       self.create_test_instance(user=self.user1, name=data)
@@ -150,8 +143,7 @@ class PrivateShelfTestAnotherUser(AnotherUserTestHarness):
     self.assertIsNone(res.data['next'])
     self.assertIsNone(res.data['previous'])
 
-  def test_list_shelves_paginated_overidden_correctly(self):
-    """Test retrieving a the full list of shelves."""
+  def test_list_shelves_paginated_overridden_correctly(self):
     for index in range(0, 11):
       data = 'shelfname' + str(index)
       self.create_test_instance(user=self.user1, name=data)
@@ -165,7 +157,6 @@ class PrivateShelfTestAnotherUser(AnotherUserTestHarness):
     self.assertEqual(len(res.data), 0)
 
   def test_delete_shelf(self):
-    """Test deleting a shelf."""
     delete = self.create_test_instance(user=self.user1, name="Refrigerator")
     self.create_test_instance(user=self.user1, name="Pantry")
 

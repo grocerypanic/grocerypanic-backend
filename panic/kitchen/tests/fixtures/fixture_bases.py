@@ -1,9 +1,10 @@
-"""Base Classes for Kitchen Model Test Fixtures"""
+"""Base classes for kitchen model test fixtures."""
 
 from abc import ABC, abstractmethod
 
 
 class KitchenModelTestFixture(ABC):
+  """Define the Abstract Base Class for the kitchen model fixtures."""
 
   @staticmethod
   @abstractmethod

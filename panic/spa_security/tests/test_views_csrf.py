@@ -13,13 +13,12 @@ CSRF_URL = reverse("spa_security:csrf")
 
 
 class PublicCSRFTest(TestCase):
-  """Test the public CSRF API"""
+  """Test the public CSRF API."""
 
   def setUp(self):
     self.client = APIClient()
 
   def test_login_required(self):
-    """Test that login is required for retrieving csrf."""
     resp = self.client.get(CSRF_URL)
 
     self.assertEqual(resp.status_code, status.HTTP_401_UNAUTHORIZED)
@@ -34,7 +33,7 @@ class PublicCSRFTest(TestCase):
 
 
 class PrivateCSRFTest(TestCase):
-  """Test the private CSRF API"""
+  """Test the private CSRF API."""
 
   def setUp(self):
     self.user = get_user_model().objects.create_user(

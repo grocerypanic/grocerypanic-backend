@@ -10,5 +10,5 @@ class UserConfig(AppConfig):
 
   def ready(self):
     """Load Signals."""
-    # pylint: disable=W0611,C0415
+    # pylint: disable=unused-import, import-outside-toplevel
     from .signals import signup

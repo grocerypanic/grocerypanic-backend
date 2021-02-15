@@ -1,16 +1,19 @@
-"""Test the Inventory Model."""
+"""Test the Inventory model."""
 
 from django.core.exceptions import ValidationError
 
-from ...tests.fixtures.inventory import InventoryTestHarness
+from ...tests.fixtures.fixtures_inventory import InventoryTestHarness
+from .. import constants
 from ..inventory import Inventory
-from ..item import MAXIMUM_QUANTITY, MINIMUM_QUANTITY
+from .fixtures.fixture_models import generate_base
 
 
-class TestItem(InventoryTestHarness):
+class TestItem(generate_base(InventoryTestHarness)):
+  """Test the Inventory model."""
 
   @classmethod
   def create_data_hook(cls):
+    cls.fields = {}
     cls.data = {
         'item': cls.item1,
         'remaining': cls.initial_quantity,
@@ -21,13 +24,13 @@ class TestItem(InventoryTestHarness):
     Inventory.objects.all().delete()
     super().setUp()
 
-  def testAddItem(self):
+  def test_create(self):
     created = self.create_test_instance(**self.data)
     query = Inventory.objects.filter(item=self.item1)
 
     self.assertQuerysetEqual(query, map(repr, [created]))
 
-  def testStr(self):
+  def test_str(self):
     inventory = self.create_test_instance(**self.data)
     expected = (
         f"{inventory.remaining} units of {self.item1.name}, "
@@ -36,14 +39,14 @@ class TestItem(InventoryTestHarness):
 
     self.assertEqual(expected, str(inventory))
 
-  def testNegativeRemaining(self):
+  def test_negative_remaining(self):
     inventory = self.create_test_instance(**self.data)
-    inventory.remaining = MINIMUM_QUANTITY - 1
+    inventory.remaining = constants.MINIMUM_QUANTITY - 1
     with self.assertRaises(ValidationError):
       inventory.save()
 
-  def testPositiveRemainingOverLimit(self):
+  def test_positive_remaining(self):
     inventory = self.create_test_instance(**self.data)
-    inventory.remaining = MAXIMUM_QUANTITY + 1
+    inventory.remaining = constants.MAXIMUM_QUANTITY + 1
     with self.assertRaises(ValidationError):
       inventory.save()

@@ -1,4 +1,4 @@
-"""Test CSRF Protect Mixin"""
+"""Test the custom csrf mixins."""
 
 from unittest.mock import patch
 
@@ -13,6 +13,7 @@ from ..mixins import CSRFMixin
 
 
 class PlaceboTest(APIView):
+  """Mocked API view without the CSRFMixin."""
 
   def get(self, request):
     return Response({}, status=HTTP_200_OK)
@@ -22,6 +23,7 @@ class PlaceboTest(APIView):
 
 
 class Ensured(CSRFMixin, APIView):
+  """Mocked API view with the CSRFMixin."""
 
   def get(self, request):
     return Response({}, status=HTTP_200_OK)
@@ -30,7 +32,8 @@ class Ensured(CSRFMixin, APIView):
     return Response({}, status=HTTP_200_OK)
 
 
-class TestValidCSRF(TestCase):
+class TestCSRFMixin(TestCase):
+  """Test the CSRFMixin."""
 
   def setUp(self):
     self.user = get_user_model().objects.create_user(

@@ -10,6 +10,7 @@ User = get_user_model()
 
 
 class AutoAdminTestCase(TestCase):
+  """Test the autoadmin management command."""
 
   def setUp(self):
     self.output_stdout = StringIO()

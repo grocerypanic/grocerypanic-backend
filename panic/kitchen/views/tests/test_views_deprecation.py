@@ -1,4 +1,4 @@
-"""Test API Deprecation Utils"""
+"""Test API deprecation utils."""
 
 from datetime import date
 from unittest import TestCase
@@ -14,7 +14,7 @@ from ..deprecation import (
 
 
 class TestDeprecationWarning(TestCase):
-  """Test the deprecated_warning function"""
+  """Test the deprecated_warning function."""
 
   def setUp(self):
     self.mock_response = Response(
@@ -32,7 +32,7 @@ class TestDeprecationWarning(TestCase):
 
 
 class TestDeprecatedResponse(TestCase):
-  """Test the deprecated_response function"""
+  """Test the deprecated_response function."""
 
   def test_response(self):
     message = "Test Message"

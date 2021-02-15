@@ -7,13 +7,14 @@ from rest_framework import status
 from rest_framework.test import APIClient
 
 from ...models.item import Item
-from ...tests.fixtures.item import ItemTestHarness
+from ...tests.fixtures.fixtures_item import ItemTestHarness
 from ..item import ItemSerializer
 
 ITEM_URL = reverse("v1:items-list")
 
 
 class PrivateItemTestHarness(ItemTestHarness):
+  """Extend the test harness by adding item test data."""
 
   @classmethod
   def setUpTestData(cls):
@@ -78,13 +79,12 @@ def item_url_with_params(query_kwargs):
 
 
 class PublicItemTest(TestCase):
-  """Test the public Item API"""
+  """Test the public Item API."""
 
   def setUp(self):
     self.client = APIClient()
 
   def test_login_required(self):
-    """Test that login is required for retrieving shelves."""
     res = self.client.get(ITEM_URL)
 
     self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
@@ -103,7 +103,7 @@ class PublicItemTest(TestCase):
 
 
 class PrivateItemTest(PrivateItemTestHarness):
-  """Test the authorized Item API"""
+  """Test the authorized Item API."""
 
   def setUp(self):
     super().setUp()
@@ -111,7 +111,6 @@ class PrivateItemTest(PrivateItemTestHarness):
     self.client.force_authenticate(self.user1)
 
   def test_list_items(self):
-    """Test retrieving a list of items."""
     self.create_test_instance(**self.data1)
     self.create_test_instance(**self.data2)
 
@@ -125,7 +124,6 @@ class PrivateItemTest(PrivateItemTestHarness):
     self.assertEqual(res.data['results'], serializer.data)
 
   def test_retrieve_single_item(self):
-    """Test retrieving a single item."""
     item = self.create_test_instance(**self.data1)
     self.create_test_instance(**self.data2)
 
@@ -138,7 +136,6 @@ class PrivateItemTest(PrivateItemTestHarness):
     self.assertEqual(res.data, serializer.data)
 
   def test_list_items_paginated_correctly(self):
-    """Test that retrieving a list of items is paginated correctly."""
     for index in range(0, 11):
       data = dict(self.data1)
       data['name'] += str(index)
@@ -150,7 +147,6 @@ class PrivateItemTest(PrivateItemTestHarness):
     self.assertIsNone(res.data['previous'])
 
   def test_list_items_by_store(self):
-    """Test retrieving a list of items, filtered by store."""
     self.create_test_instance(**self.data1)
     self.create_test_instance(**self.data2)
 
@@ -166,7 +162,6 @@ class PrivateItemTest(PrivateItemTestHarness):
     self.assertEqual(res.data['results'], serializer.data)
 
   def test_list_items_by_shelf(self):
-    """Test retrieving a list of items, filtered by shelf."""
     self.create_test_instance(**self.data1)
     self.create_test_instance(**self.data2)
 
@@ -180,7 +175,6 @@ class PrivateItemTest(PrivateItemTestHarness):
     self.assertEqual(res.data['results'], serializer.data)
 
   def test_delete_item(self):
-    """Test deleting a item."""
     delete = self.create_test_instance(**self.data1)
     self.create_test_instance(**self.data2)
 
@@ -196,7 +190,6 @@ class PrivateItemTest(PrivateItemTestHarness):
     self.assertEqual(res_get.data['results'], serializer.data)
 
   def test_create_item(self):
-    """Test creating a item."""
     res = self.client.post(ITEM_URL, data=self.serializer_data)
 
     items = Item.objects.all().order_by("index")
@@ -218,7 +211,6 @@ class PrivateItemTest(PrivateItemTestHarness):
     self.assertEqual(preferred_stores[0].id, self.store1.id)
 
   def test_update_item(self):
-    """Test updating a item."""
     original = self.create_test_instance(**self.data1)
     res = self.client.put(
         ITEM_URL + str(original.id) + '/', data=self.serializer_data
@@ -252,7 +244,7 @@ class PrivateItemTest(PrivateItemTestHarness):
 
 
 class PrivateItemTestAnotherUser(PrivateItemTestHarness):
-  """Test the authorized Item API from Another User"""
+  """Test the authorized Item API with another user."""
 
   def setUp(self):
     super().setUp()
@@ -260,7 +252,6 @@ class PrivateItemTestAnotherUser(PrivateItemTestHarness):
     self.client.force_authenticate(self.user2)
 
   def test_list_items(self):
-    """Test retrieving a list of items."""
     self.create_test_instance(**self.data1)
     self.create_test_instance(**self.data2)
 
@@ -269,7 +260,6 @@ class PrivateItemTestAnotherUser(PrivateItemTestHarness):
     self.assertEqual(res.data['results'], [])
 
   def test_retrieve_single_item(self):
-    """Test retrieving a single item."""
     item = self.create_test_instance(**self.data1)
     self.create_test_instance(**self.data2)
 
@@ -277,7 +267,6 @@ class PrivateItemTestAnotherUser(PrivateItemTestHarness):
     self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
 
   def test_list_items_paginated_correctly(self):
-    """Test that retrieving a list of items is paginated correctly."""
     for index in range(0, 11):
       data = dict(self.data1)
       data['name'] += str(index)
@@ -289,7 +278,6 @@ class PrivateItemTestAnotherUser(PrivateItemTestHarness):
     self.assertIsNone(res.data['previous'])
 
   def test_list_items_by_store(self):
-    """Test retrieving a list of items, filtered by store."""
     self.create_test_instance(**self.data1)
     self.create_test_instance(**self.data2)
 
@@ -299,7 +287,6 @@ class PrivateItemTestAnotherUser(PrivateItemTestHarness):
     self.assertEqual(res.data['results'], [])
 
   def test_list_items_by_shelf(self):
-    """Test retrieving a list of items, filtered by shelf."""
     self.create_test_instance(**self.data1)
     self.create_test_instance(**self.data2)
 
@@ -309,7 +296,6 @@ class PrivateItemTestAnotherUser(PrivateItemTestHarness):
     self.assertEqual(res.data['results'], [])
 
   def test_delete_item(self):
-    """Test deleting a item."""
     delete = self.create_test_instance(**self.data1)
     self.create_test_instance(**self.data2)
 
@@ -317,7 +303,6 @@ class PrivateItemTestAnotherUser(PrivateItemTestHarness):
     self.assertEqual(res_delete.status_code, status.HTTP_403_FORBIDDEN)
 
   def test_update_item(self):
-    """Test updating a item."""
     original = self.create_test_instance(**self.data1)
     res = self.client.put(
         ITEM_URL + str(original.id) + '/', data=self.serializer_data
@@ -326,19 +311,16 @@ class PrivateItemTestAnotherUser(PrivateItemTestHarness):
     self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
 
   def test_create_item_wrong_user(self):
-    """Test creating a item."""
     res = self.client.post(ITEM_URL, data=self.serializer_data)
 
     self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
 
   def test_create_item_wrong_shelf(self):
-    """Test creating a item."""
     res = self.client.post(ITEM_URL, data=self.serializer_data_wrong_shelf)
 
     self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
 
   def test_create_item_wrong_store(self):
-    """Test creating a item."""
     res = self.client.post(ITEM_URL, data=self.serializer_data_wrong_store)
 
     self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)

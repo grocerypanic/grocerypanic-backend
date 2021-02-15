@@ -1,27 +1,31 @@
-"""Shared Item Test Fixtures for Kitchen"""
+"""Shared Item model test fixtures."""
 
 from django.contrib.auth import get_user_model
+from django.db.models import Model
 from django.test import TestCase
 from django.utils import timezone
 
 from ...models.item import Item
 from ...models.shelf import Shelf
 from ...models.store import Store
-from .bases import KitchenModelTestFixture
+from .fixture_bases import KitchenModelTestFixture
+
+User: Model = get_user_model()
 
 
 class ItemTestHarness(KitchenModelTestFixture, TestCase):
-  user1 = None
-  shelf1 = None
-  store1 = None
-  user2 = None
-  shelf2 = None
-  store2 = None
-  objects = None
+  """Test harness for the Item model."""
+
+  user1: User
+  shelf1: Shelf
+  store1: Store
+  user2: User
+  shelf2: Shelf
+  store2: Store
+  objects: list
 
   @staticmethod
   def create_instance(**kwargs):
-    """Create a test item."""
     item = Item.objects.create(
         name=kwargs['name'],
         user=kwargs['user'],
@@ -37,7 +41,7 @@ class ItemTestHarness(KitchenModelTestFixture, TestCase):
 
   @staticmethod
   def create_dependencies(seed, **kwargs):
-    user = get_user_model().objects.create_user(
+    user = User.objects.create_user(
         username=f"testuser{seed}",
         email=f"test{seed}@niallbyrne.ca",
         password="test123",
@@ -64,7 +68,6 @@ class ItemTestHarness(KitchenModelTestFixture, TestCase):
     pass
 
   def create_test_instance(self, **kwargs):
-    """Create a test item."""
     item = self.__class__.create_instance(**kwargs)
     self.objects.append(item)
     return item

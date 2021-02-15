@@ -9,12 +9,13 @@ from rest_framework.test import APIClient
 
 from ...models.store import Store
 from ...serializers.store import StoreSerializer
-from ...tests.fixtures.store import StoreTestHarness
+from ...tests.fixtures.fixtures_store import StoreTestHarness
 
 STORE_URL = reverse("v1:stores-list")
 
 
 class AnotherUserTestHarness(StoreTestHarness):
+  """Extend the test harness by adding an additional user."""
 
   @classmethod
   def create_data_hook(cls):
@@ -27,13 +28,12 @@ def store_url_with_params(query_kwargs):
 
 
 class PublicStoreTest(TestCase):
-  """Test the public Store API"""
+  """Test the public Store API."""
 
   def setUp(self):
     self.client = APIClient()
 
   def test_login_required(self):
-    """Test that login is required for retrieving shelves."""
     res = self.client.get(STORE_URL)
 
     self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
@@ -46,7 +46,7 @@ class PublicStoreTest(TestCase):
 
 
 class PrivateStoreTest(StoreTestHarness):
-  """Test the authorized Store API"""
+  """Test the authorized Store API."""
 
   def setUp(self):
     super().setUp()
@@ -54,7 +54,6 @@ class PrivateStoreTest(StoreTestHarness):
     self.client.force_authenticate(self.user1)
 
   def test_list_stores(self):
-    """Test retrieving a list of stores."""
     self.create_test_instance(user=self.user1, name="No Frills")
     self.create_test_instance(user=self.user1, name="Loblaws")
 
@@ -68,7 +67,6 @@ class PrivateStoreTest(StoreTestHarness):
     self.assertEqual(res.data['results'], serializer.data)
 
   def test_list_stores_paginated_correctly(self):
-    """Test that retrieving a list of stores is limited correctly."""
     for index in range(0, 11):
       data = "storename" + str(index)
       self.create_test_instance(user=self.user1, name=data)
@@ -78,8 +76,7 @@ class PrivateStoreTest(StoreTestHarness):
     self.assertIsNotNone(res.data['next'])
     self.assertIsNone(res.data['previous'])
 
-  def test_list_stores_paginated_overidden_correctly(self):
-    """Test retrieving a the full list of stores."""
+  def test_list_stores_paginated_overridden_correctly(self):
     for index in range(0, 11):
       data = 'storesname' + str(index)
       self.create_test_instance(user=self.user1, name=data)
@@ -93,7 +90,6 @@ class PrivateStoreTest(StoreTestHarness):
     self.assertEqual(len(res.data), 11)
 
   def test_delete_store(self):
-    """Test deleting a store."""
     delete = self.create_test_instance(user=self.user1, name="A&P")
     self.create_test_instance(user=self.user1, name="Beckers")
 
@@ -109,7 +105,6 @@ class PrivateStoreTest(StoreTestHarness):
     self.assertEqual(res_get.data['results'], serializer.data)
 
   def test_create_store(self):
-    """Test creating a store."""
     data = {"name": "Shoppers Drugmart"}
 
     res = self.client.post(STORE_URL, data=data)
@@ -122,7 +117,7 @@ class PrivateStoreTest(StoreTestHarness):
 
 
 class PrivateStoreTestAnotherUser(AnotherUserTestHarness):
-  """Test the authorized Store API from Another User"""
+  """Test the authorized Store API from another user."""
 
   def setUp(self):
     super().setUp()
@@ -130,7 +125,6 @@ class PrivateStoreTestAnotherUser(AnotherUserTestHarness):
     self.client.force_authenticate(self.user2)
 
   def test_list_stores(self):
-    """Test retrieving a list of stores."""
     self.create_test_instance(user=self.user1, name="No Frills")
     self.create_test_instance(user=self.user1, name="Loblaws")
 
@@ -140,7 +134,6 @@ class PrivateStoreTestAnotherUser(AnotherUserTestHarness):
     self.assertEqual(res.data['results'], [])
 
   def test_list_stores_paginated_correctly(self):
-    """Test that retrieving a list of stores is limited correctly."""
     for index in range(0, 11):
       data = "storename" + str(index)
       self.create_test_instance(user=self.user1, name=data)
@@ -150,8 +143,7 @@ class PrivateStoreTestAnotherUser(AnotherUserTestHarness):
     self.assertIsNone(res.data['next'])
     self.assertIsNone(res.data['previous'])
 
-  def test_list_stores_paginated_overidden_correctly(self):
-    """Test retrieving a the full list of stores."""
+  def test_list_stores_paginated_overridden_correctly(self):
     for index in range(0, 11):
       data = 'storesname' + str(index)
       self.create_test_instance(user=self.user1, name=data)
@@ -165,7 +157,6 @@ class PrivateStoreTestAnotherUser(AnotherUserTestHarness):
     self.assertEqual(len(res.data), 0)
 
   def test_delete_store(self):
-    """Test deleting a store."""
     delete = self.create_test_instance(user=self.user1, name="A&P")
     self.create_test_instance(user=self.user1, name="Beckers")
 

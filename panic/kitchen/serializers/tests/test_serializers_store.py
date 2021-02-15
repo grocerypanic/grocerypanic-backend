@@ -1,57 +1,49 @@
-"""Test the Store Serializer."""
+"""Test the Store serializer."""
 
 from rest_framework.serializers import ValidationError
 
 from ...models.store import Store
-from ...tests.fixtures.django import MockRequest
-from ...tests.fixtures.store import StoreTestHarness
+from ...tests.fixtures.fixtures_django import MockRequest
+from ...tests.fixtures.fixtures_store import StoreTestHarness
 from .. import DUPLICATE_OBJECT_MESSAGE
 from ..store import StoreSerializer
+from .fixtures.fixtures_serializers import generate_base
 
 
-class TestStore(StoreTestHarness):
+class TestStore(generate_base(StoreTestHarness)):
+  """Test the Store serializer."""
 
   @classmethod
   def create_data_hook(cls):
     cls.serializer = StoreSerializer
     cls.fields = {"name": 255}
+    cls.data = {"name": "Super Store"}
     cls.request = MockRequest(cls.user1)
 
-  @staticmethod
-  def generate_overload(fields):
-    return_list = []
-    for key, value in fields.items():
-      overloaded = dict()
-      overloaded[key] = "abc" * value
-      return_list.append(overloaded)
-    return return_list
-
-  def testDeserialize(self):
+  def test_deserialize(self):
     test_value = "Loblaws"
     store = self.create_test_instance(user=self.user1, name=test_value)
 
     serialized = self.serializer(store)
     self.assertEqual(serialized.data['name'], test_value)
 
-  def testSerialize(self):
-    test_value = {"name": "Super Store"}
-
+  def test_serialize(self):
     serialized = self.serializer(
         context={'request': self.request},
-        data=test_value,
+        data=self.data,
     )
     serialized.is_valid(raise_exception=True)
     serialized.save()
 
-    self.assertEqual(serialized.data['name'], test_value['name'])
+    self.assertEqual(serialized.data['name'], self.data['name'])
 
-    query = Store.objects.filter(name=test_value['name'])
+    query = Store.objects.filter(name=self.data['name'])
 
     assert len(query) == 1
     self.assertEqual(query[0].user.id, self.user1.id)
-    self.assertEqual(query[0].name, test_value['name'])
+    self.assertEqual(query[0].name, self.data['name'])
 
-  def testUniqueConstraint(self):
+  def test_unique_constraint(self):
     test_value = {"name": "Super Store"}
 
     serialized = self.serializer(
@@ -71,13 +63,3 @@ class TestStore(StoreTestHarness):
     self.assertEqual(
         str(serialized2.errors['non_field_errors'][0]), DUPLICATE_OBJECT_MESSAGE
     )
-
-  def testFieldLengths(self):
-    overloads = self.generate_overload(self.fields)
-    for overload in overloads:
-      with self.assertRaises(ValidationError):
-        serialized = self.serializer(
-            context={'request': self.request},
-            data=overload,
-        )
-        serialized.is_valid(raise_exception=True)

@@ -80,8 +80,7 @@ class EmailAddressQuery:
 
   @staticmethod
   def __unverified_user_query(email_address_object):
-    """Perform a query over all django-allauth email addresses to find matching
-    django users.
+    """Query django-allauth email addresses to find a django user.
 
     :param email_address_object: The allauth email address object to search for
     :type email_address_object: :class:`allauth.account.models.EmailAddress`
@@ -97,8 +96,7 @@ class EmailAddressQuery:
 
   @staticmethod
   def __verified_user_query(email_address_object):
-    """Perform a query over all verified django-allauth email addresses to find
-    matching django users.
+    """Query verified django-allauth email addresses to find a django user.
 
     :param email_address_object: The allauth email address object to search for
     :type email_address_object: :class:`allauth.account.models.EmailAddress`

@@ -31,7 +31,7 @@ class User(AbstractUser):
   class Meta:
     db_table = 'auth_user'
 
-  # pylint: disable=W0222
+  # pylint: disable=signature-differs
   def save(self, *args, **kwargs):
     """Clean and save model."""
     self.full_clean()

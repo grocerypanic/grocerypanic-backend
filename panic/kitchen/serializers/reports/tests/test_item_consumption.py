@@ -9,13 +9,14 @@ from freezegun import freeze_time
 from rest_framework.serializers import ErrorDetail, ValidationError
 
 from ....models.transaction import Transaction
-from ....tests.fixtures.django import MockRequest
-from ....tests.fixtures.transaction import TransactionTestHarness
+from ....tests.fixtures.fixtures_django import MockRequest
+from ....tests.fixtures.fixtures_transaction import TransactionTestHarness
 from ..item_consumption_history import ItemConsumptionHistorySerializer
 from ..item_history import ItemHistorySerializer
 
 
 class TestItemConsumptionHistorySerializer(TransactionTestHarness):
+  """Test the Item Consumption Serializer."""
 
   @classmethod
   @freeze_time("2020-01-14")

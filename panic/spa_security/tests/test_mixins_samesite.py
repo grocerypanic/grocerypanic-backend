@@ -1,4 +1,4 @@
-"""Test SameSite Cookie Middleware"""
+"""Test the custom samesite middleware mixin."""
 
 from django.conf import settings
 from django.http import HttpResponse
@@ -8,6 +8,7 @@ from ..mixins import SameSiteMiddleware
 
 
 class TestSameSiteMiddleware(TestCase):
+  """Test the SameSiteMiddleware class."""
 
   def setUp(self):
     self.response = HttpResponse()

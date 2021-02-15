@@ -1,4 +1,4 @@
-"""Test Custom User Model Validators"""
+"""Test custom user model validators."""
 
 from django.core.exceptions import ValidationError
 from django.test import TestCase
@@ -6,7 +6,8 @@ from django.test import TestCase
 from ..user import validate_language
 
 
-class TestUserModel(TestCase):
+class TestValidationLanguage(TestCase):
+  """Test the validate_language function."""
 
   def setUp(self):
     self.data = {

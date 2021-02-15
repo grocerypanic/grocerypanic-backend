@@ -9,10 +9,9 @@ from django.test import TestCase
 
 
 class CommandTests(TestCase):
+  """Test the wait_for_db admin command."""
 
   def test_wait_for_db_ready(self):
-    """Test waiting for db when db is available."""
-
     capture = StringIO()
 
     with patch("django.db.connection.ensure_connection") as connection:
@@ -21,9 +20,7 @@ class CommandTests(TestCase):
       self.assertEqual(connection.call_count, 1)
 
   @patch("time.sleep", return_value=True)
-  def test_wait_for_db(self, mock_ts):  # pylint: disable=W0613
-    """Test waiting for db"""
-
+  def test_wait_for_db(self, _):
     capture = StringIO()
 
     with patch("django.db.connection.ensure_connection") as connection:

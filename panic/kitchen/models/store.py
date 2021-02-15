@@ -8,17 +8,17 @@ from spa_security.fields import BlondeCharField
 
 User = get_user_model()
 
-MAX_LENGTH = 255
-
 
 class Store(models.Model):
   """Store model."""
 
+  MAXIMUM_NAME_LENGTH = 255
+
   index = NaturalSortField(
       for_field="name",
-      max_length=MAX_LENGTH,
+      max_length=MAXIMUM_NAME_LENGTH,
   )  # Pagination Index
-  name = BlondeCharField(max_length=MAX_LENGTH)
+  name = BlondeCharField(max_length=MAXIMUM_NAME_LENGTH)
   user = models.ForeignKey(User, on_delete=models.CASCADE)
 
   objects = models.Manager()
@@ -34,7 +34,7 @@ class Store(models.Model):
   def __str__(self):
     return str(self.name)
 
-  # pylint: disable=W0222
+  # pylint: disable=signature-differs
   def save(self, *args, **kwargs):
     """Clean and save model."""
     self.full_clean()

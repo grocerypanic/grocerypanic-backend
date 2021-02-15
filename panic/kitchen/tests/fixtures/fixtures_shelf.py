@@ -1,28 +1,32 @@
-"""Shared Shelf Test Fixtures for Kitchen"""
+"""Shared Shelf model test fixtures."""
 
 from django.contrib.auth import get_user_model
+from django.db.models import Model
 from django.test import TestCase
 from django.utils import timezone
 
 from ...models.shelf import Shelf
-from .bases import KitchenModelTestFixture
+from .fixture_bases import KitchenModelTestFixture
+
+User: Model = get_user_model()
 
 
 class ShelfTestHarness(KitchenModelTestFixture, TestCase):
-  user1 = None
-  user2 = None
-  objects = None
+  """Test harness for the Shelf model."""
+
+  user1: User
+  user2: User
+  objects: list
 
   @staticmethod
   def create_instance(**kwargs):
-    """Create a test shelf."""
     shelf = Shelf.objects.create(user=kwargs['user'], name=kwargs['name'])
     shelf.save()
     return shelf
 
   @staticmethod
   def create_dependencies(seed, **kwargs):
-    user = get_user_model().objects.create_user(
+    user = User.objects.create_user(
         username=f"testuser{seed}",
         email=f"test{seed}@niallbyrne.ca",
         password="test123",
@@ -37,7 +41,6 @@ class ShelfTestHarness(KitchenModelTestFixture, TestCase):
     pass
 
   def create_test_instance(self, **kwargs):
-    """Create a test shelf."""
     shelf = self.__class__.create_instance(**kwargs)
     self.objects.append(shelf)
     return shelf

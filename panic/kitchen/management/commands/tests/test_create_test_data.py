@@ -11,6 +11,7 @@ from .... import management
 
 
 class CommandTestInvalid(TestCase):
+  """Test the wait_for_db command with a valid syntax."""
 
   def test_invalid_user_specified_stdout(self):
     output_stdout = StringIO()
@@ -30,6 +31,7 @@ class CommandTestInvalid(TestCase):
 
 
 class CommandTestValid(TestCase):
+  """Test the wait_for_db command with an invalid syntax."""
 
   @classmethod
   def setUpTestData(cls):

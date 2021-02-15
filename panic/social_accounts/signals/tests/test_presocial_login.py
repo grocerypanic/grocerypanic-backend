@@ -1,4 +1,4 @@
-"""Test the Social Accounts Signal Handlers."""
+"""Test `pre_social_login_handler` signal handling."""
 
 from unittest import mock
 
@@ -6,11 +6,15 @@ from allauth.account.models import EmailAddress
 from allauth.socialaccount.signals import pre_social_login
 from django.test import override_settings
 
-from ...tests.fixtures.signals import SignalsTestHarness, get_mock_social_login
+from ...tests.fixtures.fixtures_signals import (
+    SignalsTestHarness,
+    get_mock_social_login,
+)
 from .. import presocial_login
 
 
-class TestSocialConnect(SignalsTestHarness):
+class TestPreSocialLoginSignalHandler(SignalsTestHarness):
+  """Test the pre_social_login_handler signal handler function."""
 
   @mock.patch(presocial_login.__name__ + '.process_social_connect')
   def test_social_signup_signal_received(self, m_handler):
@@ -51,6 +55,7 @@ class TestSocialConnect(SignalsTestHarness):
 
 
 class TestPreSocialConnectClass(SignalsTestHarness):
+  """Test the PreSocialConnector class."""
 
   @classmethod
   def setUpTestData(cls):

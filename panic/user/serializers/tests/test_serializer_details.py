@@ -2,31 +2,15 @@
 
 from django.contrib.auth import get_user_model
 
-from ...tests.fixtures.django import MockRequest
-from ...tests.fixtures.serializers import SerializerTestHarness
+from ...tests.fixtures.fixtures_django import MockRequest
+from ...tests.fixtures.fixtures_serializers import SerializerTestHarness
 from ..details import UserDetailsSerializer
-
-
-class SerializeTransformations:
-
-  @staticmethod
-  def email(_):
-    return None
-
-  @staticmethod
-  def password(_):
-    return None
-
-
-class DeserializeTransformations:
-
-  @staticmethod
-  def timezone(value):
-    return str(value)
 
 
 # pylint: disable=too-many-instance-attributes
 class DetailsSerializerTest(SerializerTestHarness):
+  """Test the UserDetailsSerializer class."""
+
   __test__ = True
   serializer = UserDetailsSerializer
   model = get_user_model()
@@ -71,3 +55,23 @@ class DetailsSerializerTest(SerializerTestHarness):
         "timezone": "not a timezone",
         "language_code": "not a language code",
     }]
+
+
+class SerializeTransformations:
+  """Transform data during serialization for comparisons."""
+
+  @staticmethod
+  def email(_):
+    return None
+
+  @staticmethod
+  def password(_):
+    return None
+
+
+class DeserializeTransformations:
+  """Transform data during deserialization for comparisons."""
+
+  @staticmethod
+  def timezone(value):
+    return str(value)

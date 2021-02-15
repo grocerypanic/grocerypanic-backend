@@ -1,4 +1,4 @@
-"""Inventory Transaction Model Managers"""
+"""Inventory Transaction model managers."""
 
 from datetime import timedelta
 
@@ -26,8 +26,9 @@ class ItemExpirationCalculator:
     self.item = item
 
   def __update_oldest_expiry(self):
-    """Set the next_to_expire property to the current timestamp if there are
-    no expired items.
+    """Set the next_to_expiry property of the item being examined.
+
+    Uses the current timestamp if there are no expired items.
     """
 
     if self.next_to_expire < 1:
@@ -50,7 +51,9 @@ class ItemExpirationCalculator:
     return False
 
   def __reconcile_consumption(self, transaction):
-    """Remove expired items when a consumption transaction takes place.
+    """Reconcile a negative transaction.
+
+    Remove expired items when a consumption transaction takes place.
 
     :param transaction: An instance of the model Transactions
     :type transaction: :class:`panic.kitchen.models.transactions.Transaction`
@@ -59,7 +62,9 @@ class ItemExpirationCalculator:
     self.expired += transaction.quantity
 
   def __reconcile_purchase(self, remaining_inventory_to_check, transaction):
-    """Add expired items or decrease remaining_inventory_to_check when a
+    """Reconcile a positive transaction.
+
+    Add expired items or decrease remaining_inventory_to_check when a
     purchase transaction takes place.
 
     :param remaining_inventory_to_check: The amount of inventory to reconcile
@@ -83,8 +88,7 @@ class ItemExpirationCalculator:
     return remaining_inventory_to_check
 
   def reconcile_transaction_history(self, transaction_history):
-    """Iterate through the transaction history and reconcile each individual
-    transaction.
+    """Iterate through the history and reconcile each individual transaction.
 
     :param transaction_history: A queryset of the model Transaction
     :type transaction_history: :class:`django.db.models.query.QuerySet`
@@ -98,8 +102,7 @@ class ItemExpirationCalculator:
     self.__update_oldest_expiry()
 
   def reconcile_single_transaction(self, transaction):
-    """Reconcile a single transaction depending on whether it's a purchase or
-    consumption.
+    """Reconcile a single transaction as either a purchase or consumption.
 
     :returns: The amount of inventory yet to be reconciled
     :rtype: int
@@ -159,11 +162,11 @@ class ExpiryManager(models.Manager):
 
 
 class ConsumptionHistoryManager(models.Manager):
-  """Provide reporting around the consumption patterns of items"""
+  """Provide reporting on the consumption patterns of items."""
 
   def get_current_week_consumption(self, item_id, zone=pytz.utc.zone):
-    """Retrieve the sum of the current week of transaction activity, with the
-    week bounds determined by the specified timezone.
+    """Retrieve the sum of the current week of transaction activity.
+    Week bounds are determined by the specified timezone.
 
     :param item_id: The pk of the item model instance in question
     :type item_id: int
@@ -188,8 +191,8 @@ class ConsumptionHistoryManager(models.Manager):
     return 0
 
   def get_current_month_consumption(self, item_id, zone=pytz.utc.zone):
-    """Retrieve the sum of the current month of transaction activity, with
-    dates based on the specified timezone.
+    """Retrieve the sum of the current month of transaction activity.
+    Week bounds are determined by the specified timezone.
 
     :param item_id: The pk of the item model instance in question
     :type item_id: int
@@ -214,8 +217,8 @@ class ConsumptionHistoryManager(models.Manager):
     return 0
 
   def get_first_consumption(self, item_id, zone=pytz.utc.zone):
-    """Search for the first transaction for this item, and returns the date in
-    the relevant timezone.
+    """Search for the first transaction for this item, and returns the date.
+    The date is calculated in the specified timezone.
 
     :param item_id: The pk of the item model instance in question
     :type item_id: int
@@ -239,8 +242,8 @@ class ConsumptionHistoryManager(models.Manager):
     return None
 
   def get_last_two_weeks(self, item_id, zone=pytz.utc.zone):
-    """Retrieve the last two weeks of transaction activity, summed by each
-    timezone adjusted day.
+    """Retrieve the last two weeks of transaction activity.
+    The activity is summed by each timezone adjusted day.
 
     :param item_id: The pk of the item model instance in question
     :type item_id: int

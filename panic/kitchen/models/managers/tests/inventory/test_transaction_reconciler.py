@@ -3,11 +3,12 @@
 from rest_framework.serializers import ErrorDetail
 
 from .....exceptions import ProcessingError
-from .....tests.fixtures.inventory import InventoryTestHarness
+from .....tests.fixtures.fixtures_inventory import InventoryTestHarness
 from ....inventory import Inventory
 
 
 class TestTransactionReconcilerManager(InventoryTestHarness):
+  """Test the InventoryTransactionManager model manager class."""
 
   @classmethod
   def create_data_hook(cls):
@@ -40,24 +41,25 @@ class TestTransactionReconcilerManager(InventoryTestHarness):
         'quantity': -1 * ((cls.positive_transaction['quantity'] * 2) - 1),
     })
 
-  def wipe_inventory(self):
+  @staticmethod
+  def __wipe_inventory():
     Inventory.objects.all().delete()
 
-  def process_positive_transaction(self):
+  def __positive_transaction(self):
     transaction = self.create_test_transaction_instance(
         **self.positive_transaction,
     )
     return transaction
 
-  def process_double_positive_transaction(self):
+  def __double_positive_transaction(self):
     results = []
     for _ in range(0, 2):
-      transaction = self.process_positive_transaction()
-      Inventory.objects.process(transaction)
+      transaction = self.__positive_transaction()
+      Inventory.objects.adjustment(transaction)
       results.append(transaction)
     return results
 
-  def check_inventory(self, inventory, **kwargs):
+  def __check_inventory(self, inventory, **kwargs):
     self.assertEqual(
         kwargs['transaction'],
         inventory.transaction,
@@ -71,110 +73,110 @@ class TestTransactionReconcilerManager(InventoryTestHarness):
         inventory.item,
     )
 
-  def testProcessTransactionPositive(self):
-    transaction = self.process_positive_transaction()
-    Inventory.objects.process(transaction)
+  def test_transaction_positive(self):
+    transaction = self.__positive_transaction()
+    Inventory.objects.adjustment(transaction)
 
     query = Inventory.objects.filter(item=transaction.item)
 
     assert len(query) == 1
-    self.check_inventory(
+    self.__check_inventory(
         query[0],
         transaction=transaction,
         remaining=transaction.quantity,
         item=transaction.item,
     )
 
-  def testProcessTransactionFullDebit(self):
-    initial_transaction = self.process_positive_transaction()
-    Inventory.objects.process(initial_transaction)
+  def test_transaction_full_debit(self):
+    initial_transaction = self.__positive_transaction()
+    Inventory.objects.adjustment(initial_transaction)
 
     transaction = self.create_test_transaction_instance(
         **self.negative_transaction,
     )
 
-    Inventory.objects.process(transaction)
+    Inventory.objects.adjustment(transaction)
 
     query = Inventory.objects.filter(item=transaction.item)
 
     assert len(query) == 0
 
-  def testProcessTransactionDoubleFullDebit(self):
-    self.process_double_positive_transaction()
+  def test_transaction_double_full_debit(self):
+    self.__double_positive_transaction()
 
     transaction = self.create_test_transaction_instance(
         **self.negative_transaction_x2,
     )
 
-    Inventory.objects.process(transaction)
+    Inventory.objects.adjustment(transaction)
 
     query = Inventory.objects.filter(item=transaction.item)
 
     assert len(query) == 0
 
-  def testProcessTransactionPartialDebit(self):
-    initial_transaction = self.process_positive_transaction()
-    Inventory.objects.process(initial_transaction)
+  def test_transaction_partial_debit(self):
+    initial_transaction = self.__positive_transaction()
+    Inventory.objects.adjustment(initial_transaction)
 
     transaction = self.create_test_transaction_instance(
         **self.negative_transaction_partial,
     )
 
-    Inventory.objects.process(transaction)
+    Inventory.objects.adjustment(transaction)
 
     query = Inventory.objects.filter(item=transaction.item)
 
     assert len(query) == 1
-    self.check_inventory(
+    self.__check_inventory(
         query[0],
         transaction=initial_transaction,
         remaining=(initial_transaction.quantity + transaction.quantity),
         item=initial_transaction.item,
     )
 
-  def testProcessTransactionDoublePartialDebit(self):
-    initial_transactions = self.process_double_positive_transaction()
+  def test_transaction_double_partial_debit(self):
+    initial_transactions = self.__double_positive_transaction()
 
     transaction = self.create_test_transaction_instance(
         **self.negative_transaction_partial_x2,
     )
 
-    Inventory.objects.process(transaction)
+    Inventory.objects.adjustment(transaction)
 
     query = Inventory.objects.\
         filter(item=transaction.item).\
         order_by("-transaction__datetime")
 
     assert len(query) == 2
-    self.check_inventory(
+    self.__check_inventory(
         query[0],
         transaction=initial_transactions[0],
         remaining=(initial_transactions[0].quantity + transaction.quantity),
         item=initial_transactions[0].item,
     )
 
-  def testProcessTransactionDoublePartialDebitRollover(self):
-    initial_transactions = self.process_double_positive_transaction()
+  def test_transaction_double_partial_debit_rollover(self):
+    initial_transactions = self.__double_positive_transaction()
 
     transaction = self.create_test_transaction_instance(
         **self.negative_transaction_partial_x2_rollover,
     )
 
-    Inventory.objects.process(transaction)
+    Inventory.objects.adjustment(transaction)
 
     query = Inventory.objects.\
         filter(item=transaction.item).\
         order_by("-transaction__datetime")
 
     assert len(query) == 1
-    self.check_inventory(
+    self.__check_inventory(
         query[0],
         transaction=initial_transactions[1],
         remaining=1,
         item=initial_transactions[1].item,
     )
 
-  def testProcessTransactionBrokenInventory(self):
+  def test_transaction_broken_inventory(self):
     self.item1.quantity = 100
     self.item1.save()
 
@@ -183,15 +185,18 @@ class TestTransactionReconcilerManager(InventoryTestHarness):
     )
 
     with self.assertRaises(ProcessingError) as raised:
-      Inventory.objects.process(transaction)
+      Inventory.objects.adjustment(transaction)
+
+    expected_error_message = (
+        f"could not adjust inventory for transaction={transaction.id}, "
+        f"item={transaction.item.id}, "
+        f"transaction.quantity={transaction.quantity}, "
+        f"item.quantity={transaction.item.quantity}"
+    )
 
     self.assertEqual(
         raised.exception.detail,
         ErrorDetail(
-            string=(
-                f"Could not process transaction.id={transaction.id} to modify"
-                f" item.id={transaction.item.id} quantity",
-            ),
-            code=ProcessingError.default_code
+            string=expected_error_message, code=ProcessingError.default_code
         )
     )

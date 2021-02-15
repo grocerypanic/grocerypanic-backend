@@ -9,6 +9,7 @@ from ..bases import CustomUserBase
 
 
 class TestBase(TestCase):
+  """Test the base serializer implements all methods."""
 
   @classmethod
   def setUpTestData(cls):

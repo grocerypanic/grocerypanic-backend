@@ -1,4 +1,4 @@
-"""Signals Test Harness"""
+"""Signals test fixtures."""
 
 from unittest.mock import Mock
 
@@ -10,6 +10,7 @@ User = get_user_model()
 
 
 def get_mock_social_login():
+  """Generate a django-allauth sociallogin test double."""
 
   mock_social_login = Mock()
   mock_social_login.connect = Mock()
@@ -19,12 +20,15 @@ def get_mock_social_login():
 
 
 class MockEmail:
+  """Test double for a django-allauth email model object."""
 
   def __init__(self, email):
     self.email = email
 
 
 class SignalsTestHarness(TestCase):
+  """Test harness for testing django-all-auth social signals."""
+
   user: Model
   mock_email: MockEmail
 

@@ -12,7 +12,7 @@ class WarmUp(View):
   configuring-warmup-requests>`__
   """
 
-  def get(self, request, *args, **kwargs):  # pylint: disable=W0613
+  def get(self, request, *args, **kwargs):  # pylint: disable=unused-argument
     """Process an App Engine Warmup Request."""
 
     return HttpResponse('OK', status=200)

@@ -23,7 +23,7 @@ class PagePaginationWithOverride(BasePagePagination):
   """Adds page pagination with an override feature."""
 
   def paginate_queryset(self, queryset, request, view=None):
-    """Override the base method add, a conditional allow pagination bypass.
+    """Add a conditional to allow bypassing pagination on the base method.
 
     :param queryset: A django queryset to paginate
     :type queryset: :class:`django.db.models.query.QuerySet`

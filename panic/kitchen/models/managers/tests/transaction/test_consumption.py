@@ -9,11 +9,12 @@ from django.db.models.functions import TruncDate
 from django.utils import timezone
 from freezegun import freeze_time
 
-from .....tests.fixtures.transaction import TransactionTestHarness
+from .....tests.fixtures.fixtures_transaction import TransactionTestHarness
 from ....transaction import Transaction
 
 
-class TestHarnessWithTestData(TransactionTestHarness):
+class ConsumptionTestHarness(TransactionTestHarness):
+  """Extend the Transaction test harness by adding transaction definitions."""
 
   @classmethod
   @freeze_time("2020-01-14")
@@ -49,7 +50,7 @@ class TestHarnessWithTestData(TransactionTestHarness):
     }
 
   @classmethod
-  def create_timebatch(cls):
+  def _create_timebatch(cls):
     t_today = cls.create_instance(**cls.transaction1)
     t_yesterday = cls.create_instance(**cls.transaction2)
     t_tomorrow = cls.create_instance(**cls.transaction3)
@@ -63,49 +64,8 @@ class TestHarnessWithTestData(TransactionTestHarness):
     self.item1.save()
 
 
-class TestHarnessWithOutTestData(TransactionTestHarness):
-
-  @classmethod
-  @freeze_time("2020-01-14")
-  def create_data_hook(cls):
-    cls.today = timezone.now()
-    cls.tomorrow = timezone.now() + timedelta(days=1)
-    cls.yesterday = timezone.now() + timedelta(days=-1)
-    cls.last_year = timezone.now() + timedelta(days=-365)
-    cls.transaction1 = {
-        'item': cls.item1,
-        'date_object': cls.today,
-        'user': cls.user1,
-        'quantity': 3
-    }
-    cls.transaction2 = {
-        'item': cls.item1,
-        'date_object': cls.yesterday,
-        'user': cls.user1,
-        'quantity': 3
-    }
-    cls.transaction3 = {
-        'item': cls.item1,
-        'date_object': cls.tomorrow,
-        'user': cls.user1,
-        'quantity': 3
-    }
-    cls.transaction4 = {
-        'item': cls.item1,
-        'date_object': cls.last_year,
-        'user': cls.user1,
-        'quantity': 3
-    }
-
-  def tearDown(self):
-    super().tearDown()
-    self.item1.expired = 0
-    self.item1.quantity = 3
-    self.item1.next_to_expire = 0
-    self.item1.save()
-
-
-class TestConsumptionHistoryManagerWithoutData(TestHarnessWithOutTestData):
+class TestConsumptionHistoryManagerWithoutData(TransactionTestHarness):
+  """Test the Consumption History Manager without any item history present."""
 
   @freeze_time("2020-01-14")
   def test_last_two_weeks_no_history(self):
@@ -130,9 +90,11 @@ class TestConsumptionHistoryManagerWithoutData(TestHarnessWithOutTestData):
     )
 
 
-class TestConsumptionHistoryManagerTwoWeeks(TestHarnessWithTestData):
-  user2 = None
-  item2 = None
+class TestConsumptionHistoryManagerTwoWeeks(ConsumptionTestHarness):
+  """Test the CHM 'get_last_two_weeks' method with item history created."""
+
+  user2: object
+  item2: object
 
   @classmethod
   def setUpTestData(cls):
@@ -144,14 +106,14 @@ class TestConsumptionHistoryManagerTwoWeeks(TestHarnessWithTestData):
     cls.shelf2 = test_data['shelf']
     cls.item2 = test_data['item']
 
-    cls.create_lower_bounds_edge_case_transaction()
-    cls.create_another_user_transaction()
+    cls.__create_lower_bounds_edge_case_transaction()
+    cls.__create_another_user_transaction()
 
-    cls.create_timebatch()
+    cls._create_timebatch()
 
   @classmethod
   @freeze_time("2020-01-14")
-  def create_lower_bounds_edge_case_transaction(cls):
+  def __create_lower_bounds_edge_case_transaction(cls):
     edge_case = (
         timezone.now() - timedelta(days=settings.TRANSACTION_HISTORY_MAX)
     )
@@ -165,7 +127,7 @@ class TestConsumptionHistoryManagerTwoWeeks(TestHarnessWithTestData):
 
   @classmethod
   @freeze_time("2020-01-14")
-  def create_another_user_transaction(cls):
+  def __create_another_user_transaction(cls):
     another_user_transaction = {
         'item': cls.item2,
         'date_object': timezone.now(),
@@ -225,8 +187,10 @@ class TestConsumptionHistoryManagerTwoWeeks(TestHarnessWithTestData):
 
 
 class TestConsumptionHistoryManagerStats(TransactionTestHarness):
-  initial_transaction = None
-  dates = None
+  """Test the CHM 'get_STATISTIC' methods with item history created."""
+
+  initial_transaction: dict
+  dates: dict
 
   @classmethod
   @freeze_time("2020-01-14")
@@ -250,7 +214,7 @@ class TestConsumptionHistoryManagerStats(TransactionTestHarness):
     cls.dates['last_year'] = timezone.now() + timedelta(days=-27)
     cls.dates['two_months_ago'] = timezone.now() + timedelta(days=-67)
 
-    cls.create_transaction_history()
+    cls.__create_transaction_history()
 
   @classmethod
   def setUpTestData(cls):
@@ -262,18 +226,18 @@ class TestConsumptionHistoryManagerStats(TransactionTestHarness):
     cls.shelf2 = test_data['shelf']
     cls.item2 = test_data['item']
 
+  def setUp(self):
+    self.item1.quantity = 0
+    self.item1.save()
+    super().setUp()
+
   @classmethod
-  def create_transaction_history(cls):
+  def __create_transaction_history(cls):
     cls.create_instance(**cls.initial_transaction)
     for value in cls.dates.values():
       cls.create_instance(
           item=cls.item1, date_object=value, user=cls.user1, quantity=-3
       )
-
-  def setUp(self):
-    self.item1.quantity = 0
-    self.item1.save()
-    super().setUp()
 
   @freeze_time("2020-01-14")
   def test_get_first_consumption(self):

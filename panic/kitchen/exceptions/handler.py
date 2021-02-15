@@ -1,27 +1,12 @@
 """Kitchen app exceptions and exception handling."""
 
 from django.contrib.admin.utils import flatten
-from rest_framework import exceptions, serializers, status, views
+from rest_framework import serializers, views
+
+from . import CUSTOM_VALIDATION_CLASSES
 
 
-class ValidationPermissionError(serializers.ValidationError):
-  """Validation exception due to permission problems."""
-
-  default_code = "permission_denied"
-  status_code = status.HTTP_403_FORBIDDEN
-
-
-class ProcessingError(exceptions.APIException):
-  """An exception due to processing problems."""
-
-  default_detail = 'An error occurred during processing.'
-  default_code = 'processing_error'
-
-
-CUSTOM_VALIDATION_CLASSES = (ValidationPermissionError,)
-
-
-def kitchen_exception_handler(exc, context):
+def exception_handler(exc, context):
   """Handle exceptions and manage status codes for custom validation errors.
 
   :param exc: An exception
@@ -47,7 +32,7 @@ class CustomValidationExceptionHandler:
   """Handle custom validation errors that are hidden by DRF.
 
   :param exc: An exception
-  :type exc: :class:`BaseException`
+  :type exc: :class:`rest_framework.serializers.APIException`
   :param response: A rest_framework response object
   :type response: :class:`rest_framework.response.Response`
   """

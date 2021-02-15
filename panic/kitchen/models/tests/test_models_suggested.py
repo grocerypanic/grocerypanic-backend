@@ -1,29 +1,25 @@
-"""Test the ItemList Model."""
+"""Test the SuggestedItem model."""
 
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 
 from ..suggested import SuggestedItem
+from .fixtures.fixture_models import generate_base
 
 
-class TestItemList(TestCase):
+class TestItemList(generate_base(TestCase)):
+  """Test the SuggestedItem model."""
 
-  def sample_item(self, name="Red Beans"):
-    """Create a test user account."""
+  def create_test_instance(self, name="Red Beans"):
+    """Create a test suggested item."""
     item = SuggestedItem.objects.create(name=name)
     self.objects.append(item)
     return item
 
-  @staticmethod
-  def generate_overload(fields):
-    return_value = []
-    for key, value in fields.items():
-      return_value.append({key: "abc" * value})
-    return return_value
-
   @classmethod
   def setUpTestData(cls):
     cls.fields = {"name": 255}
+    cls.data = {"name": "Ice Cream"}
 
   def setUp(self):
     self.objects = list()
@@ -32,45 +28,38 @@ class TestItemList(TestCase):
     for obj in self.objects:
       obj.delete()
 
-  def testAddItem(self):
+  def test_create(self):
     test_name = "Custard"
-    _ = self.sample_item(test_name)
+    _ = self.create_test_instance(test_name)
 
     query = SuggestedItem.objects.filter(name=test_name)
 
     assert len(query) == 1
     self.assertEqual(query[0].name, test_name)
 
-  def testUnique(self):
+  def test_unique(self):
     test_name = "Custard"
-    _ = self.sample_item(test_name)
+    _ = self.create_test_instance(test_name)
 
     with self.assertRaises(ValidationError):
-      _ = self.sample_item(test_name)
+      _ = self.create_test_instance(test_name)
 
     query = SuggestedItem.objects.filter(name=test_name)
     assert len(query) == 1
 
-  def testItemInjection(self):
+  def test_bleach(self):
     test_name = "Broccoli<script>alert('hi');</script>"
     sanitized_name = "Broccoli&lt;script&gt;alert('hi');&lt;/script&gt;"
 
-    _ = self.sample_item(test_name)
+    _ = self.create_test_instance(test_name)
 
     query = SuggestedItem.objects.filter(name=sanitized_name)
 
     assert len(query) == 1
     self.assertEqual(query[0].name, sanitized_name)
 
-  def testStr(self):
+  def test_str(self):
     test_name = "Beer"
-    item = self.sample_item(test_name)
+    item = self.create_test_instance(test_name)
 
     self.assertEqual(test_name, str(item))
-
-  def testFieldLengths(self):
-    for overloaded_field in self.generate_overload(self.fields):
-      local_data = {"name": "Ice Cream"}
-      local_data.update(overloaded_field)
-      with self.assertRaises(ValidationError):
-        _ = self.sample_item(**local_data)

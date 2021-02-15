@@ -1,4 +1,4 @@
-"""Test the Transaction Managers and Expiry Calculator."""
+"""Test the Transaction managers and expiry calculator."""
 
 from datetime import timedelta
 from unittest.mock import Mock, patch
@@ -6,14 +6,15 @@ from unittest.mock import Mock, patch
 from django.utils import timezone
 from freezegun import freeze_time
 
-from ....tests.fixtures.transaction import TransactionTestHarness
+from ....tests.fixtures.fixtures_transaction import TransactionTestHarness
 from ...transaction import Transaction
 from .. import transaction as transaction_manager
 from ..transaction import ItemExpirationCalculator
 
 
 class MockExpiryCalculator:
-  mock = Mock()
+  """A mock that functions like the ExpiryCalculator for testing."""
+
   mock_reconcile = Mock()
   mock_save = Mock()
   quantity = None
@@ -23,7 +24,6 @@ class MockExpiryCalculator:
 
   @classmethod
   def reset(cls):
-    cls.mock.reset_mock()
     cls.mock_reconcile.reset_mock()
     cls.mock_save.reset_mock()
 
@@ -38,6 +38,7 @@ class MockExpiryCalculator:
 
 
 class TestHarnessWithTestData(TransactionTestHarness):
+  """Extend the Transaction test harness by adding data."""
 
   @classmethod
   @freeze_time("2020-01-14")
@@ -87,49 +88,8 @@ class TestHarnessWithTestData(TransactionTestHarness):
     self.item1.save()
 
 
-class TestHarnessWithOutTestData(TransactionTestHarness):
-
-  @classmethod
-  @freeze_time("2020-01-14")
-  def create_data_hook(cls):
-    cls.today = timezone.now()
-    cls.tomorrow = timezone.now() + timedelta(days=1)
-    cls.yesterday = timezone.now() + timedelta(days=-1)
-    cls.last_year = timezone.now() + timedelta(days=-365)
-    cls.transaction1 = {
-        'item': cls.item1,
-        'date_object': cls.today,
-        'user': cls.user1,
-        'quantity': 3
-    }
-    cls.transaction2 = {
-        'item': cls.item1,
-        'date_object': cls.yesterday,
-        'user': cls.user1,
-        'quantity': 3
-    }
-    cls.transaction3 = {
-        'item': cls.item1,
-        'date_object': cls.tomorrow,
-        'user': cls.user1,
-        'quantity': 3
-    }
-    cls.transaction4 = {
-        'item': cls.item1,
-        'date_object': cls.last_year,
-        'user': cls.user1,
-        'quantity': 3
-    }
-
-  def tearDown(self):
-    super().tearDown()
-    self.item1.expired = 0
-    self.item1.quantity = 3
-    self.item1.next_to_expire = 0
-    self.item1.save()
-
-
-class TestIECWithoutTransactions(TestHarnessWithOutTestData):
+class TestIECAggregateMethods(TestHarnessWithTestData):
+  """Test the high level methods of the IEC (Item Expiry Calculator) class."""
 
   @freeze_time("2020-01-14")
   def test_reconcile_transaction_history(self):
@@ -210,7 +170,8 @@ class TestIECWithoutTransactions(TestHarnessWithOutTestData):
     assert self.item1.expired == 0
 
 
-class TestIECWithTransactions(TestHarnessWithTestData):
+class TestIECTransactions(TestHarnessWithTestData):
+  """Test the lower level methods of the IEC (Item Expiry Calculator) class."""
 
   @classmethod
   @freeze_time("2020-01-14")
@@ -325,6 +286,7 @@ class TestIECWithTransactions(TestHarnessWithTestData):
 
 
 class TestExpiryManager(TestHarnessWithTestData):
+  """Test the Transaction model's ExpiryManager class."""
 
   def test_get_item_history_is_correct_order(self):
     batch = self.create_timebatch()

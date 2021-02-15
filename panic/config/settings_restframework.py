@@ -20,7 +20,7 @@ REST_FRAMEWORK_AVAILABLE = {
         'DEFAULT_VERSIONING_CLASS':
             'rest_framework.versioning.NamespaceVersioning',
         'EXCEPTION_HANDLER':
-            'kitchen.exceptions.kitchen_exception_handler',
+            'kitchen.exceptions.handler.exception_handler',
     },
     'stage': {
         'DEFAULT_AUTHENTICATION_CLASSES': [
@@ -44,7 +44,7 @@ REST_FRAMEWORK_AVAILABLE = {
         'DEFAULT_VERSIONING_CLASS':
             'rest_framework.versioning.NamespaceVersioning',
         'EXCEPTION_HANDLER':
-            'kitchen.exceptions.kitchen_exception_handler',
+            'kitchen.exceptions.handler.exception_handler',
     },
     'prod': {
         'DEFAULT_AUTHENTICATION_CLASSES': [
@@ -68,7 +68,7 @@ REST_FRAMEWORK_AVAILABLE = {
         'DEFAULT_VERSIONING_CLASS':
             'rest_framework.versioning.NamespaceVersioning',
         'EXCEPTION_HANDLER':
-            'kitchen.exceptions.kitchen_exception_handler',
+            'kitchen.exceptions.handler.exception_handler',
     },
     'admin': {
         'DEFAULT_AUTHENTICATION_CLASSES': [
@@ -82,5 +82,7 @@ REST_FRAMEWORK_AVAILABLE = {
             ('django_filters.rest_framework.DjangoFilterBackend',),
         'DEFAULT_VERSIONING_CLASS':
             'rest_framework.versioning.NamespaceVersioning',
+        'EXCEPTION_HANDLER':
+            'kitchen.exceptions.handler.exception_handler',
     },
 }

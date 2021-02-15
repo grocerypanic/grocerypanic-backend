@@ -10,19 +10,20 @@ from rest_framework.test import APIClient
 
 from ...models.transaction import Transaction
 from ...serializers.transaction import TransactionSerializer
-from ...tests.fixtures.transaction import TransactionTestHarness
+from ...tests.fixtures.fixtures_transaction import TransactionTestHarness
 from ..deprecation import DEPRECATED_WARNING
 from ..transaction import TRANSACTION_LIST_SUNSET
 
 TRANSACTION_URL = reverse("v1:transactions-list")
 
 
-def transaction_query_url(query_kwargs={}):  # pylint: disable=W0102
+# pylint: disable=dangerous-default-value
+def transaction_query_url(query_kwargs={}):
   return '{}?{}'.format(TRANSACTION_URL, urlencode(query_kwargs))
 
 
-class PublicItemTest(TestCase):
-  """Test the public Transaction API"""
+class PublicTransactionTest(TestCase):
+  """Test the public Transaction API."""
 
   def setUp(self):
     self.client = APIClient()
@@ -34,8 +35,9 @@ class PublicItemTest(TestCase):
     self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
 
 
-class PrivateItemTest(TransactionTestHarness):
-  """Test the authorized Transaction API"""
+class PrivateTransactionTest(TransactionTestHarness):
+  """Test the authorized Transaction API."""
+
   item2 = None
   user2 = None
 
@@ -90,7 +92,6 @@ class PrivateItemTest(TransactionTestHarness):
 
   @freeze_time("2014-01-01")
   def test_create_transaction(self):
-    """Test creating a transaction."""
     res = self.client.post(TRANSACTION_URL, data=self.serializer_data)
 
     items = Transaction.objects.all()
@@ -106,7 +107,6 @@ class PrivateItemTest(TransactionTestHarness):
 
   @freeze_time("2014-01-01")
   def test_create_transaction_item_owned_by_another_user(self):
-    """Test creating a transaction, but current user does not own the item."""
     res = self.client.post(
         TRANSACTION_URL,
         data=self.serializer_data_wrong_item,
@@ -115,7 +115,6 @@ class PrivateItemTest(TransactionTestHarness):
     self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
 
   def test_list_all_transactions_without_item_filter(self):
-    """Test retrieving a list of all user transactions."""
     self.create_test_instance(**self.object_def1)
     self.create_test_instance(**self.object_def2)
     self.create_test_instance(**self.object_def3)
@@ -126,7 +125,6 @@ class PrivateItemTest(TransactionTestHarness):
 
   @freeze_time("2020-01-14")
   def test_list_all_transactions(self):
-    """Test retrieving a list of all user transactions."""
     self.create_test_instance(**self.object_def1)
     self.create_test_instance(**self.object_def2)
 
@@ -141,7 +139,6 @@ class PrivateItemTest(TransactionTestHarness):
 
   @freeze_time("2020-01-14")
   def test_list_all_transactions_ensure_deprecated(self):
-    """Test retrieving transactions results in deprecation warning."""
     res = self.client.get(transaction_query_url({"item": self.item1.id}))
 
     self.assertEqual(res.status_code, status.HTTP_200_OK)
@@ -151,7 +148,6 @@ class PrivateItemTest(TransactionTestHarness):
 
   @freeze_time("2020-01-14")
   def test_list_transactions_by_item_filter(self):
-    """Test retrieving a list of transactions by item id."""
     self.create_test_instance(**self.object_def1)
     self.create_test_instance(**self.object_def2)
     self.create_test_instance(**self.object_def3)
@@ -167,7 +163,6 @@ class PrivateItemTest(TransactionTestHarness):
 
   @freeze_time("2020-01-14")
   def test_list_transactions_by_another_item_filter(self):
-    """Test retrieving a list of transactions by item id, from another item."""
     self.item2.user = self.user1
     self.item2.save()
 
@@ -189,7 +184,6 @@ class PrivateItemTest(TransactionTestHarness):
 
   @freeze_time("2020-01-14")
   def test_list_transactions_by_item_of_different_user(self):
-    """Test retrieving a list of transactions by item id, from another user"""
     self.create_test_instance(**self.object_def1)
     self.create_test_instance(**self.object_def2)
     self.create_test_instance(**self.object_def3)
@@ -201,7 +195,6 @@ class PrivateItemTest(TransactionTestHarness):
 
   @freeze_time("2020-01-14")
   def test_list_transactions_by_history_manual_value(self):
-    """Test retrieving the last 10 days worth of transactions."""
     self.create_test_instance(**self.object_def1)
     self.create_test_instance(**self.object_def2)
     self.create_test_instance(**self.object_def4)
@@ -216,7 +209,6 @@ class PrivateItemTest(TransactionTestHarness):
 
   @freeze_time("2020-01-14")
   def test_list_transactions_by_history_default_value(self):
-    """Test retrieving the default number of days of transactions."""
     self.create_test_instance(**self.object_def1)
     self.create_test_instance(**self.object_def2)
     self.create_test_instance(**self.object_def4)
@@ -228,7 +220,6 @@ class PrivateItemTest(TransactionTestHarness):
 
   @freeze_time("2020-01-14")
   def test_list_transactions_by_history_invalid_value(self):
-    """Test fall back to default when an invalid number of days is specified."""
     self.create_test_instance(**self.object_def1)
     self.create_test_instance(**self.object_def2)
     self.create_test_instance(**self.object_def4)
@@ -243,7 +234,6 @@ class PrivateItemTest(TransactionTestHarness):
 
   @freeze_time("2020-01-14")
   def test_list_transactions_ensure_pagination_active(self):
-    """Test pagination is turned on for this endpoint"""
     self.create_test_instance(**self.object_def1)
 
     res = self.client.get(transaction_query_url({
@@ -252,3 +242,6 @@ class PrivateItemTest(TransactionTestHarness):
     self.assertIsNone(res.data['next'])
     self.assertIsNone(res.data['previous'])
     self.assertIsNotNone(res.data['results'])
+
+
+# TODO: Reorg for another user

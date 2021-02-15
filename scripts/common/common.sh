@@ -10,7 +10,9 @@ fmt() {
   set -e
 
   pushd "${PROJECT_HOME}"  > /dev/null
+    echo "Running yapf ..."
     yapf -i --recursive --exclude '**/*_pb2.py' --style='{based_on_style: google, INDENT_WIDTH: 2, ALIGN_CLOSING_BRACKET_WITH_VISUAL_INDENT: false, COALESCE_BRACKETS:true, DEDENT_CLOSING_BRACKETS: true}' "${PROJECT_NAME}/"
+    echo "Running isort ..."
     isort -y
   popd  > /dev/null
 
@@ -33,9 +35,17 @@ lint_check() {
 
   pushd "${PROJECT_HOME}"  > /dev/null
 
+    echo "Checking docstrings ..."
     pydocstyle "${PROJECT_NAME}"
+    pydocstyle --config=.pydocstyle.tests "${PROJECT_NAME}"
+
+    echo "Checking imports ..."
     isort -c
+
+    echo "Running pylint ..."
     pytest --pylint -m pylint --pylint-rcfile=.pylint.rc --pylint-jobs=2 "${ARGS[@]}"
+
+    echo "Running shellcheck ..."
     shellcheck -x scripts/*.sh
     shellcheck -x scripts/common/*.sh
 

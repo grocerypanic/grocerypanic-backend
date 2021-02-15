@@ -1,4 +1,4 @@
-"""Base Classes for Serializer Test Fixtures"""
+"""Model serializer test fixtures."""
 
 from django.db import models
 from django.test import TestCase
@@ -7,14 +7,15 @@ from rest_framework import serializers
 
 # pylint disable=too-many-instance-attributes
 class SerializerTestHarness(TestCase):
+  """Test harness for model serializers."""
+
   __test__ = False
+
   serializer: serializers.Serializer
   model: models.Model
-
   deserializer_data: dict
   serializer_data_invalid: list
   serializer_data: dict
-
   request: object
   serializer_data_field: str
   serializer_operations: object
@@ -66,7 +67,6 @@ class SerializerTestHarness(TestCase):
       )
 
   def create_test_instance(self, **kwargs):
-    """Create a test item."""
     instance = self.model.objects.create(**kwargs)
     self.objects.append(instance)
     return instance
@@ -80,7 +80,7 @@ class SerializerTestHarness(TestCase):
       return_list.append(overloaded)
     return return_list
 
-  def testDeserialize(self, mock_validate=None):
+  def test_deserialize(self, mock_validate=None):
     instance = self.create_test_instance(**self.deserializer_data)
     serialized = self.serializer(instance)
     deserialized = serialized.data
@@ -90,7 +90,7 @@ class SerializerTestHarness(TestCase):
     if mock_validate:
       mock_validate.assert_not_called()
 
-  def testSerialize(self, mock_validate=None):
+  def test_serialize(self, mock_validate=None):
     if mock_validate:
       mock_validate.return_value = self.serializer_data
 
@@ -105,7 +105,7 @@ class SerializerTestHarness(TestCase):
     if mock_validate:
       mock_validate.assert_called_once()
 
-  def testSerializeInvalidData(self, mock_validate=None):
+  def test_serializeInvalidData(self, mock_validate=None):
     for invalid_data in self.serializer_data_invalid:
       serialized = self.serializer(
           context=self.context,
@@ -117,7 +117,7 @@ class SerializerTestHarness(TestCase):
     if mock_validate:
       mock_validate.assert_not_called()
 
-  def testFieldLengths(self, mock_validate=None):
+  def test_field_lengths(self, mock_validate=None):
     overloads = self.generate_overload(self.fields)
     for overload in overloads:
       with self.assertRaises(serializers.ValidationError):

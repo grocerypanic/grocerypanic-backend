@@ -7,7 +7,9 @@ from drf_yasg import openapi
 
 
 def openapi_ready(func):
-  """Openapi generation needs to be able to call some methods on the viewset
+  """Decorate a view functions so that it is compatible with drf_yasg.
+
+  Openapi generation needs to be able to call some methods on the viewset
   without a user on the request (or AnonymousUser being on it). drf_yasg sets
   the swagger_fake_view attr on the view when running these methods, so we can
   check for that and call the super method if it's present.

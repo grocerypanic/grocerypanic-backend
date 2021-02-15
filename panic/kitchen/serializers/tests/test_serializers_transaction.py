@@ -1,4 +1,4 @@
-"""Test the Transaction Serializer."""
+"""Test the Transaction serializer."""
 
 from django.utils import timezone
 from freezegun import freeze_time
@@ -6,12 +6,14 @@ from rest_framework.serializers import ErrorDetail, ValidationError
 
 from ...exceptions import ValidationPermissionError
 from ...models.transaction import Transaction
-from ...tests.fixtures.django import MockRequest, deserialize_datetime
-from ...tests.fixtures.transaction import TransactionTestHarness
+from ...tests.fixtures.fixtures_django import MockRequest, deserialize_datetime
+from ...tests.fixtures.fixtures_transaction import TransactionTestHarness
 from ..transaction import TransactionSerializer
+from .fixtures.fixtures_serializers import generate_base
 
 
-class TestTransactionSerializer(TransactionTestHarness):
+class TestTransactionSerializer(generate_base(TransactionTestHarness)):
+  """Test the Transaction serializer."""
 
   @classmethod
   @freeze_time("2020-01-14")
@@ -42,15 +44,6 @@ class TestTransactionSerializer(TransactionTestHarness):
     cls.item2 = test_data2['item']
     super().setUpTestData()
 
-  @staticmethod
-  def generate_overload(fields):
-    return_list = []
-    for key, value in fields.items():
-      overloaded = dict()
-      overloaded[key] = "abc" * value
-      return_list.append(overloaded)
-    return return_list
-
   def setUp(self):
     self.objects = list()
     self.item1.quantity = 3
@@ -60,7 +53,7 @@ class TestTransactionSerializer(TransactionTestHarness):
     for obj in self.objects:
       obj.delete()
 
-  def testDeserialize(self):
+  def test_deserialize(self):
     transaction = self.create_test_instance(**self.data)
     serialized = self.serializer(transaction)
     deserialized = serialized.data
@@ -69,7 +62,7 @@ class TestTransactionSerializer(TransactionTestHarness):
     self.assertEqual(deserialized['item'], self.item1.id)
     self.assertEqual(deserialized['quantity'], self.data['quantity'])
 
-  def testSerialize(self):
+  def test_serialize(self):
     serialized = self.serializer(
         context={'request': self.request},
         data=self.serializer_data,
@@ -86,19 +79,7 @@ class TestTransactionSerializer(TransactionTestHarness):
     self.assertEqual(transaction.datetime, self.today)
     self.assertEqual(transaction.quantity, self.serializer_data['quantity'])
 
-  def testFieldLengths(self):
-    overloads = self.generate_overload(self.fields)
-    for overload in overloads:
-      local_data = dict(self.data)
-      local_data.update(overload)
-      with self.assertRaises(ValidationError):
-        serialized = self.serializer(
-            context={'request': self.request},
-            data=local_data,
-        )
-        serialized.is_valid(raise_exception=True)
-
-  def testSerialize_wrong_item(self):
+  def test_serialize_wrong_item(self):
     serialized = self.serializer(
         context={'request': self.request},
         data=self.serializer_data_wrong_item,

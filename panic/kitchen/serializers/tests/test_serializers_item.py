@@ -1,16 +1,18 @@
-"""Test the Item Serializer."""
+"""Test the Item serializer."""
 
 from rest_framework.serializers import ErrorDetail, ValidationError
 
 from ...exceptions import ValidationPermissionError
 from ...models.item import Item
-from ...tests.fixtures.django import MockRequest
-from ...tests.fixtures.item import ItemTestHarness
+from ...tests.fixtures.fixtures_django import MockRequest
+from ...tests.fixtures.fixtures_item import ItemTestHarness
 from .. import DUPLICATE_OBJECT_MESSAGE
 from ..item import ItemSerializer
+from .fixtures.fixtures_serializers import generate_base
 
 
-class TestItem(ItemTestHarness):
+class TestItem(generate_base(ItemTestHarness)):
+  """Test the Item serializer."""
 
   @classmethod
   def create_data_hook(cls):
@@ -60,16 +62,7 @@ class TestItem(ItemTestHarness):
     cls.shelf2 = test_data1['shelf']
     super().setUpTestData()
 
-  @staticmethod
-  def generate_overload(fields):
-    return_list = []
-    for key, value in fields.items():
-      overloaded = dict()
-      overloaded[key] = "abc" * value
-      return_list.append(overloaded)
-    return return_list
-
-  def testDeserialize(self):
+  def test_deserialize(self):
     item = self.create_test_instance(**self.data)
     serialized = self.serializer(item)
     deserialized = serialized.data
@@ -86,7 +79,7 @@ class TestItem(ItemTestHarness):
     self.assertListEqual(deserialized['preferred_stores'], preferred_stores)
     assert 'user' not in deserialized
 
-  def testSerialize(self):
+  def test_serialize(self):
     serialized = self.serializer(
         context={'request': self.request},
         data=self.serializer_data,
@@ -107,7 +100,7 @@ class TestItem(ItemTestHarness):
     self.assertEqual(item.quantity, self.serializer_data['quantity'])
     self.assertFalse(item.has_partial_quantities)
 
-  def testSerialize_fractional_quantities(self):
+  def test_serialize_fractional_quantities(self):
     fractional_quantities = dict(self.serializer_data)
     fractional_quantities.update({
         "has_partial_quantities": True,
@@ -127,7 +120,7 @@ class TestItem(ItemTestHarness):
 
     self.assertTrue(item.has_partial_quantities)
 
-  def testSerialize_wrong_shelf(self):
+  def test_serialize_wrong_shelf(self):
     serialized = self.serializer(
         context={'request': self.request},
         data=self.serializer_data_wrong_shelf,
@@ -147,7 +140,7 @@ class TestItem(ItemTestHarness):
         },
     )
 
-  def testSerialize_wrong_store(self):
+  def test_serialize_wrong_store(self):
     serialized = self.serializer(
         context={'request': self.request},
         data=self.serializer_data_wrong_store,
@@ -167,7 +160,7 @@ class TestItem(ItemTestHarness):
         },
     )
 
-  def testUniqueConstraint(self):
+  def test_unique_constraint(self):
     serialized = self.serializer(
         context={'request': self.request},
         data=self.serializer_data,
@@ -186,15 +179,3 @@ class TestItem(ItemTestHarness):
         str(serialized2.errors['non_field_errors'][0]),
         DUPLICATE_OBJECT_MESSAGE,
     )
-
-  def testFieldLengths(self):
-    overloads = self.generate_overload(self.fields)
-    for overload in overloads:
-      local_data = dict(self.data)
-      local_data.update(overload)
-      with self.assertRaises(ValidationError):
-        serialized = self.serializer(
-            context={'request': self.request},
-            data=local_data,
-        )
-        serialized.is_valid(raise_exception=True)

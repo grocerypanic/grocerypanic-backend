@@ -1,25 +1,21 @@
-"""Test the Store Model."""
+"""Test the Store model."""
 
 from django.core.exceptions import ValidationError
 
-from kitchen.models.store import Store
-from kitchen.tests.fixtures.store import StoreTestHarness
+from ...tests.fixtures.fixtures_store import StoreTestHarness
+from ..store import Store
+from .fixtures.fixture_models import generate_base
 
 
-class TestStore(StoreTestHarness):
+class TestStore(generate_base(StoreTestHarness)):
+  """Test the Store model."""
 
   @classmethod
   def create_data_hook(cls):
     cls.fields = {"name": 255}
+    cls.data = {"user": cls.user1, "name": "Loblaws"}
 
-  @staticmethod
-  def generate_overload(fields):
-    return_value = []
-    for key, value in fields.items():
-      return_value.append({key: "abc" * value})
-    return return_value
-
-  def testAddStore(self):
+  def test_create(self):
     test_name = "Loblaws"
     _ = self.create_test_instance(user=self.user1, name=test_name)
 
@@ -30,7 +26,7 @@ class TestStore(StoreTestHarness):
     self.assertEqual(query[0].name, test_name)
     self.assertEqual(query[0].user.id, self.user1.id)
 
-  def testUnique(self):
+  def test_unique(self):
     test_name = "Loblaws"
     _ = self.create_test_instance(user=self.user1, name=test_name)
 
@@ -40,7 +36,7 @@ class TestStore(StoreTestHarness):
     count = Store.objects.filter(name=test_name).count()
     assert count == 1
 
-  def testAddStoreInjection(self):
+  def test_bleach(self):
     test_name = "Loblaws<script>alert('hi');</script>"
     sanitized_name = "Loblaws&lt;script&gt;alert('hi');&lt;/script&gt;"
     _ = self.create_test_instance(user=self.user1, name=test_name)
@@ -51,15 +47,8 @@ class TestStore(StoreTestHarness):
     self.assertEqual(query[0].name, sanitized_name)
     self.assertEqual(query[0].user.id, self.user1.id)
 
-  def testStr(self):
+  def test_str(self):
     test_name = "Shoppers Drugmart"
     item = self.create_test_instance(user=self.user1, name=test_name)
 
     self.assertEqual(test_name, str(item))
-
-  def testFieldLengths(self):
-    for overloaded_field in self.generate_overload(self.fields):
-      local_data = {"user": self.user1, "name": "Loblaws"}
-      local_data.update(overloaded_field)
-      with self.assertRaises(ValidationError):
-        _ = self.create_test_instance(**local_data)

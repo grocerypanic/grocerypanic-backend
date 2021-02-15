@@ -1,21 +1,25 @@
-"""Shared Store Test Fixtures for Kitchen"""
+"""Shared Store model test fixtures."""
 
 from django.contrib.auth import get_user_model
+from django.db.models import Model
 from django.test import TestCase
 from django.utils import timezone
 
 from ...models.store import Store
-from .bases import KitchenModelTestFixture
+from .fixture_bases import KitchenModelTestFixture
+
+User: Model = get_user_model()
 
 
 class StoreTestHarness(KitchenModelTestFixture, TestCase):
-  user1 = None
-  user2 = None
-  objects = None
+  """Test harness for the Store model."""
+
+  user1: User
+  user2: User
+  objects: list
 
   @staticmethod
   def create_instance(**kwargs):
-    """Create a test store."""
     store = Store.objects.create(user=kwargs['user'], name=kwargs['name'])
     store.save()
     return store
@@ -37,7 +41,6 @@ class StoreTestHarness(KitchenModelTestFixture, TestCase):
     pass
 
   def create_test_instance(self, **kwargs):
-    """Create a test store."""
     store = self.__class__.create_instance(**kwargs)
     self.objects.append(store)
     return store

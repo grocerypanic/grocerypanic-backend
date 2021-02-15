@@ -1,4 +1,4 @@
-"""Test the OpenApi Documentation Support Tools"""
+"""Test the OpenApi documentation support tools."""
 
 from django.test import TestCase
 
@@ -6,6 +6,7 @@ from ..swagger import openapi_ready
 
 
 class TestOpenApiReady(TestCase):
+  """Test openapi_ready function."""
 
   def setUp(self):
 

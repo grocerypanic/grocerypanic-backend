@@ -1,12 +1,12 @@
-"""Test the customized bleach field"""
+"""Test the custom model field."""
 
 from django.test import TestCase, override_settings
 
 from ..fields import BlondeCharField
 
 
-class BleachFieldTest(TestCase):
-  """Test the custom bleach field"""
+class BlondeCharFieldTest(TestCase):
+  """Test the BlondeCharField class."""
 
   def setUp(self):
 

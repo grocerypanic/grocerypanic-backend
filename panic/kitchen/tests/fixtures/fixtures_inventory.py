@@ -1,6 +1,9 @@
-"""Shared Inventory Test Fixtures for Kitchen"""
+"""Shared Inventory model test fixtures."""
+
+from datetime import datetime
 
 from django.contrib.auth import get_user_model
+from django.db.models import Model
 from django.test import TestCase
 from django.utils import timezone
 
@@ -9,20 +12,23 @@ from ...models.item import Item
 from ...models.shelf import Shelf
 from ...models.store import Store
 from ...models.transaction import Transaction
-from .bases import KitchenModelTestFixture
+from .fixture_bases import KitchenModelTestFixture
+
+User: Model = get_user_model()
 
 
 class InventoryTestHarness(KitchenModelTestFixture, TestCase):
-  item1 = None
-  user1 = None
-  transaction1 = None
-  objects = None
-  today = None
+  """Test harness for the Inventory model."""
+
+  item1: Item
+  user1: User
+  transaction1: Transaction
+  objects: list
+  today: datetime
   initial_quantity = 3
 
   @staticmethod
   def create_instance(**kwargs):
-    """Create a test inventory."""
     inventory = Inventory.objects.create(
         item=kwargs['item'],
         remaining=kwargs['remaining'],
@@ -32,7 +38,6 @@ class InventoryTestHarness(KitchenModelTestFixture, TestCase):
 
   @staticmethod
   def create_transaction_instance(**kwargs):
-    """Create a test transaction."""
     transaction = Transaction.objects.create(
         item=kwargs['item'],
         datetime=kwargs['date_object'],
@@ -45,7 +50,7 @@ class InventoryTestHarness(KitchenModelTestFixture, TestCase):
     datetime_object = kwargs['datetime_object']
     quantity = kwargs['quantity']
 
-    user = get_user_model().objects.create_user(
+    user = User.objects.create_user(
         username=f"testuser{seed}",
         email=f"test{seed}@niallbyrne.ca",
         password="test123",
@@ -88,13 +93,11 @@ class InventoryTestHarness(KitchenModelTestFixture, TestCase):
     pass
 
   def create_test_instance(self, **kwargs):
-    """Create a test inventory."""
     inventory = self.__class__.create_instance(**kwargs)
     self.objects.append(inventory)
     return inventory
 
   def create_test_transaction_instance(self, **kwargs):
-    """Create a test transaction."""
     transaction = self.__class__.create_transaction_instance(**kwargs)
     self.objects.append(transaction)
     return transaction

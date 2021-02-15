@@ -1,4 +1,4 @@
-"""A variation on django-bleach BleachField, derived from CharField"""
+"""A variation on django-bleach BleachField, derived from CharField."""
 
 from django.conf import settings
 from django.db import models
@@ -9,8 +9,9 @@ class BlondeCharField(models.CharField, BleachField):
   """A django_bleach derived char field, with appropriate protection."""
 
   def pre_save(self, model_instance, add):
-    """Override the default :func:`django.db.models.fields.pre_save` behavior
-    to allow for restoring some modified fields after they have been "bleached".
+    """Override the django Field `pre_save` hook.
+
+    Allows for restoring some modified fields after they have been "bleached".
     """
     restored_data = None
     data = super(BlondeCharField, self).pre_save(model_instance, add)

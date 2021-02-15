@@ -5,8 +5,12 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 
 
 class JWTCookieAuthentication(JWTAuthentication):
-  """Extend the authenticate functionality of
-  :class:`rest_framework_simplejwt.authentication.JWTAuthentication`
+  """An authentication plugin that parses JWT tokens from cookies.
+
+  Overrides: :class:`rest_framework_simplejwt.authentication.JWTAuthentication`
+
+  The default `authenticate` class was throwing exceptions on some mangled
+  headers.  This re-implementation resolves the issue.
   """
 
   def authenticate(self, request):

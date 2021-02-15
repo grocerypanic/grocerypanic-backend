@@ -4,7 +4,7 @@ from django.contrib.auth import get_user_model
 from django.db import models, transaction
 from django.utils.timezone import now
 
-from .item import MAXIMUM_QUANTITY
+from . import constants
 from .managers.transaction import ConsumptionHistoryManager, ExpiryManager
 from .validators.transaction import (
     TransactionQuantityValidator,
@@ -20,7 +20,7 @@ class Transaction(models.Model):
   datetime = models.DateTimeField(default=now)
   item = models.ForeignKey('Item', on_delete=models.CASCADE)
   quantity = models.FloatField(
-      validators=[TransactionQuantityValidator(MAXIMUM_QUANTITY)]
+      validators=[TransactionQuantityValidator(constants.MAXIMUM_QUANTITY)]
   )
 
   consumption = ConsumptionHistoryManager()
@@ -31,6 +31,16 @@ class Transaction(models.Model):
     indexes = [
         models.Index(fields=['datetime']),
     ]
+
+  def apply_transaction(self, force=False):
+    """Update the related item quantity, and it's expiry.
+
+    :param force: Allows for overriding the default apply once behaviour
+    :type force: bool
+    """
+    if self.id is None and not force:
+      self.item.quantity = self.item.quantity + self.quantity
+      self.item.save()
 
   @property
   def operation(self):
@@ -62,17 +72,10 @@ class Transaction(models.Model):
     related_item_quantity_validator(proposed_item_quantity)
     super().clean()
 
-  def apply_transaction(self):
-    """Update the related item quantity, and it's expiry."""
-    if self.id is None:
-      self.item.quantity = self.item.quantity + self.quantity
-      Transaction.expiration.update(self)
-
-  # pylint: disable=W0222
+  # pylint: disable=signature-differs
   def save(self, *args, **kwargs):
     """Clean and save model."""
     with transaction.atomic():
       self.full_clean()
       self.apply_transaction()
       super(Transaction, self).save(*args, **kwargs)
-      self.item.save()

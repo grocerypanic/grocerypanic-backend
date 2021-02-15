@@ -29,7 +29,7 @@ class CSRFView(APIView):
     'PUT',
     'TRACE',
 ])
-def csrf_error(request, reason=""):  # pylint: disable=W0613
+def csrf_error(request, reason=""):  # pylint: disable=unused-argument
   """Respond to CSRF error with a 403, and a custom JSON message."""
 
   return Response(

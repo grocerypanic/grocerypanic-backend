@@ -3,7 +3,7 @@
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 
-from ...item import MAXIMUM_QUANTITY, MINIMUM_QUANTITY
+from ... import constants
 from ..transaction import (
     TransactionQuantityValidator,
     related_item_quantity_validator,
@@ -14,29 +14,29 @@ class TestTransactionQuantityValidator(TestCase):
   """Test the TransactionQuantityValidator validator class."""
 
   def setUp(self):
-    self.instance = TransactionQuantityValidator(MAXIMUM_QUANTITY)
+    self.instance = TransactionQuantityValidator(constants.MAXIMUM_QUANTITY)
 
   def test_upper_bounds(self):
     with self.assertRaises(ValidationError) as raised:
-      self.instance(MAXIMUM_QUANTITY + 1)
+      self.instance(constants.MAXIMUM_QUANTITY + 1)
 
     self.assertListEqual(
         raised.exception.messages,
         [
             "This value must be non-zero integer between "
-            f"-{MAXIMUM_QUANTITY} and {MAXIMUM_QUANTITY}."
+            f"-{constants.MAXIMUM_QUANTITY} and {constants.MAXIMUM_QUANTITY}."
         ],
     )
 
   def test_lower_bounds(self):
     with self.assertRaises(ValidationError) as raised:
-      self.instance((-1 * MAXIMUM_QUANTITY) - 1)
+      self.instance((-1 * constants.MAXIMUM_QUANTITY) - 1)
 
     self.assertListEqual(
         raised.exception.messages,
         [
             "This value must be non-zero integer between "
-            f"-{MAXIMUM_QUANTITY} and {MAXIMUM_QUANTITY}."
+            f"-{constants.MAXIMUM_QUANTITY} and {constants.MAXIMUM_QUANTITY}."
         ],
     )
 
@@ -48,7 +48,7 @@ class TestTransactionQuantityValidator(TestCase):
         raised.exception.messages,
         [
             "This value must be non-zero integer between "
-            f"-{MAXIMUM_QUANTITY} and {MAXIMUM_QUANTITY}."
+            f"-{constants.MAXIMUM_QUANTITY} and {constants.MAXIMUM_QUANTITY}."
         ],
     )
 
@@ -57,28 +57,31 @@ class TestTransactionQuantityValidator(TestCase):
 
 
 class TestRelatedItemQuantityValidator(TestCase):
+  """Test the related_item_quantity_validator function."""
 
   def test_upper_bounds(self):
     with self.assertRaises(ValidationError) as raised:
-      related_item_quantity_validator(MAXIMUM_QUANTITY + 1)
+      related_item_quantity_validator(constants.MAXIMUM_QUANTITY + 1)
 
     self.assertListEqual(
         raised.exception.messages,
         [
             f"This object's 'quantity' may not reduced below "
-            f"{MINIMUM_QUANTITY}, or above {MAXIMUM_QUANTITY}."
+            f"{constants.MINIMUM_QUANTITY}, or above "
+            f"{constants.MAXIMUM_QUANTITY}."
         ],
     )
 
   def test_lower_bounds(self):
     with self.assertRaises(ValidationError) as raised:
-      related_item_quantity_validator(MINIMUM_QUANTITY - 1)
+      related_item_quantity_validator(constants.MINIMUM_QUANTITY - 1)
 
     self.assertListEqual(
         raised.exception.messages,
         [
             f"This object's 'quantity' may not reduced below "
-            f"{MINIMUM_QUANTITY}, or above {MAXIMUM_QUANTITY}."
+            f"{constants.MINIMUM_QUANTITY}, or above "
+            f"{constants.MAXIMUM_QUANTITY}."
         ],
     )
 

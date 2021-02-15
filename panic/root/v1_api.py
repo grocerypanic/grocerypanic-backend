@@ -1,4 +1,4 @@
-"""Root V1 API Urls"""
+"""Root v1 API URLs."""
 
 from dj_rest_auth.registration.views import ConfirmEmailView, VerifyEmailView
 from dj_rest_auth.views import PasswordResetConfirmView

@@ -32,7 +32,7 @@ class StoreListCreateViewSet(
     mixins.ListModelMixin,
     viewsets.GenericViewSet,
 ):
-  """Store list and create API views"""
+  """Store list and create API views."""
 
   pagination_class = PagePaginationWithOverride
 
@@ -44,5 +44,5 @@ class StoreListCreateViewSet(
 
   @openapi_ready
   def perform_create(self, serializer):
-    """Create a new Store"""
+    """Create a new store."""
     serializer.save(user=self.request.user)

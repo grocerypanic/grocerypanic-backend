@@ -10,5 +10,5 @@ class SocialAccountsConfig(AppConfig):
 
   def ready(self):
     """Load signals."""
-    # pylint: disable=W0611,C0415
+    # pylint: disable=unused-import, import-outside-toplevel
     from .signals import presocial_login

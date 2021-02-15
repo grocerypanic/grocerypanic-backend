@@ -10,7 +10,7 @@ from ..views import csrf_error
 
 
 class PublicCSRFErrorTest(TestCase):
-  """Test the public CSRF Error API"""
+  """Test the public CSRF Error API."""
 
   def setUp(self):
     self.factory = APIRequestFactory(enforce_csrf_checks=True)
@@ -19,7 +19,6 @@ class PublicCSRFErrorTest(TestCase):
     self.csrf_error = csrf_error
 
   def test_login_required(self):
-    """Test that login is required for retrieving csrf."""
     resp = self.csrf_error(self.get)
 
     self.assertEqual(resp.status_code, status.HTTP_401_UNAUTHORIZED)
@@ -33,7 +32,7 @@ class PublicCSRFErrorTest(TestCase):
 
 
 class PrivateCSRFErrorTest(TestCase):
-  """Test the private CSRF Error API"""
+  """Test the private CSRF Error API."""
 
   def setUp(self):
     self.user = get_user_model().objects.create_user(

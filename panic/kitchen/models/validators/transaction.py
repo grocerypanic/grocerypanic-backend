@@ -5,7 +5,7 @@ from django.core.validators import BaseValidator
 from django.utils.deconstruct import deconstructible
 from django.utils.translation import gettext_lazy as _
 
-from ..item import MAXIMUM_QUANTITY, MINIMUM_QUANTITY
+from .. import constants
 
 
 @deconstructible
@@ -33,11 +33,12 @@ def related_item_quantity_validator(value):
   :rtype: value
   :raises: :class:`django.core.exceptions.ValidationError`
   """
-  if value < MINIMUM_QUANTITY or value >= MAXIMUM_QUANTITY:
+  if value < constants.MINIMUM_QUANTITY or value >= constants.MAXIMUM_QUANTITY:
     raise ValidationError({
         'item': [
             "This object's 'quantity' may not reduced below"
-            f" {MINIMUM_QUANTITY}, or above {MAXIMUM_QUANTITY}."
+            f" {constants.MINIMUM_QUANTITY}, or above"
+            f" {constants.MAXIMUM_QUANTITY}."
         ],
     })
   return value

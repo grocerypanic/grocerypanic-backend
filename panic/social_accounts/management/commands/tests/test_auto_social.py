@@ -16,6 +16,7 @@ PROVIDERS = [{"provider": "facebook"}, {"provider": "google"}]
 
 @parameterized_class(PROVIDERS)
 class AutoSocialTestCase1(TestCase):
+  """Test the autosocial.facebook management command."""
 
   def __clear_social_accounts(self):
     query = SocialApp.objects.all()

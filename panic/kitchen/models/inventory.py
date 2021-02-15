@@ -4,7 +4,7 @@ from django.contrib.auth import get_user_model
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
-from .item import MAXIMUM_QUANTITY, MINIMUM_QUANTITY
+from . import constants
 from .managers.inventory import InventoryTransactionManager
 
 User = get_user_model()
@@ -16,8 +16,8 @@ class Inventory(models.Model):
   item = models.ForeignKey('Item', on_delete=models.CASCADE)
   remaining = models.FloatField(
       validators=[
-          MinValueValidator(MINIMUM_QUANTITY),
-          MaxValueValidator(MAXIMUM_QUANTITY),
+          MinValueValidator(constants.MINIMUM_QUANTITY),
+          MaxValueValidator(constants.MAXIMUM_QUANTITY),
       ],
   )
   transaction = models.ForeignKey('Transaction', on_delete=models.CASCADE)
@@ -34,7 +34,7 @@ class Inventory(models.Model):
         self.transaction.datetime,
     )
 
-  # pylint: disable=W0222
+  # pylint: disable=signature-differs
   def save(self, *args, **kwargs):
     """Clean and save model."""
     self.full_clean()

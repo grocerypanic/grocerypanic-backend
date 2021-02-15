@@ -1,4 +1,4 @@
-"""panic URL Configuration"""
+"""Panic root URL configuration."""
 
 from django.conf import settings
 from django.conf.urls import url

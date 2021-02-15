@@ -1,4 +1,4 @@
-"""Test Custom Permissions"""
+"""Test custom permissions."""
 
 from django.test import TestCase
 
@@ -6,7 +6,7 @@ from ..permissions import IsOwner
 
 
 class IsOwnerTest(TestCase):
-  """Test the isOwner"""
+  """Test the IsOwner permission."""
 
   def setUp(self):
 

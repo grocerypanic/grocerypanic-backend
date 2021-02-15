@@ -7,13 +7,14 @@ from django.utils import timezone
 from freezegun import freeze_time
 
 from ....models.transaction import Transaction
-from ....tests.fixtures.django import MockRequest, deserialize_date
-from ....tests.fixtures.transaction import TransactionTestHarness
+from ....tests.fixtures.fixtures_django import MockRequest, deserialize_date
+from ....tests.fixtures.fixtures_transaction import TransactionTestHarness
 from .. import item_history
 from ..item_history import ItemHistorySerializer
 
 
 class TestItemHistorySerializer(TransactionTestHarness):
+  """Test the Item History Serializer."""
 
   @classmethod
   @freeze_time("2020-01-14")

@@ -1,7 +1,6 @@
 """Item model."""
 
 from datetime import timedelta
-from decimal import Decimal
 
 from django.contrib.auth import get_user_model
 from django.core.validators import MaxValueValidator, MinValueValidator
@@ -10,16 +9,9 @@ from django.utils.timezone import now
 from naturalsortfield import NaturalSortField
 
 from spa_security.fields import BlondeCharField
+from . import constants
 
 User = get_user_model()
-
-TWOPLACES = Decimal(10)**-2
-MAXIMUM_QUANTITY = 10000
-MINIMUM_QUANTITY = 0
-MINIMUM_SHELF_LIFE = 1
-MAXIMUM_SHELF_LIFE = 365 * 3
-DEFAULT_SHELF_LIFE = 7
-MAX_LENGTH = 255
 
 
 def default_expiry():
@@ -28,26 +20,30 @@ def default_expiry():
   :returns: A datetime in the future
   :rtype: :class:`datetime.datetime`
   """
-  return now() + timedelta(days=DEFAULT_SHELF_LIFE)
+  return now() + timedelta(days=Item.DEFAULT_SHELF_LIFE)
 
 
 class Item(models.Model):
   """Item model."""
 
-  has_partial_quantities = models.BooleanField(default=False)
+  MAXIMUM_NAME_LENGTH = 255
+  MINIMUM_SHELF_LIFE = 1
+  MAXIMUM_SHELF_LIFE = 365 * 3
+  DEFAULT_SHELF_LIFE = 7
 
+  has_partial_quantities = models.BooleanField(default=False)
   index = NaturalSortField(
       for_field="name",
-      max_length=MAX_LENGTH,
+      max_length=MAXIMUM_NAME_LENGTH,
   )  # Pagination Index
-  name = BlondeCharField(max_length=MAX_LENGTH)
+  name = BlondeCharField(max_length=MAXIMUM_NAME_LENGTH)
   preferred_stores = models.ManyToManyField('Store')
   price = models.DecimalField(max_digits=10, decimal_places=2)
   quantity = models.FloatField(
       default=0,
       validators=[
-          MinValueValidator(MINIMUM_QUANTITY),
-          MaxValueValidator(MAXIMUM_QUANTITY),
+          MinValueValidator(constants.MINIMUM_QUANTITY),
+          MaxValueValidator(constants.MAXIMUM_QUANTITY),
       ],
   )
   shelf = models.ForeignKey('Shelf', on_delete=models.CASCADE)
@@ -67,15 +63,15 @@ class Item(models.Model):
   next_expiry_quantity = models.FloatField(
       default=0,
       validators=[
-          MinValueValidator(MINIMUM_QUANTITY),
-          MaxValueValidator(MAXIMUM_QUANTITY)
+          MinValueValidator(constants.MINIMUM_QUANTITY),
+          MaxValueValidator(constants.MAXIMUM_QUANTITY)
       ],
   )
   expired = models.FloatField(
       default=0,
       validators=[
-          MinValueValidator(MINIMUM_QUANTITY),
-          MaxValueValidator(MAXIMUM_QUANTITY)
+          MinValueValidator(constants.MINIMUM_QUANTITY),
+          MaxValueValidator(constants.MAXIMUM_QUANTITY)
       ],
   )
 
@@ -90,7 +86,7 @@ class Item(models.Model):
   def __str__(self):
     return str(self.name)
 
-  # pylint: disable=W0222
+  # pylint: disable=signature-differs
   def save(self, *args, **kwargs):
     """Clean and save model."""
     self.full_clean()

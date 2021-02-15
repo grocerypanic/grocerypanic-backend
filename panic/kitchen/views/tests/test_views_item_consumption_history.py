@@ -9,14 +9,15 @@ from freezegun import freeze_time
 from rest_framework import status
 from rest_framework.test import APIClient
 
-from ...tests.fixtures.django import MockRequest
-from ...tests.fixtures.transaction import TransactionTestHarness
+from ...tests.fixtures.fixtures_django import MockRequest
+from ...tests.fixtures.fixtures_transaction import TransactionTestHarness
 from ..item import ItemConsumptionHistorySerializer
 
 CONSUMPTION_HISTORY_VIEW = "v1:item-consumption-detail"
 
 
 class PrivateTCHTestHarness(TransactionTestHarness):
+  """Extend the transaction test harness by adding transaction test data."""
 
   @classmethod
   @freeze_time("2020-01-14")
@@ -60,12 +61,13 @@ def item_pk_url(item):
   return reverse(CONSUMPTION_HISTORY_VIEW, args=[item])
 
 
-def item_query_url(item, query_kwargs={}):  # pylint: disable=W0102
+# pylint: disable=dangerous-default-value
+def item_query_url(item, query_kwargs={}):
   return '{}?{}'.format(item_pk_url(item), urlencode(query_kwargs))
 
 
 class PublicTCHTest(TestCase):
-  """Test the public Transaction Consumption History API"""
+  """Test the public TCH (Transaction Consumption History) API."""
 
   def setUp(self):
     self.client = APIClient()
@@ -77,7 +79,7 @@ class PublicTCHTest(TestCase):
 
 
 class PrivateTCHTest(PrivateTCHTestHarness):
-  """Test the authorized TCH API"""
+  """Test the authorized TCH (Transaction Consumption History) API."""
 
   def setUp(self):
     super().setUp()
@@ -86,7 +88,6 @@ class PrivateTCHTest(PrivateTCHTestHarness):
 
   @freeze_time("2020-01-14")
   def test_get_item_history(self):
-    """Test retrieving consumption history for the last two weeks"""
     res = self.client.get(item_pk_url(self.item1.id))
     serializer = ItemConsumptionHistorySerializer(
         self.item1,
@@ -105,7 +106,6 @@ class PrivateTCHTest(PrivateTCHTestHarness):
 
   @freeze_time("2020-01-14")
   def test_first_transaction(self):
-    """Test identifying the first transaction date of a consumption event."""
     res = self.client.get(item_pk_url(self.item1.id))
 
     self.assertEqual(res.status_code, status.HTTP_200_OK)
@@ -115,7 +115,6 @@ class PrivateTCHTest(PrivateTCHTestHarness):
 
   @freeze_time("2020-01-14")
   def test_total_consumption(self):
-    """Test identifying the total consumption of a user's item."""
     res = self.client.get(item_pk_url(self.item1.id))
     total_consumption = abs(
         self.object_def1['quantity'] + self.object_def2['quantity'] +
@@ -126,7 +125,6 @@ class PrivateTCHTest(PrivateTCHTestHarness):
     self.assertEqual(res.data['total_consumption'], total_consumption)
 
   def test_specify_timezone(self):
-    """Test pagination is turned on for this endpoint"""
     test_timezone = "Asia/Hong_Kong"
     res = self.client.get(
         item_query_url(
@@ -143,7 +141,6 @@ class PrivateTCHTest(PrivateTCHTestHarness):
     )
 
   def test_specify_illegal_timezone(self):
-    """Test pagination is turned on for this endpoint"""
     test_timezone = "Not A Valid Timezone"
     res = self.client.get(
         item_query_url(
@@ -156,7 +153,7 @@ class PrivateTCHTest(PrivateTCHTestHarness):
 
 
 class PrivateTCHTestAnotherUser(PrivateTCHTestHarness):
-  """Test the authorized TCH API from Another User"""
+  """Test the authorized TCH API from another user."""
 
   @classmethod
   @freeze_time("2020-01-14")
@@ -172,7 +169,6 @@ class PrivateTCHTestAnotherUser(PrivateTCHTestHarness):
 
   @freeze_time("2020-01-14")
   def test_get_item_history(self):
-    """Test retrieving consumption history for the last two weeks"""
     res = self.client.get(item_pk_url(self.item1.id))
 
     self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)

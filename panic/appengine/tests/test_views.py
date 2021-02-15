@@ -1,4 +1,4 @@
-"""Test the appengine app views."""
+"""Test the app engine app views."""
 
 from django.http import HttpRequest
 from django.test import TestCase
@@ -8,6 +8,7 @@ from ..views import WarmUp
 
 
 class AppEngineWarmUpTest(TestCase):
+  """Test the APP Engine public endpoint."""
 
   def test_warmup_returns_correct_html(self):
     request = HttpRequest()

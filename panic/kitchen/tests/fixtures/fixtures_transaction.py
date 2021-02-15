@@ -1,6 +1,9 @@
-"""Shared Transaction Test Fixtures for Kitchen"""
+"""Shared Transaction model test fixtures."""
+
+from datetime import datetime
 
 from django.contrib.auth import get_user_model
+from django.db.models import Model
 from django.test import TestCase
 from django.utils import timezone
 
@@ -8,19 +11,22 @@ from ...models.item import Item
 from ...models.shelf import Shelf
 from ...models.store import Store
 from ...models.transaction import Transaction
-from .bases import KitchenModelTestFixture
+from .fixture_bases import KitchenModelTestFixture
+
+User: Model = get_user_model()
 
 
 class TransactionTestHarness(KitchenModelTestFixture, TestCase):
-  item1 = None
-  user1 = None
-  objects = None
-  today = None
+  """Test harness for the Transaction model."""
+
+  item1: Item
+  user1: User
+  objects: list
+  today: datetime
   initial_quantity = 0
 
   @staticmethod
   def create_instance(**kwargs):
-    """Create a test transaction."""
     transaction = Transaction.objects.create(
         item=kwargs['item'],
         datetime=kwargs['date_object'],
@@ -30,7 +36,7 @@ class TransactionTestHarness(KitchenModelTestFixture, TestCase):
 
   @staticmethod
   def create_dependencies(seed, **kwargs):
-    user = get_user_model().objects.create_user(
+    user = User.objects.create_user(
         username=f"testuser{seed}",
         email=f"test{seed}@niallbyrne.ca",
         password="test123",
@@ -66,7 +72,7 @@ class TransactionTestHarness(KitchenModelTestFixture, TestCase):
     pass
 
   def create_another_user(self, seed):
-    new_user = get_user_model().objects.create_user(
+    new_user = User.objects.create_user(
         username=f"testuser{seed}",
         email=f"test{seed}@niallbyrne.ca",
         password="test123",
@@ -75,7 +81,6 @@ class TransactionTestHarness(KitchenModelTestFixture, TestCase):
     return new_user
 
   def create_test_instance(self, **kwargs):
-    """Create a test transaction."""
     transaction = self.__class__.create_instance(**kwargs)
     self.objects.append(transaction)
     return transaction

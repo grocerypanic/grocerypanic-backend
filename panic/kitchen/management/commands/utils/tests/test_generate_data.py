@@ -1,4 +1,4 @@
-"""Test DataGenerator Class"""
+"""Test the DataGenerator class."""
 
 from unittest.mock import patch
 
@@ -21,6 +21,7 @@ with patch(
   },)
 
   class TestGenerateData(TestCase):
+    """Test the GenerateData class."""
 
     @classmethod
     def setUpTestData(cls):
