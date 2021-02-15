@@ -8,15 +8,15 @@ https://docs.djangoproject.com/en/3.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.0/ref/settings/
 """
-# pylint: disable=unused-wildcard-import, wildcard-import
+# pylint: disable=unused-import, wildcard-import, unused-wildcard-import
 
 from django.contrib.messages import constants as message_constants
 
-from . import BASE_DIR  # pylint: disable=unused-import
+from . import BASE_DIR
 from .settings_database import DATABASES_AVAILABLE
-from .settings_email import *  # pylint: disable=W0614,W0401
-from .settings_jwt import *  # pylint: disable=unused-import
-from .settings_registration import *  # pylint: disable=unused-import
+from .settings_email import *
+from .settings_jwt import *
+from .settings_registration import *
 from .settings_restframework import REST_FRAMEWORK_AVAILABLE
 
 # Select Runtime Environment
@@ -224,13 +224,10 @@ LEGACY_TRANSACTION_HISTORY_UPPER_BOUND = 150
 # Environment Specific Settings
 
 if ENVIRONMENT == "stage":
-  # pylint: disable=W0614,W0401
   from .environments.settings_stage import *  # nocover
 
 if ENVIRONMENT == "prod":
-  # pylint: disable=W0614,W0401
   from .environments.settings_prod import *  # nocover
 
 if ENVIRONMENT == "admin":
-  # pylint: disable=W0614,W0401
   from .environments.settings_admin import *  # nocover
