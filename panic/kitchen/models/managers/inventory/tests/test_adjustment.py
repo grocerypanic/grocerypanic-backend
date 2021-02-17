@@ -7,7 +7,7 @@ from .....tests.fixtures.fixtures_inventory import InventoryTestHarness
 from ....inventory import Inventory
 
 
-class TestTransactionReconcilerManager(InventoryTestHarness):
+class TestAdjustmentManager(InventoryTestHarness):
   """Test the InventoryTransactionManager model manager class."""
 
   @classmethod

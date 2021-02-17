@@ -2,10 +2,10 @@
 
 from django.db import models
 
-from ...exceptions import ProcessingError
+from ....exceptions import ProcessingError
 
 
-class InventoryTransactionManager(models.Manager):
+class AdjustmentManager(models.Manager):
   """Update the inventory based on transaction events."""
 
   def adjustment(self, transaction):

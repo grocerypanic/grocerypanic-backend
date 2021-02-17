@@ -5,7 +5,7 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
 from . import constants
-from .managers.inventory import InventoryTransactionManager
+from .managers.inventory import InventoryManager
 
 User = get_user_model()
 
@@ -22,7 +22,7 @@ class Inventory(models.Model):
   )
   transaction = models.ForeignKey('Transaction', on_delete=models.CASCADE)
 
-  objects = InventoryTransactionManager()
+  objects = InventoryManager()
 
   class Meta:
     verbose_name_plural = "Inventory"

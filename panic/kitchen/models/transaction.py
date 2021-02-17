@@ -5,7 +5,7 @@ from django.db import models, transaction
 from django.utils.timezone import now
 
 from . import constants
-from .managers.transaction import ConsumptionHistoryManager
+from .managers.transaction import TransactionManager
 from .validators.transaction import (
     TransactionQuantityValidator,
     related_item_quantity_validator,
@@ -23,9 +23,7 @@ class Transaction(models.Model):
       validators=[TransactionQuantityValidator(constants.MAXIMUM_QUANTITY)]
   )
 
-  consumption = ConsumptionHistoryManager()
-  expiration = models.Manager()  # Disabled
-  objects = models.Manager()
+  objects = TransactionManager()
 
   class Meta:
     indexes = [

@@ -58,7 +58,7 @@ class ItemConsumptionHistorySerializer(serializers.ModelSerializer):
     """Trigger the transaction consumption report for the past two weeks."""
     item_id = obj.id
     configured_timezone = self.__get_initial_timezone_value()
-    query = Transaction.consumption.get_last_two_weeks(
+    query = Transaction.objects.get_last_two_weeks(
         item_id,
         configured_timezone,
     )
@@ -69,7 +69,7 @@ class ItemConsumptionHistorySerializer(serializers.ModelSerializer):
     """Trigger the transaction consumption report for the current month."""
     item_id = obj.id
     configured_timezone = self.__get_initial_timezone_value()
-    return Transaction.consumption.get_current_month_consumption(
+    return Transaction.objects.get_current_month_consumption(
         item_id,
         configured_timezone,
     )
@@ -79,7 +79,7 @@ class ItemConsumptionHistorySerializer(serializers.ModelSerializer):
     """Trigger the transaction consumption report for the current week."""
     item_id = obj.id
     configured_timezone = self.__get_initial_timezone_value()
-    return Transaction.consumption.get_current_week_consumption(
+    return Transaction.objects.get_current_week_consumption(
         item_id,
         configured_timezone,
     )
@@ -89,7 +89,7 @@ class ItemConsumptionHistorySerializer(serializers.ModelSerializer):
     """Retrieve the first consumption date for this item, if any."""
     item_id = obj.id
     configured_timezone = self.__get_initial_timezone_value()
-    return Transaction.consumption.get_first_consumption(
+    return Transaction.objects.get_first_consumption(
         item_id,
         configured_timezone,
     )
@@ -98,7 +98,7 @@ class ItemConsumptionHistorySerializer(serializers.ModelSerializer):
   def get_total_consumption(self, obj):
     """Trigger the transaction consumption report for total consumption."""
     item_id = obj.id
-    return Transaction.consumption.get_total_consumption(item_id)
+    return Transaction.objects.get_total_consumption(item_id)
 
   def __get_initial_timezone_value(self):
     timezone_value = self.initial_data.get('timezone', DEFAULT_TIMEZONE)

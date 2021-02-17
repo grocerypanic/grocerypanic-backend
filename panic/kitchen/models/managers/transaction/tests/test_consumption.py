@@ -70,7 +70,7 @@ class TestConsumptionHistoryManagerWithoutData(TransactionTestHarness):
   @freeze_time("2020-01-14")
   def test_last_two_weeks_no_history(self):
 
-    received = Transaction.consumption.get_last_two_weeks(self.item1)
+    received = Transaction.objects.get_last_two_weeks(self.item1)
     self.assertQuerysetEqual(received, map(repr, []))
 
   @freeze_time("2020-01-14")
@@ -78,7 +78,7 @@ class TestConsumptionHistoryManagerWithoutData(TransactionTestHarness):
     assert Transaction.objects.all().count() == 0
 
     self.assertIsNone(
-        Transaction.consumption.get_first_consumption(self.item1.id)
+        Transaction.objects.get_first_consumption(self.item1.id)
     )
 
   @freeze_time("2020-01-14")
@@ -86,7 +86,7 @@ class TestConsumptionHistoryManagerWithoutData(TransactionTestHarness):
     assert Transaction.objects.all().count() == 0
 
     self.assertEqual(
-        0, Transaction.consumption.get_total_consumption(self.item1.id)
+        0, Transaction.objects.get_total_consumption(self.item1.id)
     )
 
 
@@ -143,7 +143,7 @@ class TestConsumptionHistoryManagerTwoWeeks(ConsumptionTestHarness):
         days=int(settings.TRANSACTION_HISTORY_MAX)
     )
 
-    received = Transaction.consumption.get_last_two_weeks(self.item1)
+    received = Transaction.objects.get_last_two_weeks(self.item1)
     expected = Transaction.objects.\
         filter(
           item=self.item1,
@@ -168,7 +168,7 @@ class TestConsumptionHistoryManagerTwoWeeks(ConsumptionTestHarness):
         timedelta(days=int(settings.TRANSACTION_HISTORY_MAX))
     )
 
-    received = Transaction.consumption.get_last_two_weeks(
+    received = Transaction.objects.get_last_two_weeks(
         self.item1,
         zone=test_tz,
     )
@@ -243,7 +243,7 @@ class TestConsumptionHistoryManagerStats(TransactionTestHarness):
   def test_get_first_consumption(self):
     self.assertEqual(
         self.dates['two_months_ago'],
-        Transaction.consumption.get_first_consumption(self.item1.id)
+        Transaction.objects.get_first_consumption(self.item1.id)
     )
 
   @freeze_time("2020-01-14")
@@ -252,7 +252,7 @@ class TestConsumptionHistoryManagerStats(TransactionTestHarness):
 
     self.assertEqual(
         self.dates['two_months_ago'].astimezone(pytz.timezone(zone)),
-        Transaction.consumption.get_first_consumption(
+        Transaction.objects.get_first_consumption(
             self.item1.id,
             zone=zone,
         )
@@ -261,7 +261,7 @@ class TestConsumptionHistoryManagerStats(TransactionTestHarness):
   @freeze_time("2020-01-14")
   def test_get_first_consumption_another_user(self):
     self.assertIsNone(
-        Transaction.consumption.get_first_consumption(self.item2.id)
+        Transaction.objects.get_first_consumption(self.item2.id)
     )
 
   @freeze_time("2020-01-14")
@@ -269,19 +269,19 @@ class TestConsumptionHistoryManagerStats(TransactionTestHarness):
     expected = len(self.dates) * 3
 
     self.assertEqual(
-        expected, Transaction.consumption.get_total_consumption(self.item1.id)
+        expected, Transaction.objects.get_total_consumption(self.item1.id)
     )
 
   @freeze_time("2020-01-14")
   def test_get_total_consumption_another_user(self):
     self.assertEqual(
-        0, Transaction.consumption.get_total_consumption(self.item2.id)
+        0, Transaction.objects.get_total_consumption(self.item2.id)
     )
 
   @freeze_time("2020-01-14")
   def test_get_current_week_consumption(self):
     self.assertEqual(
-        6, Transaction.consumption.get_current_week_consumption(self.item1.id)
+        6, Transaction.objects.get_current_week_consumption(self.item1.id)
     )
 
   @freeze_time("2020-01-14")
@@ -290,7 +290,7 @@ class TestConsumptionHistoryManagerStats(TransactionTestHarness):
 
     self.assertEqual(
         3,
-        Transaction.consumption.get_current_week_consumption(
+        Transaction.objects.get_current_week_consumption(
             self.item1.id,
             zone=zone,
         )
@@ -299,14 +299,14 @@ class TestConsumptionHistoryManagerStats(TransactionTestHarness):
   @freeze_time("2020-01-14")
   def test_get_current_week_consumption_another_user(self):
     self.assertEqual(
-        0, Transaction.consumption.get_current_week_consumption(self.item2.id)
+        0, Transaction.objects.get_current_week_consumption(self.item2.id)
     )
 
   @freeze_time("2020-01-14")
   def test_get_current_month_consumption(self):
     self.assertEqual(
         12,
-        Transaction.consumption.get_current_month_consumption(self.item1.id)
+        Transaction.objects.get_current_month_consumption(self.item1.id)
     )
 
   @freeze_time("2020-01-14")
@@ -315,7 +315,7 @@ class TestConsumptionHistoryManagerStats(TransactionTestHarness):
 
     self.assertEqual(
         9,
-        Transaction.consumption.get_current_month_consumption(
+        Transaction.objects.get_current_month_consumption(
             self.item1.id,
             zone=zone,
         )
@@ -324,5 +324,5 @@ class TestConsumptionHistoryManagerStats(TransactionTestHarness):
   @freeze_time("2020-01-14")
   def test_get_current_month_consumption_another_user(self):
     self.assertEqual(
-        0, Transaction.consumption.get_current_month_consumption(self.item2.id)
+        0, Transaction.objects.get_current_month_consumption(self.item2.id)
     )

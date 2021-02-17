@@ -43,7 +43,7 @@ class TestItemHistorySerializer(TransactionTestHarness):
   @freeze_time("2020-01-14")
   def test_deserialize_last_two_weeks(self):
     transaction = self.create_test_instance(**self.data)
-    history = Transaction.consumption.get_last_two_weeks(self.item1.id)
+    history = Transaction.objects.get_last_two_weeks(self.item1.id)
     deserialized_transaction = ItemHistorySerializer(history, many=True)
     deserialized = deserialized_transaction.data
 
@@ -63,7 +63,7 @@ class TestItemHistorySerializer(TransactionTestHarness):
 
     test_timezone = pytz.timezone(test_zone)
     transaction = self.create_test_instance(**self.data)
-    history = Transaction.consumption.get_last_two_weeks(
+    history = Transaction.objects.get_last_two_weeks(
         self.item1.id,
         zone=test_zone,
     )
