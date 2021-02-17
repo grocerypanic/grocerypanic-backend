@@ -5,7 +5,7 @@ from django.db import models, transaction
 from django.utils.timezone import now
 
 from . import constants
-from .managers.transaction import ConsumptionHistoryManager, ExpiryManager
+from .managers.transaction import ConsumptionHistoryManager
 from .validators.transaction import (
     TransactionQuantityValidator,
     related_item_quantity_validator,
@@ -24,7 +24,7 @@ class Transaction(models.Model):
   )
 
   consumption = ConsumptionHistoryManager()
-  expiration = ExpiryManager()
+  expiration = models.Manager()  # Disabled
   objects = models.Manager()
 
   class Meta:

@@ -2,17 +2,18 @@
 
 from django.contrib.auth import get_user_model
 from django.db.models import Model
-from django.test import TestCase
 from django.utils import timezone
 
 from ...models.store import Store
-from .fixture_bases import KitchenModelTestFixture
+from .fixture_bases import KitchenModelTestFixture, MutableSignalsBaseTestCase
 
 User: Model = get_user_model()
 
 
-class StoreTestHarness(KitchenModelTestFixture, TestCase):
+class StoreTestHarness(KitchenModelTestFixture, MutableSignalsBaseTestCase):
   """Test harness for the Store model."""
+
+  mute_signals = True
 
   user1: User
   user2: User

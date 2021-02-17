@@ -1,6 +1,7 @@
 """Mixin classes for kitchen model test fixtures."""
 
 from django.core.exceptions import ValidationError
+from django.db.models import signals as django_signals
 from rest_framework import serializers
 
 
@@ -29,6 +30,37 @@ class ModelTestMixin:
       local_data.update(overloaded_field)
       with super().assertRaises(ValidationError):
         _ = super().create_test_instance(**local_data)
+
+
+class MutableSignalsMixin:
+  """Mixin class for adding mutable signal control to test classes.
+
+  Mix with a class that inherits from::
+    - :class:`django.test.TestCase`
+  """
+
+  mute_signals: bool = True
+  registered_signals: list = []
+
+  @classmethod
+  def _toggle_signal(cls, action, **kwargs):
+    signal = getattr(django_signals, kwargs['signal_name'])
+    toggle = getattr(signal, action)
+    toggle(kwargs['handler'], sender=kwargs['sender'])
+
+  @classmethod
+  def setUpClass(cls):
+    if cls.mute_signals:
+      for signal_definition in cls.registered_signals:
+        cls._toggle_signal('disconnect', **signal_definition)
+    super().setUpClass()
+
+  @classmethod
+  def tearDownClass(cls):
+    if cls.mute_signals:
+      for signal_definition in cls.registered_signals:
+        cls._toggle_signal('connect', **signal_definition)
+    super().tearDownClass()
 
 
 class SerializerTestMixin:
