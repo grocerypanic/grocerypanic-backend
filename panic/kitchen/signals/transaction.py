@@ -11,4 +11,4 @@ from ..models.inventory import Inventory
 def transaction_post_save_handler(instance, created, **kwargs):
   """Handle the Transaction model `post_save` signal."""
   if created:
-    Inventory.objects.adjustment(instance)
+    Inventory.objects.adjust(instance)

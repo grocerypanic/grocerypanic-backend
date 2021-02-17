@@ -1,5 +1,8 @@
 """Test the Inventory Transaction Manager."""
 
+from datetime import timedelta
+
+from freezegun import freeze_time
 from rest_framework.serializers import ErrorDetail
 
 from .....exceptions import ProcessingError
@@ -7,6 +10,7 @@ from .....tests.fixtures.fixtures_inventory import InventoryTestHarness
 from ....inventory import Inventory
 
 
+@freeze_time("2020-01-14")
 class TestAdjustmentManager(InventoryTestHarness):
   """Test the InventoryTransactionManager model manager class."""
 
@@ -55,7 +59,7 @@ class TestAdjustmentManager(InventoryTestHarness):
     results = []
     for _ in range(0, 2):
       transaction = self.__positive_transaction()
-      Inventory.objects.adjustment(transaction)
+      Inventory.objects.adjust(transaction)
       results.append(transaction)
     return results
 
@@ -75,9 +79,11 @@ class TestAdjustmentManager(InventoryTestHarness):
 
   def test_transaction_positive(self):
     transaction = self.__positive_transaction()
-    Inventory.objects.adjustment(transaction)
+    Inventory.objects.adjust(transaction)
 
-    query = Inventory.objects.filter(item=transaction.item)
+    query = Inventory.objects.\
+        filter(item=transaction.item).\
+        order_by("transaction__datetime")
 
     assert len(query) == 1
     self.__check_inventory(
@@ -89,15 +95,17 @@ class TestAdjustmentManager(InventoryTestHarness):
 
   def test_transaction_full_debit(self):
     initial_transaction = self.__positive_transaction()
-    Inventory.objects.adjustment(initial_transaction)
+    Inventory.objects.adjust(initial_transaction)
 
     transaction = self.create_test_transaction_instance(
         **self.negative_transaction,
     )
 
-    Inventory.objects.adjustment(transaction)
+    Inventory.objects.adjust(transaction)
 
-    query = Inventory.objects.filter(item=transaction.item)
+    query = Inventory.objects.\
+        filter(item=transaction.item).\
+        order_by("transaction__datetime")
 
     assert len(query) == 0
 
@@ -108,23 +116,27 @@ class TestAdjustmentManager(InventoryTestHarness):
         **self.negative_transaction_x2,
     )
 
-    Inventory.objects.adjustment(transaction)
+    Inventory.objects.adjust(transaction)
 
-    query = Inventory.objects.filter(item=transaction.item)
+    query = Inventory.objects.\
+        filter(item=transaction.item).\
+        order_by("transaction__datetime")
 
     assert len(query) == 0
 
   def test_transaction_partial_debit(self):
     initial_transaction = self.__positive_transaction()
-    Inventory.objects.adjustment(initial_transaction)
+    Inventory.objects.adjust(initial_transaction)
 
     transaction = self.create_test_transaction_instance(
         **self.negative_transaction_partial,
     )
 
-    Inventory.objects.adjustment(transaction)
+    Inventory.objects.adjust(transaction)
 
-    query = Inventory.objects.filter(item=transaction.item)
+    query = Inventory.objects.\
+        filter(item=transaction.item).\
+        order_by("transaction__datetime")
 
     assert len(query) == 1
     self.__check_inventory(
@@ -141,11 +153,11 @@ class TestAdjustmentManager(InventoryTestHarness):
         **self.negative_transaction_partial_x2,
     )
 
-    Inventory.objects.adjustment(transaction)
+    Inventory.objects.adjust(transaction)
 
     query = Inventory.objects.\
         filter(item=transaction.item).\
-        order_by("-transaction__datetime")
+        order_by("transaction__datetime")
 
     assert len(query) == 2
     self.__check_inventory(
@@ -162,11 +174,11 @@ class TestAdjustmentManager(InventoryTestHarness):
         **self.negative_transaction_partial_x2_rollover,
     )
 
-    Inventory.objects.adjustment(transaction)
+    Inventory.objects.adjust(transaction)
 
     query = Inventory.objects.\
         filter(item=transaction.item).\
-        order_by("-transaction__datetime")
+        order_by("transaction__datetime")
 
     assert len(query) == 1
     self.__check_inventory(
@@ -185,7 +197,7 @@ class TestAdjustmentManager(InventoryTestHarness):
     )
 
     with self.assertRaises(ProcessingError) as raised:
-      Inventory.objects.adjustment(transaction)
+      Inventory.objects.adjust(transaction)
 
     expected_error_message = (
         f"could not adjust inventory for transaction={transaction.id}, "
@@ -200,3 +212,51 @@ class TestAdjustmentManager(InventoryTestHarness):
             string=expected_error_message, code=ProcessingError.default_code
         )
     )
+
+
+@freeze_time("2020-01-14")
+class TestAdjustmentManagerQueries(InventoryTestHarness):
+  """Test the queries used by the AdjustmentManager model manager class."""
+
+  @classmethod
+  def create_data_hook(cls):
+    cls.purchased_today = {
+        'item': cls.item1,
+        'date_object': cls.today,
+        'user': cls.user1,
+        'quantity': 3,
+    }
+    cls.purchased_yesterday = dict(cls.purchased_today)
+    cls.purchased_yesterday.update({
+        'date_object': cls.today - timedelta(days=1),
+    })
+
+  @staticmethod
+  def __wipe_inventory():
+    Inventory.objects.all().delete()
+
+  def __apply_transaction(self, definition):
+    transaction = self.create_test_transaction_instance(**definition,)
+    Inventory.objects.adjust(transaction)
+    return transaction
+
+  def test_single_record(self):
+    self.__apply_transaction(self.purchased_today)
+
+    query = Inventory.objects. \
+        filter(item=self.item1). \
+        order_by("transaction__datetime")
+    expected_results = Inventory.objects.select_inventory_by_item(self.item1)
+
+    self.assertQuerysetEqual(expected_results, map(repr, query))
+
+  def test_two_records(self):
+    self.__apply_transaction(self.purchased_today)
+    self.__apply_transaction(self.purchased_yesterday)
+
+    query = Inventory.objects.\
+        filter(item=self.item1).\
+        order_by("transaction__datetime")
+    expected_results = Inventory.objects.select_inventory_by_item(self.item1)
+
+    self.assertQuerysetEqual(expected_results, map(repr, query))

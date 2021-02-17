@@ -28,12 +28,12 @@ class TestTransactionPostSaveHandler(TransactionTestHarness):
         'quantity': -3
     }
 
-  @patch(transaction_module.__name__ + '.Inventory.objects.adjustment')
+  @patch(transaction_module.__name__ + '.Inventory.objects.adjust')
   def test_create_inventory_from_transaction(self, m_adjust):
     transaction = self.create_test_instance(**self.positive_data)
     m_adjust.assert_called_once_with(transaction)
 
-  @patch(transaction_module.__name__ + '.Inventory.objects.adjustment')
+  @patch(transaction_module.__name__ + '.Inventory.objects.adjust')
   def test_existing_transaction_save_event_noop(self, m_adjust):
     transaction = self.create_test_instance(**self.positive_data)
     transaction.save()

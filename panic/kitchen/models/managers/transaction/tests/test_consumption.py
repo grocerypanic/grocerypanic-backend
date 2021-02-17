@@ -77,9 +77,7 @@ class TestConsumptionHistoryManagerWithoutData(TransactionTestHarness):
   def test_get_first_consumption_no_history(self):
     assert Transaction.objects.all().count() == 0
 
-    self.assertIsNone(
-        Transaction.objects.get_first_consumption(self.item1.id)
-    )
+    self.assertIsNone(Transaction.objects.get_first_consumption(self.item1.id))
 
   @freeze_time("2020-01-14")
   def test_get_total_consumption_no_history(self):
@@ -260,9 +258,7 @@ class TestConsumptionHistoryManagerStats(TransactionTestHarness):
 
   @freeze_time("2020-01-14")
   def test_get_first_consumption_another_user(self):
-    self.assertIsNone(
-        Transaction.objects.get_first_consumption(self.item2.id)
-    )
+    self.assertIsNone(Transaction.objects.get_first_consumption(self.item2.id))
 
   @freeze_time("2020-01-14")
   def test_get_total_consumption(self):
@@ -305,8 +301,7 @@ class TestConsumptionHistoryManagerStats(TransactionTestHarness):
   @freeze_time("2020-01-14")
   def test_get_current_month_consumption(self):
     self.assertEqual(
-        12,
-        Transaction.objects.get_current_month_consumption(self.item1.id)
+        12, Transaction.objects.get_current_month_consumption(self.item1.id)
     )
 
   @freeze_time("2020-01-14")
