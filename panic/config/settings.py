@@ -51,6 +51,8 @@ INSTALLED_APPS = [
     'django_filters',
     'dj_rest_auth',
     'corsheaders',
+    'timezone_field',
+    'user',
     'appengine',
     'kitchen',
     'drf_yasg',
@@ -133,6 +135,11 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# Custom User Model
+# https://docs.djangoproject.com/en/3.0/ref/settings/#std:setting-AUTH_USER_MODEL
+
+AUTH_USER_MODEL = 'user.User'
+
 # Internationalization
 # https://docs.djangoproject.com/en/3.0/topics/i18n/
 
@@ -160,7 +167,7 @@ SESSION_COOKIE_SAMESITE = "Strict"
 REST_FRAMEWORK = REST_FRAMEWORK_AVAILABLE[ENVIRONMENT]
 REST_COOKIES_SECURE = False  # Development
 REST_USE_JWT = True
-JWT_AUTH_COOKIE = 'panic_auth'
+JWT_AUTH_COOKIE = 'panic_dev_auth'
 JWT_AUTH_COOKIE_SAMESITE = 'lax'  # Development
 
 # CSRF
@@ -171,7 +178,7 @@ CSRF_COOKIE_HTTPONLY = True  # Development
 CSRF_COOKIE_SECURE = False  # Development
 CSRF_TRUSTED_ORIGINS = ['localhost', '127.0.0.1']
 CSRF_FAILURE_VIEW = "spa_security.views.csrf_error"
-CSRF_COOKIE_NAME = "panic_csrf"
+CSRF_COOKIE_NAME = "panic_dev_csrf"
 
 # CORS
 
@@ -181,6 +188,13 @@ CORS_ORIGIN_ALLOW_ALL = True
 # Sites
 
 SITE_ID = 1
+
+# URLS
+
+LOGIN_URL = "/api/v1/auth/login/"
+LOGIN_REDIRECT_URL = "/api/v1/auth/login/"
+LOGOUT_REDIRECT_URL = None
+ACCOUNT_LOGOUT_REDIRECT_URL = LOGIN_URL
 
 # Default Message Level
 
