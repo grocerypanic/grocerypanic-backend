@@ -113,22 +113,56 @@ source_environment() {
 
 }
 
+test_runner() {
+
+  set -e
+
+  if [[ $1 == "functional" ]]; then
+    functional_tests "$@"
+  else
+    unittests "$@"
+  fi
+
+}
+
 unittests() {
 
   set -e
 
+  if [[ $1 == "integration" ]]; then
+
+    integration_tests "$@"
+
+  else
+
+    pushd "${PROJECT_HOME}"  > /dev/null
+      if [[ $1 == "coverage" ]]; then
+        shift
+        set +e
+          pytest --cov-config=.coveragerc --cov-report term-missing --cov-fail-under=100 --cov="${PROJECT_NAME}" "${PROJECT_NAME}/" "$@"
+          exit_code="$?"
+          coverage html
+        set -e
+        exit "${exit_code}"
+      else
+        pytest "$@"
+      fi
+    popd  > /dev/null
+
+  fi
+
+}
+
+integration_tests() {
+
+  set -e
+
   pushd "${PROJECT_HOME}"  > /dev/null
-    if [[ $1 == "coverage" ]]; then
-      shift
-      set +e
-        pytest --cov-config=.coveragerc --cov-report term-missing --cov-fail-under=100 --cov="${PROJECT_NAME}" "${PROJECT_NAME}/" "$@"
-        exit_code="$?"
-        coverage html
-      set -e
-      exit "${exit_code}"
-    else
-      pytest "$@"
-    fi
+
+    shopt -s globstar
+
+    pytest -x "${PROJECT_NAME}/"**/integration_*.py
+
   popd  > /dev/null
 
 }

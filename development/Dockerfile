@@ -18,6 +18,7 @@ RUN apt-get update      && \
     jq                     \
     libpq-dev              \
     openssh-client         \
+    postgresql-client      \
     shellcheck             \
     sudo                   \
     tig                    \

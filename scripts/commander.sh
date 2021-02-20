@@ -70,17 +70,22 @@ case $1 in
     setup_python "$@"
     ;;
   'shortlist')
-    echo "build-docs deploy-prod deploy-stage fmt lint lint-validate reinstall-requirements sectest setup test test-coverage update"
+    echo "build-docs deploy-prod deploy-stage fmt lint lint-validate reinstall-requirements sectest setup test test-coverage test-integration update"
     ;;
   'test')
     shift
     source_environment
-    unittests "$@"
+    test_runner "$@"
     ;;
   'test-coverage')
     shift
     source_environment
-    unittests "coverage" "$@"
+    test_runner "coverage" "$@"
+    ;;
+  'test-integration')
+    shift
+    source_environment
+    test_runner "integration" "$@"
     ;;
   'update')
     shift
@@ -99,6 +104,7 @@ case $1 in
     echo ' - setup                   (Setup/Reset environment)'
     echo ' - test                    (Run pytest)'
     echo ' - test-coverage           (Run pytest with coverage)'
+    echo ' - test-integration        (Run pytest on integration tests)'
     echo ' - update                  (Update bash & the CLI)'
     ;;
 

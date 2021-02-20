@@ -41,6 +41,9 @@ jobs:
     - name: Run Unit Tests
       run: |
         docker-compose exec -T panic bash -l -c 'scripts/commander.sh test coverage'
+    - name: Run Functional Tests
+      run: |
+        docker-compose exec -T panic bash -l -c 'scripts/commander.sh test integration'
     - name: Report Job Status (Success)
       run: |
         curl -X POST -H 'Content-type: application/json' --data '{"text":"panic backend build was successful!"}' "${WEBHOOK_URL}"
