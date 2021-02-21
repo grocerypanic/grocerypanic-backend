@@ -97,7 +97,7 @@ class TestItem(SerializerTestMixin, ItemTestHarness):
     self.assertEqual(item.user.id, self.user1.id)
     self.assertEqual(item.shelf.id, self.shelf1.id)
     self.assertEqual(item.price, self.serializer_data['price'])
-    self.assertEqual(item.quantity, self.serializer_data['quantity'])
+    self.assertEqual(item.quantity, 0)
     self.assertFalse(item.has_partial_quantities)
 
   def test_serialize_fractional_quantities(self):

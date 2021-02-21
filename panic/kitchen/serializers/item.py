@@ -21,6 +21,7 @@ class ItemSerializer(RelatedValidatorModelSerializer):
     exclude = ('index',)
     read_only_fields = (
         "id",
+        "quantity",
         "next_expiry_date",
         "next_expiry_quantity",
         "expired",
