@@ -25,7 +25,11 @@ class TestTransactionSerializer(SerializerTestMixin, TransactionTestHarness):
     cls.today = timezone.now()
     cls.fields = {"name": 255}
 
-    cls.data = {'item': cls.item1, 'date_object': cls.today, 'quantity': 3}
+    cls.create_data = {
+        'item': cls.item1,
+        'date_object': cls.today,
+        'quantity': 3
+    }
     cls.serializer_data = {
         'item': cls.item1.id,
         'datetime': cls.today,
@@ -49,21 +53,20 @@ class TestTransactionSerializer(SerializerTestMixin, TransactionTestHarness):
 
   def setUp(self):
     self.objects = list()
-    self.item1.quantity = 3
-    self.item1.save()
+    self.reset_item1()
 
   def tearDown(self):
     for obj in self.objects:
       obj.delete()
 
   def test_deserialize(self):
-    transaction = self.create_test_instance(**self.data)
+    transaction = self.create_test_instance(**self.create_data)
     serialized = self.serializer(transaction)
     deserialized = serialized.data
 
     self.assertEqual(deserialize_datetime(deserialized['datetime']), self.today)
     self.assertEqual(deserialized['item'], self.item1.id)
-    self.assertEqual(deserialized['quantity'], self.data['quantity'])
+    self.assertEqual(deserialized['quantity'], self.create_data['quantity'])
 
   def test_serialize(self):
     serialized = self.serializer(

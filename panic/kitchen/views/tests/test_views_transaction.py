@@ -33,6 +33,8 @@ class TestHarnessWithData(TransactionTestHarness):
   item2: Item
   user2: User
 
+  mute_signals = False
+
   @classmethod
   def setUpTestData(cls):
     super().setUpTestData()
@@ -97,8 +99,6 @@ class PrivateTransactionTest(TestHarnessWithData):
 
   def setUp(self):
     super().setUp()
-    self.item1.quantity = 3
-    self.item1.save()
     self.client = APIClient()
     self.client.force_authenticate(self.user1)
 
@@ -115,7 +115,7 @@ class PrivateTransactionTest(TestHarnessWithData):
     self.assertEqual(transaction.item.id, self.item1.id)
     self.assertEqual(transaction.datetime, timezone.now())
     self.assertEqual(transaction.quantity, self.serializer_data['quantity'])
-    assert transaction.item.quantity == 6  # The modified value
+    assert transaction.item.quantity == transaction.quantity
 
   def test_list_all_transactions_without_item_filter(self):
     self.create_test_instance(**self.transaction_now)
@@ -220,8 +220,6 @@ class PrivateTransactionAnotherUser(TestHarnessWithData):
 
   def setUp(self):
     super().setUp()
-    self.item1.quantity = 3
-    self.item1.save()
     self.client = APIClient()
     self.client.force_authenticate(self.user1)
 
@@ -238,7 +236,7 @@ class PrivateTransactionAnotherUser(TestHarnessWithData):
     self.assertEqual(transaction.item.id, self.item1.id)
     self.assertEqual(transaction.datetime, timezone.now())
     self.assertEqual(transaction.quantity, self.serializer_data['quantity'])
-    assert transaction.item.quantity == 6  # The modified value
+    assert transaction.item.quantity == transaction.quantity
 
   @freeze_time("2014-01-01")
   def test_create_transaction_item_owned_by_another_user(self):

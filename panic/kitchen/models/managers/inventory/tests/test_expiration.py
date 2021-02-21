@@ -36,11 +36,7 @@ class TestExpirationManager(ItemTestHarness):
         'shelf': cls.shelf1,
         'preferred_stores': [cls.store1],
         'price': 2.00,
-        'quantity': 3,
     }
-    cls.zeroed_data = dict(cls.data)
-    cls.zeroed_data.update({"quantity": 0})
-
     cls.user1.timezone = "Pacific/Honolulu"
     cls.user1.save()
 
@@ -49,7 +45,7 @@ class TestExpirationManager(ItemTestHarness):
     cls.one_week_ago = cls.today - timedelta(days=14)
     cls.one_month_ago = cls.today - timedelta(days=31)
 
-    cls.item = cls.create_instance(**cls.zeroed_data)
+    cls.item = cls.create_instance(**cls.data)
 
   def _create_scenarios(self, quantity):
 

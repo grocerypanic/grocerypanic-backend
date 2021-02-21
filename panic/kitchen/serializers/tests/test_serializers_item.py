@@ -20,14 +20,13 @@ class TestItem(SerializerTestMixin, ItemTestHarness):
     cls.fields = {"name": 255}
     cls.request = MockRequest(cls.user1)
 
-    cls.data = {
+    cls.create_data = {
         'name': "Canned Beans",
         'shelf_life': 99,
         'user': cls.user1,
         'shelf': cls.shelf1,
         'preferred_stores': [cls.store1],
         'price': 2.00,
-        'quantity': 3
     }
     cls.serializer_data = {
         'name': "Canned Beans",
@@ -63,18 +62,21 @@ class TestItem(SerializerTestMixin, ItemTestHarness):
     super().setUpTestData()
 
   def test_deserialize(self):
-    item = self.create_test_instance(**self.data)
+    item = self.create_test_instance(**self.create_data)
     serialized = self.serializer(item)
     deserialized = serialized.data
 
     price = '2.00'
 
-    self.assertEqual(deserialized['name'], self.data['name'])
+    self.assertEqual(deserialized['name'], self.create_data['name'])
     self.assertFalse(deserialized['has_partial_quantities'])
-    self.assertEqual(deserialized['shelf_life'], self.data['shelf_life'])
+    self.assertEqual(deserialized['shelf_life'], self.create_data['shelf_life'])
     self.assertEqual(deserialized['shelf'], self.shelf1.id)
     self.assertEqual(deserialized['price'], price)
-    self.assertEqual(deserialized['quantity'], self.data['quantity'])
+    self.assertEqual(deserialized['quantity'], 0)
+    self.assertEqual(deserialized['expired'], 0)
+    self.assertEqual(deserialized['next_expiry_quantity'], 0)
+    self.assertEqual(deserialized['next_expiry_date'], None)
     preferred_stores = [store.id for store in item.preferred_stores.all()]
     self.assertListEqual(deserialized['preferred_stores'], preferred_stores)
     assert 'user' not in deserialized

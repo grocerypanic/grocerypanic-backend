@@ -8,6 +8,7 @@ import kitchen.models.item
 import kitchen.models.transaction
 import naturalsortfield.fields
 import spa_security.fields
+from django.utils.timezone import now
 
 
 class Migration(migrations.Migration):
@@ -59,10 +60,7 @@ class Migration(migrations.Migration):
                       ]
                   )
               ),
-              (
-                  'next_expiry_date',
-                  models.DateField(default=kitchen.models.item.default_expiry)
-              ),
+              ('next_expiry_date', models.DateField(default=now())),
               (
                   'next_expiry_quantity',
                   models.IntegerField(

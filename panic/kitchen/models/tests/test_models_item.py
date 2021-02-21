@@ -1,4 +1,5 @@
 """Test the Item model."""
+# pylint: disable=protected-access
 
 from unittest.mock import patch
 
@@ -20,34 +21,33 @@ class TestItem(ModelTestMixin, ItemTestHarness):
   def create_data_hook(cls):
     cls.today = timezone.now()
     cls.fields = {"name": 255}
-    cls.data = {
+    cls.create_data = {
         'user': cls.user1,
         'name': "Canned Beans",
         'shelf_life': 99,
         'shelf': cls.shelf1,
         'preferred_stores': [cls.store1],
         'price': 2.00,
-        'quantity': 3,
     }
 
   def test_create(self):
-    created = self.create_test_instance(**self.data)
-    query = Item.objects.filter(name=self.data['name'])
+    created = self.create_test_instance(**self.create_data)
+    query = Item.objects.filter(name=self.create_data['name'])
 
     self.assertQuerysetEqual(query, map(repr, [created]))
-    self.assertEqual(query[0].index, self.data['name'].lower())
+    self.assertEqual(query[0].index, self.create_data['name'].lower())
 
   def test_unique(self):
-    _ = self.create_test_instance(**self.data)
+    _ = self.create_test_instance(**self.create_data)
 
     with self.assertRaises(ValidationError):
-      _ = self.create_test_instance(**self.data)
+      _ = self.create_test_instance(**self.create_data)
 
-    count = Item.objects.filter(name=self.data['name']).count()
+    count = Item.objects.filter(name=self.create_data['name']).count()
     assert count == 1
 
   def test_bleach(self):
-    injection_attack = dict(self.data)
+    injection_attack = dict(self.create_data)
     injection_attack['name'] = "Canned Beans<script>alert('hi');</script>"
     sanitized_name = "Canned Beans&lt;script&gt;alert('hi');&lt;/script&gt;"
 
@@ -62,45 +62,32 @@ class TestItem(ModelTestMixin, ItemTestHarness):
     item = query[0]
     self.assertEqual(item.index, sanitized_name.lower())
     self.assertEqual(item.name, sanitized_name)
-    self.assertEqual(item.shelf_life, self.data['shelf_life'])
+    self.assertEqual(item.shelf_life, self.create_data['shelf_life'])
     self.assertEqual(item.user.id, self.user1.id)
     self.assertEqual(item.shelf.id, self.shelf1.id)
-    self.assertEqual(item.price, self.data['price'])
-    self.assertEqual(item.quantity, self.data['quantity'])
+    self.assertEqual(item.price, self.create_data['price'])
 
   def test_str(self):
-    item = self.create_test_instance(**self.data)
-    self.assertEqual(self.data['name'], str(item))
-
-  def test_negative_qty(self):
-    item = self.create_test_instance(**self.data)
-    item.quantity = constants.MINIMUM_QUANTITY - 1
-    with self.assertRaises(ValidationError):
-      item.save()
-
-  def test_upper_bound_qty(self):
-    item = self.create_test_instance(**self.data)
-    item.quantity = constants.MAXIMUM_QUANTITY + 1
-    with self.assertRaises(ValidationError):
-      item.save()
+    item = self.create_test_instance(**self.create_data)
+    self.assertEqual(self.create_data['name'], str(item))
 
   def test_lower_bound_shelf_life(self):
-    item = self.create_test_instance(**self.data)
+    item = self.create_test_instance(**self.create_data)
     item.shelf_life = Item.MINIMUM_SHELF_LIFE - 1
     with self.assertRaises(ValidationError):
       item.save()
 
   def test_upper_bound_shelf_life(self):
-    item = self.create_test_instance(**self.data)
+    item = self.create_test_instance(**self.create_data)
     item.shelf_life = Item.MAXIMUM_SHELF_LIFE + 1
     with self.assertRaises(ValidationError):
       item.save()
 
   def test_two_users_with_the_same_item_name(self):
-    item1 = self.create_test_instance(**self.data)
+    item1 = self.create_test_instance(**self.create_data)
 
     self.create_second_test_set()
-    second_item_data = dict(self.data)
+    second_item_data = dict(self.create_data)
     second_item_data['user'] = self.user2
     second_item_data['shelf'] = self.shelf2
     second_item_data['preferred_stores'] = [self.store2]
@@ -110,14 +97,50 @@ class TestItem(ModelTestMixin, ItemTestHarness):
     self.assertNotEqual(item1, item2)
 
   def test_default_fraction_bool(self):
-    item1 = self.create_test_instance(**self.data)
+    item1 = self.create_test_instance(**self.create_data)
     self.assertFalse(item1.has_partial_quantities)
 
   def test_toggle_fraction_bool(self):
-    item1 = self.create_test_instance(**self.data)
+    item1 = self.create_test_instance(**self.create_data)
     item1.has_partial_quantities = True
     item1.save()
     self.assertTrue(item1.has_partial_quantities)
+
+  def test_lower_bound_quantity(self):
+    item = self.create_test_instance(**self.create_data)
+    item.quantity = constants.MINIMUM_QUANTITY - 1
+    with self.assertRaises(ValidationError):
+      item.save()
+
+  def test_upper_bound_quantity(self):
+    item = self.create_test_instance(**self.create_data)
+    item.quantity = constants.MAXIMUM_QUANTITY + 1
+    with self.assertRaises(ValidationError):
+      item.save()
+
+  def test_lower_bound__expired(self):
+    item = self.create_test_instance(**self.create_data)
+    item._expired = constants.MINIMUM_QUANTITY - 1
+    with self.assertRaises(ValidationError):
+      item.save()
+
+  def test_upper_bound__expired(self):
+    item = self.create_test_instance(**self.create_data)
+    item._expired = constants.MAXIMUM_QUANTITY + 1
+    with self.assertRaises(ValidationError):
+      item.save()
+
+  def test_lower_bound__next_expiry_quantity(self):
+    item = self.create_test_instance(**self.create_data)
+    item._next_expiry_quantity = constants.MINIMUM_QUANTITY - 1
+    with self.assertRaises(ValidationError):
+      item.save()
+
+  def test_upper_bound__next_expiry_quantity(self):
+    item = self.create_test_instance(**self.create_data)
+    item._next_expiry_quantity = constants.MAXIMUM_QUANTITY + 1
+    with self.assertRaises(ValidationError):
+      item.save()
 
 
 @freeze_time("2020-01-14")
@@ -142,26 +165,19 @@ class TestItemCalculatedProperties(ItemTestHarness):
   def test_expired(self, m_func):
     m_func.return_value = "return_value"
     item = self.create_test_instance(**self.data)
-    self.assertEqual(item.expired_new, "return_value")
+    self.assertEqual(item.expired, "return_value")
     m_func.assert_called_with(item)
 
   @patch(item_module.__name__ + ".Inventory.objects.get_next_expiry_date")
   def test_next_expiry_date(self, m_func):
     m_func.return_value = "return_value"
     item = self.create_test_instance(**self.data)
-    self.assertEqual(item.next_expiry_date_new, "return_value")
+    self.assertEqual(item.next_expiry_date, "return_value")
     m_func.assert_called_with(item)
 
   @patch(item_module.__name__ + ".Inventory.objects.get_next_expiry_quantity")
   def test_next_expiry_quantity(self, m_func):
     m_func.return_value = "return_value"
     item = self.create_test_instance(**self.data)
-    self.assertEqual(item.next_expiry_quantity_new, "return_value")
-    m_func.assert_called_with(item)
-
-  @patch(item_module.__name__ + ".Inventory.objects.get_quantity")
-  def test_quantity(self, m_func):
-    m_func.return_value = "return_value"
-    item = self.create_test_instance(**self.data)
-    self.assertEqual(item.quantity_new, "return_value")
+    self.assertEqual(item.next_expiry_quantity, "return_value")
     m_func.assert_called_with(item)

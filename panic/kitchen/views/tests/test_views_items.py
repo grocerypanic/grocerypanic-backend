@@ -241,7 +241,7 @@ class PrivateItemTest(PrivateItemTestHarness):
     self.assertEqual(item.user.id, self.user1.id)
     self.assertEqual(item.shelf.id, self.shelf1.id)
     self.assertEqual(item.price, self.serializer_data['price'])
-    self.assertEqual(item.quantity, self.serializer_data['quantity'])
+    self.assertEqual(item.quantity, 0)
     self.assertFalse(item.has_partial_quantities)
 
     preferred_stores = item.preferred_stores.all()

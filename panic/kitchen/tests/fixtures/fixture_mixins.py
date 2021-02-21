@@ -14,7 +14,7 @@ class ModelTestMixin:
     - :class:`django.test.TestCase`
   """
 
-  data: dict
+  create_data: dict
   fields: dict
 
   @staticmethod
@@ -26,7 +26,7 @@ class ModelTestMixin:
 
   def test_field_lengths(self):
     for overloaded_field in self.generate_overload(self.fields):
-      local_data = dict(self.data)
+      local_data = dict(self.create_data)
       local_data.update(overloaded_field)
       with super().assertRaises(ValidationError):
         _ = super().create_test_instance(**local_data)
@@ -70,7 +70,7 @@ class SerializerTestMixin:
     - :class:`django.test.TestCase`
   """
 
-  data: dict
+  create_data: dict
   fields: dict
   request: object
   serializer: serializers.Serializer
@@ -85,7 +85,7 @@ class SerializerTestMixin:
   def test_field_lengths(self):
     overloads = self.generate_overload(self.fields)
     for overload in overloads:
-      local_data = dict(self.data)
+      local_data = dict(self.create_data)
       local_data.update(overload)
       with super().assertRaises(serializers.ValidationError):
         serialized = self.serializer(

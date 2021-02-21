@@ -1,5 +1,6 @@
 """Test the Item History Serializer."""
 
+from datetime import timedelta
 from unittest.mock import patch
 
 import pytz
@@ -16,25 +17,31 @@ from ..item_history import ItemHistorySerializer
 class TestItemHistorySerializer(TransactionTestHarness):
   """Test the Item History Serializer."""
 
+  mute_signals = False
+
   @classmethod
   @freeze_time("2020-01-14")
   def create_data_hook(cls):
     cls.today = timezone.now()
     cls.fields = {"name": 255}
 
-    cls.data = {
+    cls.positive_transaction = {
         'item': cls.item1,
-        'date_object': cls.today,
+        'date_object': cls.today - timedelta(days=365),
         'user': cls.user1,
-        'quantity': -3
+        'quantity': 3
     }
+
+    cls.consumption_today = dict(cls.positive_transaction)
+    cls.consumption_today.update({'date_object': cls.today, 'quantity': -3})
+
     cls.request = MockRequest(cls.user1)
     cls.test_value = "ExpectedString"
 
   def setUp(self):
     self.objects = list()
-    self.item1.quantity = 3
-    self.item1.save()
+    self.reset_item1()
+    self.create_test_instance(**self.positive_transaction)
 
   def tearDown(self):
     for obj in self.objects:
@@ -42,7 +49,7 @@ class TestItemHistorySerializer(TransactionTestHarness):
 
   @freeze_time("2020-01-14")
   def test_deserialize_last_two_weeks(self):
-    transaction = self.create_test_instance(**self.data)
+    transaction = self.create_test_instance(**self.consumption_today)
     history = Transaction.objects.get_last_two_weeks(self.item1.id)
     deserialized_transaction = ItemHistorySerializer(history, many=True)
     deserialized = deserialized_transaction.data
@@ -62,7 +69,7 @@ class TestItemHistorySerializer(TransactionTestHarness):
     test_zone = "Asia/Hong_Kong"
 
     test_timezone = pytz.timezone(test_zone)
-    transaction = self.create_test_instance(**self.data)
+    transaction = self.create_test_instance(**self.consumption_today)
     history = Transaction.objects.get_last_two_weeks(
         self.item1.id,
         zone=test_zone,

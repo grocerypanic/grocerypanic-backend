@@ -19,6 +19,8 @@ CONSUMPTION_HISTORY_VIEW = "v1:item-consumption-detail"
 class PrivateTCHTestHarness(TransactionTestHarness):
   """Extend the transaction test harness by adding transaction test data."""
 
+  mute_signals = False
+
   @classmethod
   @freeze_time("2020-01-14")
   def create_data_hook(cls):
@@ -27,6 +29,12 @@ class PrivateTCHTestHarness(TransactionTestHarness):
     cls.five_days_ago = cls.today - timezone.timedelta(days=5)
     cls.sixteen_days_ago = cls.today - timezone.timedelta(days=16)
 
+    cls.initial_transaction = {
+        'user': cls.user1,
+        'date_object': cls.today - timezone.timedelta(days=365),
+        'item': cls.item1,
+        'quantity': 200
+    }
     cls.transaction_today = {
         'user': cls.user1,
         'date_object': cls.today,
@@ -50,11 +58,11 @@ class PrivateTCHTestHarness(TransactionTestHarness):
 
   def setUp(self):
     super().setUp()
-    self.item1.quantity = 2000
-    self.item1.save()
+    self.reset_item1()
     self.populate_history()
 
   def populate_history(self):
+    self.create_test_instance(**self.initial_transaction)
     self.create_test_instance(**self.transaction_today)
     self.create_test_instance(**self.transaction_5_days_ago)
     self.create_test_instance(**self.transaction_16_days_ago)

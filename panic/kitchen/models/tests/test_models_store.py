@@ -13,7 +13,7 @@ class TestStore(ModelTestMixin, StoreTestHarness):
   @classmethod
   def create_data_hook(cls):
     cls.fields = {"name": 255}
-    cls.data = {"user": cls.user1, "name": "Loblaws"}
+    cls.create_data = {"user": cls.user1, "name": "Loblaws"}
 
   def test_create(self):
     test_name = "Loblaws"

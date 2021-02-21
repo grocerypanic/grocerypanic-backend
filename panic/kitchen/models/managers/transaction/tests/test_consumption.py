@@ -16,6 +16,8 @@ from ....transaction import Transaction
 class ConsumptionTestHarness(TransactionTestHarness):
   """Extend the Transaction test harness by adding transaction definitions."""
 
+  mute_signals = False
+
   @classmethod
   @freeze_time("2020-01-14")
   def create_data_hook(cls):
@@ -58,10 +60,7 @@ class ConsumptionTestHarness(TransactionTestHarness):
 
   def tearDown(self):
     super().tearDown()
-    self.item1.expired = 0
-    self.item1.quantity = 3
-    self.item1.next_to_expire = 0
-    self.item1.save()
+    self.reset_item1()
 
 
 class TestConsumptionHistoryManagerWithoutData(TransactionTestHarness):
@@ -190,6 +189,8 @@ class TestConsumptionHistoryManagerStats(TransactionTestHarness):
   initial_transaction: dict
   dates: dict
 
+  mute_signals = False
+
   @classmethod
   @freeze_time("2020-01-14")
   def create_data_hook(cls):
@@ -223,11 +224,6 @@ class TestConsumptionHistoryManagerStats(TransactionTestHarness):
     cls.store2 = test_data['store']
     cls.shelf2 = test_data['shelf']
     cls.item2 = test_data['item']
-
-  def setUp(self):
-    self.item1.quantity = 0
-    self.item1.save()
-    super().setUp()
 
   @classmethod
   def __create_transaction_history(cls):

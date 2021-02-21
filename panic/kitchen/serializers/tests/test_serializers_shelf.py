@@ -18,7 +18,7 @@ class TestShelf(SerializerTestMixin, ShelfTestHarness):
     cls.serializer = ShelfSerializer
     cls.fields = {"name": 255}
     cls.request = MockRequest(cls.user1)
-    cls.data = {"name": "Pantry"}
+    cls.create_data = {"name": "Pantry"}
 
   def setUp(self):
     self.objects = list()
@@ -38,12 +38,12 @@ class TestShelf(SerializerTestMixin, ShelfTestHarness):
   def test_serialize(self):
     serialized = self.serializer(
         context={'request': self.request},
-        data=self.data,
+        data=self.create_data,
     )
     serialized.is_valid(raise_exception=True)
     serialized.save()
 
-    self.assertEqual(serialized.data['name'], self.data['name'])
+    self.assertEqual(serialized.data['name'], self.create_data['name'])
 
     query = Shelf.objects.filter(name="Pantry")
 
@@ -54,14 +54,14 @@ class TestShelf(SerializerTestMixin, ShelfTestHarness):
   def test_unique_constraint(self):
     serialized = self.serializer(
         context={'request': self.request},
-        data=self.data,
+        data=self.create_data,
     )
     serialized.is_valid(raise_exception=True)
     serialized.save()
 
     serialized2 = self.serializer(
         context={'request': self.request},
-        data=self.data,
+        data=self.create_data,
     )
     with self.assertRaises(ValidationError):
       serialized2.is_valid(raise_exception=True)

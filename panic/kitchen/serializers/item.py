@@ -15,10 +15,17 @@ class ItemSerializer(RelatedValidatorModelSerializer):
   """Serializer for Item."""
 
   user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+  next_expiry_date = serializers.ReadOnlyField()
+  next_expiry_quantity = serializers.ReadOnlyField()
+  expired = serializers.ReadOnlyField()
 
   class Meta:
     model = Item
-    exclude = ('index',)
+    exclude = (
+        'index',
+        '_next_expiry_quantity',
+        '_expired',
+    )
     read_only_fields = (
         "id",
         "quantity",

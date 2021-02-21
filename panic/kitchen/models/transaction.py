@@ -30,16 +30,6 @@ class Transaction(models.Model):
         models.Index(fields=['datetime']),
     ]
 
-  def apply_transaction(self, force=False):
-    """Update the related item quantity, and it's expiry.
-
-    :param force: Allows for overriding the default apply once behaviour
-    :type force: bool
-    """
-    if self.id is None and not force:
-      self.item.quantity = self.item.quantity + self.quantity
-      self.item.save()
-
   @property
   def operation(self):
     """Return a string indicating if the quantity is consumption or purchase.
@@ -64,6 +54,16 @@ class Transaction(models.Model):
       )
     return "Invalid Transaction"
 
+  def apply_transaction_to_item(self, force=False):
+    """Adjust fields on the related item with transaction data, and save.
+
+    :param force: A boolean to force updates on existing transaction
+    :type force: bool
+    """
+    if force or self.id is None:
+      self.item.quantity += self.quantity
+      self.item.save()
+
   def clean(self):
     """Validate the related item quantity changes we're about to make."""
     proposed_item_quantity = self.item.quantity + self.quantity
@@ -75,5 +75,5 @@ class Transaction(models.Model):
     """Clean and save model."""
     with transaction.atomic():
       self.full_clean()
-      self.apply_transaction()
+      self.apply_transaction_to_item()
       super(Transaction, self).save(*args, **kwargs)

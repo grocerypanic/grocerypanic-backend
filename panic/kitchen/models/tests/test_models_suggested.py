@@ -13,7 +13,7 @@ class TestItemList(ModelTestMixin, SuggestedItemTestHarness):
   @classmethod
   def create_data_hook(cls):
     cls.fields = {"name": 255}
-    cls.data = {"name": "Ice Cream"}
+    cls.create_data = {"name": "Ice Cream"}
     cls.test_item_name = "Red Beans"
 
   def tearDown(self):

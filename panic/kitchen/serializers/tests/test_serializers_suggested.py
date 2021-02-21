@@ -15,7 +15,7 @@ class TestItemList(SerializerTestMixin, SuggestedItemTestHarness):
   @classmethod
   def create_data_hook(cls):
     cls.fields = {"name": 255}
-    cls.data = {"name": "Grape"}
+    cls.create_data = {"name": "Grape"}
     cls.serializer = SuggestedItemSerializer
     cls.request = MockRequest("MockUser")
     cls.test_item_name = "Red Beans"
@@ -27,17 +27,17 @@ class TestItemList(SerializerTestMixin, SuggestedItemTestHarness):
     self.assertEqual(serialized.data['name'], self.test_item_name)
 
   def test_serialize(self):
-    serialized = self.serializer(data=self.data)
+    serialized = self.serializer(data=self.create_data)
     serialized.is_valid()
 
-    self.assertEqual(serialized.data['name'], self.data['name'])
+    self.assertEqual(serialized.data['name'], self.create_data['name'])
 
   def test_unique_constraint(self):
-    serialized = self.serializer(data=self.data,)
+    serialized = self.serializer(data=self.create_data,)
     serialized.is_valid(raise_exception=True)
     serialized.save()
 
-    serialized2 = self.serializer(data=self.data,)
+    serialized2 = self.serializer(data=self.create_data,)
     with self.assertRaises(ValidationError):
       serialized2.is_valid(raise_exception=True)
 

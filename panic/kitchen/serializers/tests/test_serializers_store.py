@@ -17,7 +17,7 @@ class TestStore(SerializerTestMixin, StoreTestHarness):
   def create_data_hook(cls):
     cls.serializer = StoreSerializer
     cls.fields = {"name": 255}
-    cls.data = {"name": "Super Store"}
+    cls.create_data = {"name": "Super Store"}
     cls.request = MockRequest(cls.user1)
 
   def test_deserialize(self):
@@ -30,18 +30,18 @@ class TestStore(SerializerTestMixin, StoreTestHarness):
   def test_serialize(self):
     serialized = self.serializer(
         context={'request': self.request},
-        data=self.data,
+        data=self.create_data,
     )
     serialized.is_valid(raise_exception=True)
     serialized.save()
 
-    self.assertEqual(serialized.data['name'], self.data['name'])
+    self.assertEqual(serialized.data['name'], self.create_data['name'])
 
-    query = Store.objects.filter(name=self.data['name'])
+    query = Store.objects.filter(name=self.create_data['name'])
 
     assert len(query) == 1
     self.assertEqual(query[0].user.id, self.user1.id)
-    self.assertEqual(query[0].name, self.data['name'])
+    self.assertEqual(query[0].name, self.create_data['name'])
 
   def test_unique_constraint(self):
     test_value = {"name": "Super Store"}

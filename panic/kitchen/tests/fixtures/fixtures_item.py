@@ -33,7 +33,6 @@ class ItemTestHarness(KitchenModelTestFixture, MutableSignalsBaseTestCase):
         shelf_life=kwargs['shelf_life'],
         shelf=kwargs['shelf'],
         price=kwargs['price'],
-        quantity=kwargs['quantity'],
     )
     for store in kwargs['preferred_stores']:
       item.preferred_stores.add(store)

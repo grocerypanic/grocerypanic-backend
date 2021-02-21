@@ -68,7 +68,6 @@ class InventoryTestHarness(KitchenModelTestFixture, MutableSignalsBaseTestCase):
         user=user,
         shelf=shelf,
         price=2.00,
-        quantity=0,
     )
     transaction = Transaction.objects.create(
         item=item,
@@ -119,8 +118,6 @@ class InventoryTestHarness(KitchenModelTestFixture, MutableSignalsBaseTestCase):
     cls.create_data_hook()
 
   def setUp(self):
-    self.item1.quantity = self.initial_quantity
-    self.item1.save()
     self.objects = list()
 
   def tearDown(self):

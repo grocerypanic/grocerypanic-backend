@@ -189,12 +189,13 @@ class TestAdjustmentManager(InventoryTestHarness):
     )
 
   def test_transaction_broken_inventory(self):
-    self.item1.quantity = 100
-    self.item1.save()
-
+    positive_transactions = self.__double_positive_transaction()
     transaction = self.create_test_transaction_instance(
         **self.negative_transaction_partial_x2_rollover,
     )
+
+    for positive_transaction in positive_transactions:
+      Inventory.objects.filter(transaction=positive_transaction).delete()
 
     with self.assertRaises(ProcessingError) as raised:
       Inventory.objects.adjust(transaction)

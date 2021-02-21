@@ -39,7 +39,6 @@ class DataGenerator:
           shelf_life="99",
           shelf=self.shelf,
           price="2.00",
-          quantity=20
       )
       self.items.append(new_item)
 

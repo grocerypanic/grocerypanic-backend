@@ -13,7 +13,7 @@ class TestShelf(ModelTestMixin, ShelfTestHarness):
   @classmethod
   def create_data_hook(cls):
     cls.fields = {"name": 255}
-    cls.data = {"user": cls.user1, "name": "Refrigerator"}
+    cls.create_data = {"user": cls.user1, "name": "Refrigerator"}
 
   def test_create(self):
     test_name = "Refrigerator"
@@ -21,7 +21,7 @@ class TestShelf(ModelTestMixin, ShelfTestHarness):
     query = Shelf.objects.filter(name=test_name)
 
     self.assertQuerysetEqual(query, [repr(shelf)])
-    self.assertEqual(query[0].index, self.data['name'].lower())
+    self.assertEqual(query[0].index, self.create_data['name'].lower())
 
   def test_unique(self):
     test_name = "Above Sink"

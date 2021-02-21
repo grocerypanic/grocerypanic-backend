@@ -18,6 +18,8 @@ from ..item_history import ItemHistorySerializer
 class TestItemConsumptionHistorySerializer(TransactionTestHarness):
   """Test the Item Consumption Serializer."""
 
+  mute_signals = False
+
   @classmethod
   @freeze_time("2020-01-14")
   def create_data_hook(cls):
@@ -28,33 +30,33 @@ class TestItemConsumptionHistorySerializer(TransactionTestHarness):
 
     cls.fields = {"name": 255}
 
-    cls.data = {
+    cls.positive_transaction = {
         'item': cls.item1,
-        'date_object': cls.today,
+        'date_object': cls.today - timedelta(days=365),
         'user': cls.user1,
-        'quantity': -3
+        'quantity': 3
     }
 
-    cls.week_border = {
-        'item': cls.item1,
+    cls.consumption_today = dict(cls.positive_transaction)
+    cls.consumption_today.update({'date_object': cls.today, 'quantity': -3})
+
+    cls.consumption_week_border = dict(cls.positive_transaction)
+    cls.consumption_week_border.update({
         'date_object': cls.two_days_ago,
-        'user': cls.user1,
         'quantity': -3
-    }
+    })
 
-    cls.month_border = {
-        'item': cls.item1,
+    cls.consumption_month_border = dict(cls.positive_transaction)
+    cls.consumption_month_border.update({
         'date_object': cls.start_of_month,
-        'user': cls.user1,
         'quantity': -3
-    }
+    })
 
     cls.request = MockRequest(cls.user1)
 
   def setUp(self):
     self.objects = list()
-    self.item1.quantity = 3
-    self.item1.save()
+    self.create_test_instance(**self.positive_transaction)
 
   def tearDown(self):
     for obj in self.objects:
@@ -62,7 +64,7 @@ class TestItemConsumptionHistorySerializer(TransactionTestHarness):
 
   @freeze_time("2020-01-14")
   def test_deserialize_last_two_weeks(self):
-    self.create_test_instance(**self.data)
+    self.create_test_instance(**self.consumption_today)
     history = Transaction.objects.get_last_two_weeks(self.item1.id)
     deserialized_transaction = ItemHistorySerializer(history, many=True)
 
@@ -82,7 +84,7 @@ class TestItemConsumptionHistorySerializer(TransactionTestHarness):
   @freeze_time("2020-01-14")
   def test_deserialize_last_two_weeks_alternate_timezone(self):
     test_zone = "Asia/Hong_Kong"
-    self.create_test_instance(**self.data)
+    self.create_test_instance(**self.consumption_today)
     history = Transaction.objects.get_last_two_weeks(
         self.item1.id,
         zone=test_zone,
@@ -104,7 +106,7 @@ class TestItemConsumptionHistorySerializer(TransactionTestHarness):
 
   @freeze_time("2020-01-14")
   def test_deserialize_first_consumption_date(self):
-    self.create_test_instance(**self.data)
+    self.create_test_instance(**self.consumption_today)
 
     serialized = self.serializer(
         self.item1,
@@ -121,7 +123,7 @@ class TestItemConsumptionHistorySerializer(TransactionTestHarness):
 
   @freeze_time("2020-01-14")
   def test_deserialize_total_consumption(self):
-    self.create_test_instance(**self.data)
+    self.create_test_instance(**self.consumption_today)
 
     serialized = self.serializer(
         self.item1,
@@ -138,7 +140,7 @@ class TestItemConsumptionHistorySerializer(TransactionTestHarness):
 
   @freeze_time("2020-01-14")
   def test_deserialize_consumption_this_week(self):
-    self.create_test_instance(**self.data)
+    self.create_test_instance(**self.consumption_today)
 
     serialized = self.serializer(
         self.item1,
@@ -156,7 +158,7 @@ class TestItemConsumptionHistorySerializer(TransactionTestHarness):
   @freeze_time("2020-01-14")
   def test_deserialize_consumption_this_week_tz(self):
     zone = "Pacific/Honolulu"
-    self.create_test_instance(**self.week_border)
+    self.create_test_instance(**self.consumption_week_border)
 
     serialized = self.serializer(
         self.item1,
@@ -173,7 +175,7 @@ class TestItemConsumptionHistorySerializer(TransactionTestHarness):
 
   @freeze_time("2020-01-14")
   def test_deserialize_consumption_this_month(self):
-    self.create_test_instance(**self.data)
+    self.create_test_instance(**self.consumption_today)
 
     serialized = self.serializer(
         self.item1,
@@ -191,7 +193,7 @@ class TestItemConsumptionHistorySerializer(TransactionTestHarness):
   @freeze_time("2020-01-14")
   def test_deserialize_consumption_this_month_tz(self):
     zone = "Pacific/Honolulu"
-    self.create_test_instance(**self.month_border)
+    self.create_test_instance(**self.consumption_month_border)
 
     serialized = self.serializer(
         self.item1,
