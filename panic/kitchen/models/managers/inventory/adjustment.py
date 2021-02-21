@@ -1,4 +1,4 @@
-"""Inventory Transaction model managers."""
+"""Inventory Adjustment model managers."""
 
 from django.db import models
 
@@ -48,8 +48,8 @@ class AdjustmentManager(models.Manager):
     :returns: A query set representing the inventory
     :rtype: :class:`django.db.models.QuerySet`
     """
-    return super().get_queryset(). \
-        filter(item=item). \
+    return super().get_queryset().\
+        filter(item=item).\
         order_by("transaction__datetime")
 
   @staticmethod

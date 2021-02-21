@@ -10,6 +10,7 @@ from naturalsortfield import NaturalSortField
 
 from spa_security.fields import BlondeCharField
 from . import constants
+from .inventory import Inventory
 
 User = get_user_model()
 
@@ -39,13 +40,6 @@ class Item(models.Model):
   name = BlondeCharField(max_length=MAXIMUM_NAME_LENGTH)
   preferred_stores = models.ManyToManyField('Store')
   price = models.DecimalField(max_digits=10, decimal_places=2)
-  quantity = models.FloatField(
-      default=0,
-      validators=[
-          MinValueValidator(constants.MINIMUM_QUANTITY),
-          MaxValueValidator(constants.MAXIMUM_QUANTITY),
-      ],
-  )
   shelf = models.ForeignKey('Shelf', on_delete=models.CASCADE)
   shelf_life = models.IntegerField(
       default=DEFAULT_SHELF_LIFE,
@@ -58,7 +52,14 @@ class Item(models.Model):
 
   objects = models.Manager()
 
-  # These 3 fields are recalculated on each transaction
+  # These 4 fields are recalculated on each transaction
+  quantity = models.FloatField(
+      default=0,
+      validators=[
+          MinValueValidator(constants.MINIMUM_QUANTITY),
+          MaxValueValidator(constants.MAXIMUM_QUANTITY),
+      ],
+  )
   next_expiry_date = models.DateField(default=default_expiry)
   next_expiry_quantity = models.FloatField(
       default=0,
@@ -82,6 +83,46 @@ class Item(models.Model):
     indexes = [
         models.Index(fields=['index']),
     ]
+
+  @property
+  def quantity_new(self):
+    """Return the sum quantity of all inventory.
+
+    :returns: The total quantity of items in inventory (both expired and not).
+    :rtype: float
+    """
+    return Inventory.objects.get_quantity(self)
+
+  @property
+  def next_expiry_date_new(self):
+    """Return the date of the next batch of expiring items, if any.
+
+    The date is tz corrected to the User's configured tz.
+
+    :returns: A date, or None if no items are expiring.
+    :rtype: None, :class:`datetime.date`
+    """
+    return Inventory.objects.get_next_expiry_date(self)
+
+  @property
+  def next_expiry_quantity_new(self):
+    """Return the quantity of the next batch of expiring items, if any.
+
+    The items are aggregated by the user's timezone based date.
+
+    :returns: The quantity of items that will expire next
+    :rtype: float
+    """
+    return Inventory.objects.get_next_expiry_quantity(self)
+
+  @property
+  def expired_new(self):
+    """Return the sum quantity of all inventory that is expired.
+
+    :returns: The quantity of items that will expire next
+    :rtype: float
+    """
+    return Inventory.objects.get_expired(self)
 
   def __str__(self):
     return str(self.name)

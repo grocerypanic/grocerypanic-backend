@@ -1,10 +1,15 @@
 """Test the Item model."""
 
+from unittest.mock import patch
+
 from django.core.exceptions import ValidationError
+from django.utils import timezone
+from freezegun import freeze_time
 
 from ...tests.fixtures.fixture_mixins import ModelTestMixin
 from ...tests.fixtures.fixtures_item import ItemTestHarness
 from .. import constants
+from .. import item as item_module
 from ..item import Item
 
 
@@ -13,6 +18,7 @@ class TestItem(ModelTestMixin, ItemTestHarness):
 
   @classmethod
   def create_data_hook(cls):
+    cls.today = timezone.now()
     cls.fields = {"name": 255}
     cls.data = {
         'user': cls.user1,
@@ -29,6 +35,7 @@ class TestItem(ModelTestMixin, ItemTestHarness):
     query = Item.objects.filter(name=self.data['name'])
 
     self.assertQuerysetEqual(query, map(repr, [created]))
+    self.assertEqual(query[0].index, self.data['name'].lower())
 
   def test_unique(self):
     _ = self.create_test_instance(**self.data)
@@ -89,30 +96,6 @@ class TestItem(ModelTestMixin, ItemTestHarness):
     with self.assertRaises(ValidationError):
       item.save()
 
-  def test_next_expiry_quantity_low(self):
-    item = self.create_test_instance(**self.data)
-    item.next_expiry_quantity = constants.MINIMUM_QUANTITY - 1
-    with self.assertRaises(ValidationError):
-      item.save()
-
-  def test_next_expiry_quantity_high(self):
-    item = self.create_test_instance(**self.data)
-    item.next_expiry_quantity = constants.MAXIMUM_QUANTITY + 1
-    with self.assertRaises(ValidationError):
-      item.save()
-
-  def test_expired_low(self):
-    item = self.create_test_instance(**self.data)
-    item.expired = constants.MINIMUM_QUANTITY - 1
-    with self.assertRaises(ValidationError):
-      item.save()
-
-  def test_expired_high(self):
-    item = self.create_test_instance(**self.data)
-    item.expired = constants.MAXIMUM_QUANTITY + 1
-    with self.assertRaises(ValidationError):
-      item.save()
-
   def test_two_users_with_the_same_item_name(self):
     item1 = self.create_test_instance(**self.data)
 
@@ -135,3 +118,50 @@ class TestItem(ModelTestMixin, ItemTestHarness):
     item1.has_partial_quantities = True
     item1.save()
     self.assertTrue(item1.has_partial_quantities)
+
+
+@freeze_time("2020-01-14")
+class TestItemCalculatedProperties(ItemTestHarness):
+  """Test the Item model's calculated properties."""
+
+  @classmethod
+  def create_data_hook(cls):
+    cls.today = timezone.now()
+    cls.fields = {"name": 255}
+    cls.data = {
+        'user': cls.user1,
+        'name': "Canned Beans",
+        'shelf_life': 99,
+        'shelf': cls.shelf1,
+        'preferred_stores': [cls.store1],
+        'price': 2.00,
+        'quantity': 3,
+    }
+
+  @patch(item_module.__name__ + ".Inventory.objects.get_expired")
+  def test_expired(self, m_func):
+    m_func.return_value = "return_value"
+    item = self.create_test_instance(**self.data)
+    self.assertEqual(item.expired_new, "return_value")
+    m_func.assert_called_with(item)
+
+  @patch(item_module.__name__ + ".Inventory.objects.get_next_expiry_date")
+  def test_next_expiry_date(self, m_func):
+    m_func.return_value = "return_value"
+    item = self.create_test_instance(**self.data)
+    self.assertEqual(item.next_expiry_date_new, "return_value")
+    m_func.assert_called_with(item)
+
+  @patch(item_module.__name__ + ".Inventory.objects.get_next_expiry_quantity")
+  def test_next_expiry_quantity(self, m_func):
+    m_func.return_value = "return_value"
+    item = self.create_test_instance(**self.data)
+    self.assertEqual(item.next_expiry_quantity_new, "return_value")
+    m_func.assert_called_with(item)
+
+  @patch(item_module.__name__ + ".Inventory.objects.get_quantity")
+  def test_quantity(self, m_func):
+    m_func.return_value = "return_value"
+    item = self.create_test_instance(**self.data)
+    self.assertEqual(item.quantity_new, "return_value")
+    m_func.assert_called_with(item)

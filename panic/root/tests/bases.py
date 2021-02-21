@@ -96,7 +96,7 @@ class APICrudTestHarness(APILiveServerTestCase):
   """Test harness for API integration testing."""
 
   client_class = RequestsClient
-  test_view = None
+  test_view: str
 
   @classmethod
   def setUpClass(cls):
