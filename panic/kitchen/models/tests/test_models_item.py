@@ -2,13 +2,13 @@
 
 from django.core.exceptions import ValidationError
 
+from ...tests.fixtures.fixture_mixins import ModelTestMixin
 from ...tests.fixtures.fixtures_item import ItemTestHarness
 from .. import constants
 from ..item import Item
-from .fixtures.fixture_models import generate_base
 
 
-class TestItem(generate_base(ItemTestHarness)):
+class TestItem(ModelTestMixin, ItemTestHarness):
   """Test the Item model."""
 
   @classmethod

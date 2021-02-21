@@ -1,44 +1,30 @@
 """Test the Suggested Item serializer."""
 
-from django.test import TestCase
 from rest_framework.serializers import ValidationError
 
-from ...models.suggested import SuggestedItem
+from ...tests.fixtures.fixture_mixins import SerializerTestMixin
 from ...tests.fixtures.fixtures_django import MockRequest
+from ...tests.fixtures.fixtures_suggested import SuggestedItemTestHarness
 from .. import DUPLICATE_OBJECT_MESSAGE
 from ..suggested import SuggestedItemSerializer
-from .fixtures.fixtures_serializers import generate_base
 
 
-class TestItemList(generate_base(TestCase)):
+class TestItemList(SerializerTestMixin, SuggestedItemTestHarness):
   """Test the Suggested Item serializer."""
 
-  def sample_item(self, name="Red Beans"):
-    item = SuggestedItem.objects.create(name=name)
-    self.objects.append(item)
-    return item
-
   @classmethod
-  def setUpTestData(cls):
-    cls.objects = list()
-    cls.serializer = SuggestedItemSerializer
+  def create_data_hook(cls):
     cls.fields = {"name": 255}
     cls.data = {"name": "Grape"}
+    cls.serializer = SuggestedItemSerializer
     cls.request = MockRequest("MockUser")
-
-  def setUp(self):
-    self.objects = list()
-
-  def tearDown(self):
-    for obj in self.objects:
-      obj.delete()
+    cls.test_item_name = "Red Beans"
 
   def test_deserialize(self):
-    test_value = "Custard"
-    item = self.sample_item(test_value)
+    item = self.create_test_instance(name=self.test_item_name)
 
     serialized = self.serializer(item)
-    self.assertEqual(serialized.data['name'], test_value)
+    self.assertEqual(serialized.data['name'], self.test_item_name)
 
   def test_serialize(self):
     serialized = self.serializer(data=self.data)

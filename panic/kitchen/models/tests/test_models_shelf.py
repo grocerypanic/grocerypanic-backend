@@ -2,12 +2,12 @@
 
 from django.core.exceptions import ValidationError
 
+from ...tests.fixtures.fixture_mixins import ModelTestMixin
 from ...tests.fixtures.fixtures_shelf import ShelfTestHarness
 from ..shelf import Shelf
-from .fixtures.fixture_models import generate_base
 
 
-class TestShelf(generate_base(ShelfTestHarness)):
+class TestShelf(ModelTestMixin, ShelfTestHarness):
   """Test the Shelf model."""
 
   @classmethod
@@ -18,9 +18,10 @@ class TestShelf(generate_base(ShelfTestHarness)):
   def test_create(self):
     test_name = "Refrigerator"
     shelf = self.create_test_instance(user=self.user1, name=test_name)
-
     query = Shelf.objects.filter(name=test_name)
+
     self.assertQuerysetEqual(query, [repr(shelf)])
+    self.assertEqual(query[0].index, self.data['name'].lower())
 
   def test_unique(self):
     test_name = "Above Sink"

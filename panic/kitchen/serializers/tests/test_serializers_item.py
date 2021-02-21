@@ -4,14 +4,14 @@ from rest_framework.serializers import ErrorDetail, ValidationError
 
 from ...exceptions import ValidationPermissionError
 from ...models.item import Item
+from ...tests.fixtures.fixture_mixins import SerializerTestMixin
 from ...tests.fixtures.fixtures_django import MockRequest
 from ...tests.fixtures.fixtures_item import ItemTestHarness
 from .. import DUPLICATE_OBJECT_MESSAGE
 from ..item import ItemSerializer
-from .fixtures.fixtures_serializers import generate_base
 
 
-class TestItem(generate_base(ItemTestHarness)):
+class TestItem(SerializerTestMixin, ItemTestHarness):
   """Test the Item serializer."""
 
   @classmethod

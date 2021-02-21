@@ -35,7 +35,7 @@ class TransactionTestHarness(KitchenModelTestFixture, TestCase):
     return transaction
 
   @staticmethod
-  def create_dependencies(seed, **kwargs):
+  def create_dependencies(seed, **kwargs):  # pylint: disable=unused-argument
     user = User.objects.create_user(
         username=f"testuser{seed}",
         email=f"test{seed}@niallbyrne.ca",

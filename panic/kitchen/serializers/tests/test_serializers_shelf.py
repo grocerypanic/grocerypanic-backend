@@ -3,14 +3,14 @@
 from rest_framework.serializers import ValidationError
 
 from ...models.shelf import Shelf
+from ...tests.fixtures.fixture_mixins import SerializerTestMixin
 from ...tests.fixtures.fixtures_django import MockRequest
 from ...tests.fixtures.fixtures_shelf import ShelfTestHarness
 from .. import DUPLICATE_OBJECT_MESSAGE
 from ..shelf import ShelfSerializer
-from .fixtures.fixtures_serializers import generate_base
 
 
-class TestShelf(generate_base(ShelfTestHarness)):
+class TestShelf(SerializerTestMixin, ShelfTestHarness):
   """Test the Shelf serializer."""
 
   @classmethod

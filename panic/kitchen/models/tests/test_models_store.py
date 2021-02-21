@@ -2,12 +2,12 @@
 
 from django.core.exceptions import ValidationError
 
+from ...tests.fixtures.fixture_mixins import ModelTestMixin
 from ...tests.fixtures.fixtures_store import StoreTestHarness
 from ..store import Store
-from .fixtures.fixture_models import generate_base
 
 
-class TestStore(generate_base(StoreTestHarness)):
+class TestStore(ModelTestMixin, StoreTestHarness):
   """Test the Store model."""
 
   @classmethod
@@ -17,14 +17,12 @@ class TestStore(generate_base(StoreTestHarness)):
 
   def test_create(self):
     test_name = "Loblaws"
-    _ = self.create_test_instance(user=self.user1, name=test_name)
+    created = self.create_test_instance(user=self.user1, name=test_name)
 
     query = Store.objects.filter(name=test_name)
 
-    assert len(query) == 1
+    self.assertQuerysetEqual(query, map(repr, [created]))
     self.assertEqual(query[0].index, test_name.lower())
-    self.assertEqual(query[0].name, test_name)
-    self.assertEqual(query[0].user.id, self.user1.id)
 
   def test_unique(self):
     test_name = "Loblaws"

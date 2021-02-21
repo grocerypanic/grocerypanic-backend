@@ -3,14 +3,14 @@
 from rest_framework.serializers import ValidationError
 
 from ...models.store import Store
+from ...tests.fixtures.fixture_mixins import SerializerTestMixin
 from ...tests.fixtures.fixtures_django import MockRequest
 from ...tests.fixtures.fixtures_store import StoreTestHarness
 from .. import DUPLICATE_OBJECT_MESSAGE
 from ..store import StoreSerializer
-from .fixtures.fixtures_serializers import generate_base
 
 
-class TestStore(generate_base(StoreTestHarness)):
+class TestStore(SerializerTestMixin, StoreTestHarness):
   """Test the Store serializer."""
 
   @classmethod

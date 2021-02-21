@@ -1,6 +1,7 @@
 """Test the Transaction API."""
 
 from django.contrib.auth import get_user_model
+from django.db.models import Model
 from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
@@ -9,6 +10,7 @@ from freezegun import freeze_time
 from rest_framework import status
 from rest_framework.test import APIClient
 
+from ...models.item import Item
 from ...models.transaction import Transaction
 from ...serializers.transaction import TransactionSerializer
 from ...tests.fixtures.fixtures_transaction import TransactionTestHarness
@@ -16,6 +18,8 @@ from ..deprecation import DEPRECATED_WARNING
 from ..transaction import TRANSACTION_LIST_SUNSET
 
 TRANSACTION_URL = reverse("v1:transactions-list")
+
+User: Model = get_user_model()
 
 
 # pylint: disable=dangerous-default-value
@@ -26,8 +30,8 @@ def transaction_query_url(query_kwargs={}):
 class TestHarnessWithData(TransactionTestHarness):
   """Extend the TransactionTestHarness class by adding test data."""
 
-  item2: type(Transaction.item)
-  user2: type(get_user_model())
+  item2: Item
+  user2: User
 
   @classmethod
   def setUpTestData(cls):

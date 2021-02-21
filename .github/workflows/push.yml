@@ -29,6 +29,9 @@ jobs:
     - name: Run Linter
       run: |
         docker-compose exec -T panic bash -l -c 'scripts/commander.sh lint-validate'
+    - name: Run Type Checker
+      run: |
+        docker-compose exec -T panic bash -l -c 'scripts/commander.sh types'
     - name: Run Sec Test
       run: |
         docker-compose exec -T panic bash -l -c 'scripts/commander.sh sectest'

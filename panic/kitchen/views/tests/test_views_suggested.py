@@ -9,6 +9,7 @@ from rest_framework.test import APIClient
 
 from ...models.suggested import SuggestedItem
 from ...serializers.suggested import SuggestedItemSerializer
+from ...tests.fixtures.fixtures_suggested import SuggestedItemTestHarness
 
 LIST_URL = reverse("v1:suggestions-list")
 
@@ -35,16 +36,11 @@ class PublicListItemsTest(TestCase):
     self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
 
 
-class PrivateListItemsTest(TestCase):
+class PrivateListItemsTest(SuggestedItemTestHarness):
   """Test the authorized Suggested Items API."""
 
-  def create_item(self, name):
-    item = SuggestedItem.objects.create(name=name)
-    self.objects.append(item)
-    return item
-
   @classmethod
-  def setUpTestData(cls):
+  def create_data_hook(cls):
     cls.objects = list()
     cls.user = get_user_model().objects.create_user(
         username="testuser",
@@ -55,17 +51,13 @@ class PrivateListItemsTest(TestCase):
     cls.fields = {"name": 255}
 
   def setUp(self):
-    self.objects = list()
+    super().setUp()
     self.client = APIClient()
     self.client.force_authenticate(self.user)
 
-  def tearDown(self):
-    for obj in self.objects:
-      obj.delete()
-
   def test_list_items(self):
-    self.create_item(name="Red Bean Dessert")
-    self.create_item(name="Tofu")
+    self.create_test_instance(name="Red Bean Dessert")
+    self.create_test_instance(name="Tofu")
 
     res = self.client.get(LIST_URL)
 
@@ -76,9 +68,9 @@ class PrivateListItemsTest(TestCase):
     self.assertEqual(res.data['results'], serializer.data)
 
   def test_list_items_order(self):
-    c_item = self.create_item(name="CCCCC")
-    b_item = self.create_item(name="BBBBB")
-    a_item = self.create_item(name="AAAAA")
+    c_item = self.create_test_instance(name="CCCCC")
+    b_item = self.create_test_instance(name="BBBBB")
+    a_item = self.create_test_instance(name="AAAAA")
 
     res = self.client.get(LIST_URL)
 
@@ -91,7 +83,7 @@ class PrivateListItemsTest(TestCase):
   def test_list_items_paginated_correctly(self):
     for index in range(0, 11):
       data = "name" + str(index)
-      self.create_item(name=data)
+      self.create_test_instance(name=data)
 
     res = self.client.get(item_url_with_params({"page_size": 10}))
     self.assertEqual(len(res.data['results']), 10)

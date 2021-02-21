@@ -25,8 +25,8 @@ class ShelfTestHarness(KitchenModelTestFixture, TestCase):
     return shelf
 
   @staticmethod
-  def create_dependencies(seed, **kwargs):
-    user = User.objects.create_user(
+  def create_dependencies(seed, **kwargs):  # pylint: disable=unused-argument
+    user = get_user_model().objects.create_user(
         username=f"testuser{seed}",
         email=f"test{seed}@niallbyrne.ca",
         password="test123",

@@ -5,15 +5,18 @@ from freezegun import freeze_time
 from rest_framework.serializers import ErrorDetail, ValidationError
 
 from ...exceptions import ValidationPermissionError
+from ...models.item import Item
 from ...models.transaction import Transaction
+from ...tests.fixtures.fixture_mixins import SerializerTestMixin
 from ...tests.fixtures.fixtures_django import MockRequest, deserialize_datetime
 from ...tests.fixtures.fixtures_transaction import TransactionTestHarness
 from ..transaction import TransactionSerializer
-from .fixtures.fixtures_serializers import generate_base
 
 
-class TestTransactionSerializer(generate_base(TransactionTestHarness)):
+class TestTransactionSerializer(SerializerTestMixin, TransactionTestHarness):
   """Test the Transaction serializer."""
+
+  item2: Item
 
   @classmethod
   @freeze_time("2020-01-14")

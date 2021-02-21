@@ -3,12 +3,12 @@
 from django.core.exceptions import ValidationError
 from freezegun import freeze_time
 
+from ...tests.fixtures.fixture_mixins import ModelTestMixin
 from ...tests.fixtures.fixtures_transaction import TransactionTestHarness
 from ..transaction import Transaction
-from .fixtures.fixture_models import generate_base
 
 
-class TestTransaction(generate_base(TransactionTestHarness)):
+class TestTransaction(ModelTestMixin, TransactionTestHarness):
   """Test the Transaction model."""
 
   @classmethod
@@ -39,24 +39,26 @@ class TestTransaction(generate_base(TransactionTestHarness)):
         self.positive_data['quantity'] + self.initial_quantity
     )
     instance.apply_transaction()
+
+  def test_transaction_apply_force(self):
+
+    instance = self.create_test_instance(**self.positive_data)
     self.assertEqual(
         instance.item.quantity,
-        self.positive_data['quantity'] + self.initial_quantity,
+        self.positive_data['quantity'] + self.initial_quantity
     )
+    instance.apply_transaction(force=True)
 
   def test_positive_transaction(self):
-    self.create_test_instance(**self.positive_data)
+    transaction = self.create_test_instance(**self.positive_data)
 
     query = Transaction.objects.filter(item=self.item1)
 
-    assert len(query) == 1
-    transaction = query[0]
-    self.assertEqual(transaction.item.id, self.item1.id)
-    self.assertEqual(transaction.datetime, self.today)
-    self.assertEqual(transaction.quantity, self.positive_data['quantity'])
+    self.assertQuerysetEqual(query, [repr(transaction)])
+
     self.assertEqual(
         transaction.item.quantity,
-        self.initial_quantity + self.positive_data['quantity']
+        self.initial_quantity + self.positive_data['quantity'],
     )
 
   def test_positive_operation(self):
@@ -75,15 +77,14 @@ class TestTransaction(generate_base(TransactionTestHarness)):
     self.item1.quantity = 3
     self.item1.save()
 
-    self.create_test_instance(**self.negative_data)
+    transaction = self.create_test_instance(**self.negative_data)
     query = Transaction.objects.filter(item=self.item1)
 
-    assert len(query) == 1
-    transaction = query[0]
-    self.assertEqual(transaction.item.id, self.item1.id)
-    self.assertEqual(transaction.datetime, self.today)
-    self.assertEqual(transaction.quantity, self.negative_data['quantity'])
-    assert transaction.item.quantity == 3 + self.negative_data['quantity']
+    self.assertQuerysetEqual(query, [repr(transaction)])
+    self.assertEqual(
+        transaction.item.quantity,
+        3 + self.negative_data['quantity'],
+    )
 
   def test_negative_operation(self):
 
@@ -109,9 +110,9 @@ class TestTransaction(generate_base(TransactionTestHarness)):
       self.create_test_instance(**self.zero_data)
 
     query = Transaction.objects.filter(item=self.item1)
-    assert len(query) == 0
+    self.assertEqual(len(query), 0)
     self.item1.refresh_from_db()
-    assert self.item1.quantity == self.initial_quantity
+    self.assertEqual(self.item1.quantity, self.initial_quantity)
 
   def test_zero_operation(self):
 
@@ -138,6 +139,6 @@ class TestTransaction(generate_base(TransactionTestHarness)):
       self.create_test_instance(**self.invalid_data)
 
     query = Transaction.objects.filter(item=self.item1)
-    assert len(query) == 0
+    self.assertEqual(len(query), 0)
     self.item1.refresh_from_db()
-    assert self.item1.quantity == self.initial_quantity
+    self.assertEqual(self.item1.quantity, self.initial_quantity)
