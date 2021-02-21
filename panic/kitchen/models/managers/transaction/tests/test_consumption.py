@@ -5,7 +5,7 @@ from datetime import timedelta
 import pytz
 from django.conf import settings
 from django.db.models import Sum
-from django.db.models.functions import TruncDate
+from django.db.models.functions import TruncDate, TruncDay
 from django.utils import timezone
 from freezegun import freeze_time
 
@@ -13,72 +13,22 @@ from .....tests.fixtures.fixtures_transaction import TransactionTestHarness
 from ....transaction import Transaction
 
 
-class ConsumptionTestHarness(TransactionTestHarness):
-  """Extend the Transaction test harness by adding transaction definitions."""
-
-  mute_signals = False
-
-  @classmethod
-  @freeze_time("2020-01-14")
-  def create_data_hook(cls):
-    cls.today = timezone.now()
-    cls.tomorrow = timezone.now() + timedelta(days=1)
-    cls.yesterday = timezone.now() + timedelta(days=-1)
-    cls.last_year = timezone.now() + timedelta(days=-365)
-
-    cls.transaction1 = {
-        'item': cls.item1,
-        'date_object': cls.today,
-        'user': cls.user1,
-        'quantity': 3
-    }
-    cls.transaction2 = {
-        'item': cls.item1,
-        'date_object': cls.yesterday,
-        'user': cls.user1,
-        'quantity': 3
-    }
-    cls.transaction3 = {
-        'item': cls.item1,
-        'date_object': cls.tomorrow,
-        'user': cls.user1,
-        'quantity': 3
-    }
-    cls.transaction4 = {
-        'item': cls.item1,
-        'date_object': cls.last_year,
-        'user': cls.user1,
-        'quantity': 3
-    }
-
-  @classmethod
-  def _create_timebatch(cls):
-    t_today = cls.create_instance(**cls.transaction1)
-    t_yesterday = cls.create_instance(**cls.transaction2)
-    t_tomorrow = cls.create_instance(**cls.transaction3)
-    return {"today": t_today, "yesterday": t_yesterday, "tomorrow": t_tomorrow}
-
-  def tearDown(self):
-    super().tearDown()
-    self.reset_item1()
-
-
+@freeze_time("2020-01-14")
 class TestConsumptionHistoryManagerWithoutData(TransactionTestHarness):
   """Test the Consumption History Manager without any item history present."""
 
-  @freeze_time("2020-01-14")
+  mute_signals = False
+
   def test_last_two_weeks_no_history(self):
 
     received = Transaction.objects.get_last_two_weeks(self.item1)
     self.assertQuerysetEqual(received, map(repr, []))
 
-  @freeze_time("2020-01-14")
   def test_get_first_consumption_no_history(self):
     assert Transaction.objects.all().count() == 0
 
     self.assertIsNone(Transaction.objects.get_first_consumption(self.item1.id))
 
-  @freeze_time("2020-01-14")
   def test_get_total_consumption_no_history(self):
     assert Transaction.objects.all().count() == 0
 
@@ -87,16 +37,35 @@ class TestConsumptionHistoryManagerWithoutData(TransactionTestHarness):
     )
 
 
-class TestConsumptionHistoryManagerTwoWeeks(ConsumptionTestHarness):
+@freeze_time("2020-01-14")
+class TestConsumptionHistoryManagerTwoWeeks(TransactionTestHarness):
   """Test the CHM 'get_last_two_weeks' method with item history created."""
+
+  mute_signals = False
 
   user2: object
   item2: object
 
   @classmethod
-  def setUpTestData(cls):
-    super().setUpTestData()
+  def create_data_hook(cls):
     cls.today = timezone.now()
+    cls.tomorrow = timezone.now() + timedelta(days=1)
+    cls.yesterday = timezone.now() + timedelta(days=-1)
+    cls.last_year = timezone.now() + timedelta(days=-365)
+
+    def generate_transaction_data(datetime_object):
+      return {
+          'item': cls.item1,
+          'date_object': datetime_object,
+          'user': cls.user1,
+          'quantity': 3
+      }
+
+    cls.transaction1 = generate_transaction_data(cls.today)
+    cls.transaction2 = generate_transaction_data(cls.yesterday)
+    cls.transaction3 = generate_transaction_data(cls.tomorrow)
+    cls.transaction4 = generate_transaction_data(cls.last_year)
+
     test_data = cls.create_dependencies(2)
     cls.user2 = test_data['user']
     cls.store2 = test_data['store']
@@ -105,11 +74,16 @@ class TestConsumptionHistoryManagerTwoWeeks(ConsumptionTestHarness):
 
     cls.__create_lower_bounds_edge_case_transaction()
     cls.__create_another_user_transaction()
-
     cls._create_timebatch()
 
   @classmethod
-  @freeze_time("2020-01-14")
+  def _create_timebatch(cls):
+    t_today = cls.create_instance(**cls.transaction1)
+    t_yesterday = cls.create_instance(**cls.transaction2)
+    t_tomorrow = cls.create_instance(**cls.transaction3)
+    return {"today": t_today, "yesterday": t_yesterday, "tomorrow": t_tomorrow}
+
+  @classmethod
   def __create_lower_bounds_edge_case_transaction(cls):
     edge_case = (
         timezone.now() - timedelta(days=settings.TRANSACTION_HISTORY_MAX)
@@ -123,7 +97,6 @@ class TestConsumptionHistoryManagerTwoWeeks(ConsumptionTestHarness):
     cls.create_instance(**edge_case_transaction)
 
   @classmethod
-  @freeze_time("2020-01-14")
   def __create_another_user_transaction(cls):
     another_user_transaction = {
         'item': cls.item2,
@@ -133,14 +106,14 @@ class TestConsumptionHistoryManagerTwoWeeks(ConsumptionTestHarness):
     }
     cls.create_instance(**another_user_transaction)
 
-  @freeze_time("2020-01-14")
-  def test_last_two_weeks(self):
+  def test_last_two_weeks_tz1(self):
     start_of_window = timezone.now()
     end_of_window = start_of_window - timedelta(
         days=int(settings.TRANSACTION_HISTORY_MAX)
     )
 
     received = Transaction.objects.get_last_two_weeks(self.item1)
+
     expected = Transaction.objects.\
         filter(
           item=self.item1,
@@ -148,15 +121,14 @@ class TestConsumptionHistoryManagerTwoWeeks(ConsumptionTestHarness):
         ).\
         order_by('-datetime').\
         annotate(
-          date=TruncDate('datetime', tzinfo=pytz.utc),
+          date=TruncDate(TruncDay('datetime', tzinfo=pytz.utc)),
         ).\
         values('date').\
         annotate(quantity=Sum('quantity'))
 
     self.assertQuerysetEqual(received, map(repr, expected))
 
-  @freeze_time("2020-01-14")
-  def test_last_two_weeks_another_timezone(self):
+  def test_last_two_weeks_tz2(self):
     test_tz = "Pacific/Honolulu"
     zone = pytz.timezone(test_tz)
     start_of_window = timezone.now()
@@ -176,13 +148,37 @@ class TestConsumptionHistoryManagerTwoWeeks(ConsumptionTestHarness):
           datetime__date__gte=end_of_window.date(),
         ).\
         order_by('-datetime').\
-        annotate(date=TruncDate('datetime', tzinfo=zone)).\
+        annotate(date=TruncDate(TruncDay('datetime', tzinfo=zone))).\
         values('date').\
         annotate(quantity=Sum('quantity'))
 
     self.assertQuerysetEqual(received, map(repr, expected))
 
+  def test_last_two_weeks_compare_tz_dates(self):
+    test_tz1 = "Pacific/Honolulu"
+    test_tz2 = "Asia/Hong_Kong"
 
+    received1 = Transaction.objects.get_last_two_weeks(
+        self.item1,
+        zone=test_tz1,
+    )
+
+    received2 = Transaction.objects.get_last_two_weeks(
+        self.item1,
+        zone=test_tz2,
+    )
+
+    self.assertEqual(
+        len(received1),
+        len(received2),
+    )
+
+    for index, transaction in enumerate(received1):
+      assert received2[index]['date'] != transaction['date']
+      assert received2[index]['quantity'] == transaction['quantity']
+
+
+@freeze_time("2020-01-14")
 class TestConsumptionHistoryManagerStats(TransactionTestHarness):
   """Test the CHM 'get_STATISTIC' methods with item history created."""
 
@@ -192,7 +188,6 @@ class TestConsumptionHistoryManagerStats(TransactionTestHarness):
   mute_signals = False
 
   @classmethod
-  @freeze_time("2020-01-14")
   def create_data_hook(cls):
 
     cls.initial_transaction = {
@@ -233,15 +228,13 @@ class TestConsumptionHistoryManagerStats(TransactionTestHarness):
           item=cls.item1, date_object=value, user=cls.user1, quantity=-3
       )
 
-  @freeze_time("2020-01-14")
-  def test_get_first_consumption(self):
+  def test_get_first_consumption_utc(self):
     self.assertEqual(
         self.dates['two_months_ago'],
         Transaction.objects.get_first_consumption(self.item1.id)
     )
 
-  @freeze_time("2020-01-14")
-  def test_get_first_consumption_another_timezone(self):
+  def test_get_first_consumption_honolulu(self):
     zone = "Pacific/Honolulu"
 
     self.assertEqual(
@@ -252,11 +245,32 @@ class TestConsumptionHistoryManagerStats(TransactionTestHarness):
         )
     )
 
-  @freeze_time("2020-01-14")
+  def test_get_first_consumption_tz_difference(self):
+    zone1 = "UTC"
+    zone2 = "Pacific/Honolulu"
+
+    first_consumption_tz1 = Transaction.objects.get_first_consumption(
+        self.item1.id,
+        zone=zone1,
+    )
+    first_consumption_tz2 = Transaction.objects.get_first_consumption(
+        self.item1.id,
+        zone=zone2,
+    )
+
+    self.assertEqual(
+        first_consumption_tz1,
+        first_consumption_tz2,
+    )
+
+    self.assertNotEqual(
+        first_consumption_tz1.date(),
+        first_consumption_tz2.date(),
+    )
+
   def test_get_first_consumption_another_user(self):
     self.assertIsNone(Transaction.objects.get_first_consumption(self.item2.id))
 
-  @freeze_time("2020-01-14")
   def test_get_total_consumption(self):
     expected = len(self.dates) * 3
 
@@ -264,20 +278,17 @@ class TestConsumptionHistoryManagerStats(TransactionTestHarness):
         expected, Transaction.objects.get_total_consumption(self.item1.id)
     )
 
-  @freeze_time("2020-01-14")
   def test_get_total_consumption_another_user(self):
     self.assertEqual(
         0, Transaction.objects.get_total_consumption(self.item2.id)
     )
 
-  @freeze_time("2020-01-14")
-  def test_get_current_week_consumption(self):
+  def test_get_current_week_consumption_utc(self):
     self.assertEqual(
         6, Transaction.objects.get_current_week_consumption(self.item1.id)
     )
 
-  @freeze_time("2020-01-14")
-  def test_get_current_week_consumption_another_timezone(self):
+  def test_get_current_week_consumption_honolulu(self):
     zone = "Pacific/Honolulu"
 
     self.assertEqual(
@@ -288,20 +299,31 @@ class TestConsumptionHistoryManagerStats(TransactionTestHarness):
         )
     )
 
-  @freeze_time("2020-01-14")
+  def test_get_current_week_consumption_tz_difference(self):
+    zone1 = "UTC"
+    zone2 = "Pacific/Honolulu"
+
+    self.assertNotEqual(
+        Transaction.objects.get_current_week_consumption(
+            self.item1.id, zone=zone1
+        ),
+        Transaction.objects.get_current_week_consumption(
+            self.item1.id,
+            zone=zone2,
+        ),
+    )
+
   def test_get_current_week_consumption_another_user(self):
     self.assertEqual(
         0, Transaction.objects.get_current_week_consumption(self.item2.id)
     )
 
-  @freeze_time("2020-01-14")
-  def test_get_current_month_consumption(self):
+  def test_get_current_month_consumption_utc(self):
     self.assertEqual(
         12, Transaction.objects.get_current_month_consumption(self.item1.id)
     )
 
-  @freeze_time("2020-01-14")
-  def test_get_current_month_consumption_another_timezone(self):
+  def test_get_current_month_consumption_honolulu(self):
     zone = "Pacific/Honolulu"
 
     self.assertEqual(
@@ -312,7 +334,20 @@ class TestConsumptionHistoryManagerStats(TransactionTestHarness):
         )
     )
 
-  @freeze_time("2020-01-14")
+  def test_get_current_month_consumption_tz_difference(self):
+    zone1 = "UTC"
+    zone2 = "Pacific/Honolulu"
+
+    self.assertNotEqual(
+        Transaction.objects.get_current_month_consumption(
+            self.item1.id, zone=zone1
+        ),
+        Transaction.objects.get_current_month_consumption(
+            self.item1.id,
+            zone=zone2,
+        ),
+    )
+
   def test_get_current_month_consumption_another_user(self):
     self.assertEqual(
         0, Transaction.objects.get_current_month_consumption(self.item2.id)

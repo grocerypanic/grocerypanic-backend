@@ -14,13 +14,13 @@ from .. import item_history
 from ..item_history import ItemHistorySerializer
 
 
+@freeze_time("2020-01-14")
 class TestItemHistorySerializer(TransactionTestHarness):
-  """Test the Item History Serializer."""
+  """Test the ItemHistory Serializer."""
 
   mute_signals = False
 
   @classmethod
-  @freeze_time("2020-01-14")
   def create_data_hook(cls):
     cls.today = timezone.now()
     cls.fields = {"name": 255}
@@ -47,7 +47,6 @@ class TestItemHistorySerializer(TransactionTestHarness):
     for obj in self.objects:
       obj.delete()
 
-  @freeze_time("2020-01-14")
   def test_deserialize_last_two_weeks(self):
     transaction = self.create_test_instance(**self.consumption_today)
     history = Transaction.objects.get_last_two_weeks(self.item1.id)
@@ -64,7 +63,6 @@ class TestItemHistorySerializer(TransactionTestHarness):
         transaction.quantity,
     )
 
-  @freeze_time("2020-01-14")
   def test_deserialize_last_two_weeks_alternate_timezone(self):
     test_zone = "Asia/Hong_Kong"
 

@@ -11,7 +11,7 @@ from rest_framework.test import APIClient
 
 from ...tests.fixtures.fixtures_django import MockRequest, deserialize_date
 from ...tests.fixtures.fixtures_transaction import TransactionTestHarness
-from ..item import ItemConsumptionHistorySerializer
+from ..item import ItemConsumptionHistoryReportSerializer
 
 CONSUMPTION_HISTORY_VIEW = "v1:item-consumption-detail"
 
@@ -22,10 +22,12 @@ class PrivateTCHTestHarness(TransactionTestHarness):
   mute_signals = False
 
   @classmethod
-  @freeze_time("2020-01-14")
   def create_data_hook(cls):
     cls.serializer_data = {'item': cls.item1.id, 'quantity': 3}
+
+    cls.timezone = "Pacific/Honolulu"
     cls.today = timezone.now()
+
     cls.five_days_ago = cls.today - timezone.timedelta(days=5)
     cls.sixteen_days_ago = cls.today - timezone.timedelta(days=16)
 
@@ -89,59 +91,50 @@ class PublicTCHTest(TestCase):
     self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
 
 
+@freeze_time("2020-01-14")
 class PrivateTCHTest(PrivateTCHTestHarness):
   """Test the authorized TCH (Transaction Consumption History) API."""
 
   def setUp(self):
     super().setUp()
+    self.user1.timezone = self.timezone
+    self.user1.save()
+
     self.client = APIClient()
     self.client.force_authenticate(self.user1)
 
-  @freeze_time("2020-01-14")
-  def test_get_item_history(self):
-    res = self.client.get(item_pk_url(self.item1.id))
-    serializer = ItemConsumptionHistorySerializer(
-        self.item1,
-        data={},
-        context={
-            'request': self.MockRequest,
-        },
-    )
-    serializer.is_valid(raise_exception=True)
+  def _user_date(self, datetime_object):
+    return datetime_object.astimezone(pytz.timezone(self.timezone)).date()
 
-    self.assertEqual(res.status_code, status.HTTP_200_OK)
-    self.assertEqual(
-        res.data['consumption_last_two_weeks'],
-        serializer.data['consumption_last_two_weeks']
-    )
-
-  @freeze_time("2020-01-14")
-  def test_get_item_history_order(self):
-    res = self.client.get(item_pk_url(self.item1.id))
-    self.assertEqual(res.status_code, status.HTTP_200_OK)
-
-    assert len(res.data['consumption_last_two_weeks']) == 2
-
-    self.assertEqual(
-        deserialize_date(res.data['consumption_last_two_weeks'][0]['date']),
-        self.today.date()
-    )
-    self.assertEqual(
-        deserialize_date(res.data['consumption_last_two_weeks'][1]['date']),
-        self.five_days_ago.date()
-    )
-
-  @freeze_time("2020-01-14")
   def test_first_transaction(self):
     res = self.client.get(item_pk_url(self.item1.id))
 
     self.assertEqual(res.status_code, status.HTTP_200_OK)
     self.assertEqual(
-        res.data['first_consumption_date'],
+        res.data['first_consumption'],
         self.transaction_16_days_ago['date_object']
     )
+    self.assertEqual(
+        res.data['first_consumption'].date(),
+        self.transaction_16_days_ago['date_object'].date()
+    )
 
-  @freeze_time("2020-01-14")
+  def test_first_transaction_always_utc(self):
+    test_timezone = "Asia/Hong_Kong"
+    self.user1.timezone = test_timezone
+    self.user1.save()
+
+    res = self.client.get(item_pk_url(self.item1.id))
+
+    self.assertEqual(
+        res.data['first_consumption'],
+        self.transaction_16_days_ago['date_object']
+    )
+    self.assertEqual(
+        res.data['first_consumption'].date(),
+        self.transaction_16_days_ago['date_object'].date()
+    )
+
   def test_total_consumption(self):
     res = self.client.get(item_pk_url(self.item1.id))
     total_consumption = abs(
@@ -153,39 +146,98 @@ class PrivateTCHTest(PrivateTCHTestHarness):
     self.assertEqual(res.status_code, status.HTTP_200_OK)
     self.assertEqual(res.data['total_consumption'], total_consumption)
 
-  def test_specify_timezone(self):
-    test_timezone = "Asia/Hong_Kong"
-    res = self.client.get(
-        item_query_url(
-            self.item1.id,
-            query_kwargs={"timezone": test_timezone},
-        )
-    )
+  def test_recent_user_timezone_utc(self):
+    res = self.client.get(item_pk_url(self.item1.id))
+    self.assertEqual(res.status_code, status.HTTP_200_OK)
 
     self.assertEqual(
-        res.data['first_consumption_date'],
-        self.transaction_16_days_ago['date_object'].astimezone(
-            pytz.timezone(test_timezone)
-        )
+        res.data['recent_consumption']['user_timezone'],
+        str(self.user1.timezone),
     )
 
-  def test_specify_illegal_timezone(self):
-    test_timezone = "Not A Valid Timezone"
-    res = self.client.get(
-        item_query_url(
-            self.item1.id,
-            query_kwargs={"timezone": test_timezone},
-        )
+  def test_recent_user_timezone_alternate(self):
+    test_timezone = "Asia/Hong_Kong"
+    self.user1.timezone = test_timezone
+    self.user1.save()
+
+    res = self.client.get(item_pk_url(self.item1.id))
+    self.assertEqual(res.status_code, status.HTTP_200_OK)
+
+    self.assertEqual(
+        res.data['recent_consumption']['user_timezone'],
+        str(self.user1.timezone),
     )
 
-    self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+  def test_recent_daily_past_two_weeks(self):
+    res = self.client.get(item_pk_url(self.item1.id))
+    serializer = ItemConsumptionHistoryReportSerializer(
+        self.item1,
+        context={
+            'request': self.MockRequest,
+        },
+    )
+
+    self.assertEqual(res.status_code, status.HTTP_200_OK)
+    self.assertEqual(
+        res.data['recent_consumption']['daily_past_two_weeks'],
+        serializer.data['recent_consumption']['daily_past_two_weeks'],
+    )
+
+  def test_recent_daily_past_two_weeks_order(self):
+    res = self.client.get(item_pk_url(self.item1.id))
+    self.assertEqual(res.status_code, status.HTTP_200_OK)
+
+    consumption_past_two_weeks = (
+        res.data['recent_consumption']['daily_past_two_weeks']
+    )
+
+    assert len(consumption_past_two_weeks) == 2
+
+    self.assertEqual(
+        deserialize_date(consumption_past_two_weeks[0]['date']),
+        self._user_date(self.today)
+    )
+    self.assertEqual(
+        deserialize_date(consumption_past_two_weeks[1]['date']),
+        self._user_date(self.five_days_ago)
+    )
+
+  def test_recent_past_week(self):
+    res = self.client.get(item_pk_url(self.item1.id))
+    serializer = ItemConsumptionHistoryReportSerializer(
+        self.item1,
+        context={
+            'request': self.MockRequest,
+        },
+    )
+
+    self.assertEqual(res.status_code, status.HTTP_200_OK)
+    self.assertEqual(
+        res.data['recent_consumption']['past_week'],
+        serializer.data['recent_consumption']['past_week']
+    )
+
+  def test_recent_past_month(self):
+    res = self.client.get(item_pk_url(self.item1.id))
+    serializer = ItemConsumptionHistoryReportSerializer(
+        self.item1,
+        context={
+            'request': self.MockRequest,
+        },
+    )
+
+    self.assertEqual(res.status_code, status.HTTP_200_OK)
+    self.assertEqual(
+        res.data['recent_consumption']['past_month'],
+        serializer.data['recent_consumption']['past_month']
+    )
 
 
+@freeze_time("2020-01-14")
 class PrivateTCHTestAnotherUser(PrivateTCHTestHarness):
   """Test the authorized TCH API from another user."""
 
   @classmethod
-  @freeze_time("2020-01-14")
   def create_data_hook(cls):
     super().create_data_hook()
     test_data2 = cls.create_dependencies(2)
@@ -196,7 +248,6 @@ class PrivateTCHTestAnotherUser(PrivateTCHTestHarness):
     self.client = APIClient()
     self.client.force_authenticate(self.user2)
 
-  @freeze_time("2020-01-14")
   def test_get_item_history(self):
     res = self.client.get(item_pk_url(self.item1.id))
 

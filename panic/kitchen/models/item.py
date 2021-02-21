@@ -46,14 +46,18 @@ class Item(models.Model):
   user = models.ForeignKey(User, on_delete=models.CASCADE)
 
   _expired = models.FloatField(
-      default=0,
+      null=True,
+      blank=True,
+      default=None,
       validators=[
           MinValueValidator(constants.MINIMUM_QUANTITY),
           MaxValueValidator(constants.MAXIMUM_QUANTITY),
       ],
   )
   _next_expiry_quantity = models.FloatField(
-      default=0,
+      null=True,
+      blank=True,
+      default=None,
       validators=[
           MinValueValidator(constants.MINIMUM_QUANTITY),
           MaxValueValidator(constants.MAXIMUM_QUANTITY),
@@ -79,7 +83,11 @@ class Item(models.Model):
     :returns: A date, or None if no items are expiring.
     :rtype: None, :class:`datetime.date`
     """
-    return Inventory.objects.get_next_expiry_date(self)
+    user_date = None
+    utc_datetime = Inventory.objects.get_next_expiry_datetime(self)
+    if utc_datetime:
+      user_date = utc_datetime.astimezone(self.user.timezone).date()
+    return user_date
 
   @property
   def next_expiry_quantity(self):

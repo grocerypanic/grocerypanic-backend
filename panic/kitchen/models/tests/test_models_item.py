@@ -1,6 +1,7 @@
 """Test the Item model."""
 # pylint: disable=protected-access
 
+import datetime
 from unittest.mock import patch
 
 from django.core.exceptions import ValidationError
@@ -161,6 +162,11 @@ class TestItemCalculatedProperties(ItemTestHarness):
         'quantity': 3,
     }
 
+  def setUp(self):
+    super().setUp()
+    self.user1.timezone = "UTC"
+    self.user1.save()
+
   @patch(item_module.__name__ + ".Inventory.objects.get_expired")
   def test_expired(self, m_func):
     m_func.return_value = "return_value"
@@ -168,12 +174,63 @@ class TestItemCalculatedProperties(ItemTestHarness):
     self.assertEqual(item.expired, "return_value")
     m_func.assert_called_with(item)
 
-  @patch(item_module.__name__ + ".Inventory.objects.get_next_expiry_date")
-  def test_next_expiry_date(self, m_func):
-    m_func.return_value = "return_value"
+  @patch(item_module.__name__ + ".Inventory.objects.get_next_expiry_datetime")
+  def test_next_expiry_date_utc(self, m_func):
+    self.user1.timezone = "UTC"
+    self.user1.save()
+
+    m_func.return_value = timezone.now()
+    user_adjusted_date = timezone.now().astimezone(self.user1.timezone).date()
+
     item = self.create_test_instance(**self.data)
-    self.assertEqual(item.next_expiry_date, "return_value")
+    received_date = item.next_expiry_date
+
+    self.assertEqual(received_date, user_adjusted_date)
+    self.assertIsInstance(received_date, datetime.date)
     m_func.assert_called_with(item)
+
+  @patch(item_module.__name__ + ".Inventory.objects.get_next_expiry_datetime")
+  def test_next_expiry_date_honolulu(self, m_func):
+    self.user1.timezone = "Pacific/Honolulu"
+    self.user1.save()
+
+    m_func.return_value = timezone.now()
+    user_adjusted_date = timezone.now().astimezone(self.user1.timezone).date()
+
+    item = self.create_test_instance(**self.data)
+    received_date = item.next_expiry_date
+
+    self.assertEqual(received_date, user_adjusted_date)
+    self.assertIsInstance(received_date, datetime.date)
+    m_func.assert_called_with(item)
+
+  @patch(item_module.__name__ + ".Inventory.objects.get_next_expiry_datetime")
+  def test_next_expiry_date_utc_w_no_expiry_objects(self, m_func):
+    self.user1.timezone = "UTC"
+    self.user1.save()
+
+    m_func.return_value = None
+
+    item = self.create_test_instance(**self.data)
+    received_date = item.next_expiry_date
+
+    self.assertEqual(received_date, None)
+    m_func.assert_called_with(item)
+
+  @patch(item_module.__name__ + ".Inventory.objects.get_next_expiry_datetime")
+  def test_next_expiry_date_tz_diff(self, m_func):
+    m_func.return_value = timezone.now()
+    item = self.create_test_instance(**self.data)
+
+    self.user1.timezone = "Pacific/Honolulu"
+    self.user1.save()
+    tz1_date = item.next_expiry_date
+
+    self.user1.timezone = "UTC"
+    self.user1.save()
+    tz2_date = item.next_expiry_date
+
+    self.assertNotEqual(tz1_date, tz2_date)
 
   @patch(item_module.__name__ + ".Inventory.objects.get_next_expiry_quantity")
   def test_next_expiry_quantity(self, m_func):

@@ -3,18 +3,20 @@
 from datetime import timedelta
 
 import pendulum
+import pytz
 from django.db import models
 from django.db.models import Sum
-from django.db.models.functions import TruncDate
+from django.db.models.functions import TruncDay
 
 
 class ExpirationManager(models.Manager):
   """Retrieve Inventory expiration data for individual items."""
 
   def _get_inventory_expiry(self, inventory):
-    """Return the expiry date of an inventory entry.
+    """Return the expiry datetime of an inventory entry, for the user.
 
-    The date is tz corrected to the User's configured tz.
+    Best before dates are generally accurate to "date" only, so the calculated
+    expiry datetime is adjusted to the start of the user's local timezone day.
 
     :returns: A datetime, or None if no items are expiring.
     :rtype: None, :class:`datetime.datetime`
@@ -23,15 +25,20 @@ class ExpirationManager(models.Manager):
     shelf_life = inventory.item.shelf_life
     user_timezone = inventory.item.user.timezone
 
-    utc_time = transaction_datetime + timedelta(days=shelf_life)
-    return utc_time.astimezone(user_timezone)
+    user_time = pendulum.instance(
+        transaction_datetime.astimezone(user_timezone) +
+        timedelta(days=shelf_life)
+    )
+    return user_time.start_of('day').astimezone(pytz.utc)
 
   def get_inventory_expiration_datetime(self, item):
     """Return a date when which inventory older than are expired.
-    The datetime is tz corrected to the User's configured tz.
+
+    Best before dates are generally accurate to "date" only, so the calculated
+    expiry datetime is adjusted to the start of the user's local timezone day.
 
     :param item: A item instance to analyze
-    :type item: :class:`kichen.models.item.Item`
+    :type item: :class:`kitchen.models.item.Item`
 
     :returns: A datetime, or None if no items are expiring.
     :rtype: None, :class:`datetime.datetime`
@@ -41,15 +48,17 @@ class ExpirationManager(models.Manager):
     current_day_start = pendulum.now(tz=timezone).start_of('day')
     return current_day_start - timedelta(days=shelf_life)
 
-  def get_next_expiry_date(self, item):
-    """Return the date of the next expiring item(s), if any.
-    The date is tz corrected to the User's configured tz.
+  def get_next_expiry_datetime(self, item):
+    """Return the datetime of the next expiring item(s), if any.
+
+    Best before dates are generally accurate to "date" only, so the calculated
+    expiry datetime is adjusted to the start of the user's local timezone day.
 
     :param item: A item instance to analyze
-    :type item: :class:`kichen.models.item.Item`
+    :type item: :class:`kitchen.models.item.Item`
 
-    :returns: A date, or None if no items are expiring.
-    :rtype: None, :class:`datetime.date`
+    :returns: A datetime, or None if no items are expiring.
+    :rtype: None, :class:`datetime.datetime`
     """
     next_expiry_date = None
     inventory_expiration = self.get_inventory_expiration_datetime(item)
@@ -66,16 +75,18 @@ class ExpirationManager(models.Manager):
 
     if oldest_inventory:
       next_expiry_datetime = self._get_inventory_expiry(oldest_inventory)
-      next_expiry_date = next_expiry_datetime.date()
+      next_expiry_date = next_expiry_datetime
 
     return next_expiry_date
 
   def get_next_expiry_quantity(self, item):
     """Return the quantity of the item(s) expiring next, if any.
-    The date is tz corrected to the User's configured tz.
+
+    Best before dates are generally accurate to "date" only, so the calculated
+    expiry datetime is adjusted to the start of the user's local timezone day.
 
     :param item: A item instance to analyze
-    :type item: :class:`kichen.models.item.Item`
+    :type item: :class:`kitchen.models.item.Item`
 
     :returns: A quantity expressed as a float
     :rtype: float
@@ -90,16 +101,16 @@ class ExpirationManager(models.Manager):
           transaction__datetime__gte=inventory_expiration,
         ).\
         annotate(
-          date=TruncDate(
+          datetime=TruncDay(
             'transaction__datetime',
             tzinfo=timezone,
           ),
         ).\
-        values('date',).\
+        values('datetime',).\
         annotate(
           quantity=Sum('remaining')
         ).\
-        order_by('date').\
+        order_by('datetime').\
         first()
 
     if next_quantity_sum:
@@ -109,8 +120,11 @@ class ExpirationManager(models.Manager):
   def get_expired(self, item):
     """Return the total quantity of the specified item that is expired.
 
+    Best before dates are generally accurate to "date" only, so the calculated
+    expiry datetime is adjusted to the start of the user's local timezone day.
+
     :param item: A item instance to analyze
-    :type item: :class:`kichen.models.item.Item`
+    :type item: :class:`kitchen.models.item.Item`
 
     :returns: A quantity expressed as a float
     :rtype: float

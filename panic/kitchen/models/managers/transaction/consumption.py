@@ -7,7 +7,7 @@ import pytz
 from django.conf import settings
 from django.db import models
 from django.db.models import Sum
-from django.db.models.functions import TruncDate
+from django.db.models.functions import TruncDate, TruncDay
 from django.utils.timezone import now
 
 
@@ -104,6 +104,7 @@ class ConsumptionHistoryManager(models.Manager):
     :rtype: :class:`django.db.models.QuerySet`, None
     """
     zone = pytz.timezone(zone)
+
     start_of_window = now()
     end_of_window = (
         start_of_window.astimezone(zone) -
@@ -115,8 +116,9 @@ class ConsumptionHistoryManager(models.Manager):
           datetime__date__gte=end_of_window.date(),
         ).\
         order_by('-datetime').\
-        annotate(date=TruncDate('datetime', tzinfo=zone)).\
-        values('date').annotate(quantity=Sum('quantity'))
+        annotate(date=TruncDate(TruncDay('datetime', tzinfo=zone))).\
+        values('date').\
+        annotate(quantity=Sum('quantity'))
 
   def get_total_consumption(self, item_id):
     """Calculate the total sum consumption of an item.
