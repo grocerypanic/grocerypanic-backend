@@ -49,10 +49,15 @@ case $1 in
     source_environment
     lint "$@"
     ;;
-  'lint-validate')
+  'lint-diff')
     shift
     source_environment
-    lint_check "$@"
+    lint_diff "$@"
+    ;;
+  'lint-extras')
+    shift
+    source_environment
+    lint_extras "$@"
     ;;
   'reinstall-requirements')
     shift
@@ -70,7 +75,7 @@ case $1 in
     setup_python "$@"
     ;;
   'shortlist')
-    echo "build-docs deploy-prod deploy-stage fmt lint lint-validate reinstall-requirements sectest setup test test-coverage test-integration types update"
+    echo "build-docs deploy-prod deploy-stage fmt lint lint-diff lint-extras reinstall-requirements sectest setup test test-coverage test-integration types update"
     ;;
   'test')
     shift
@@ -103,7 +108,8 @@ case $1 in
     echo ' - deploy-stage            (Deploy to App Engine)'
     echo ' - fmt                     (Run the code formatters)'
     echo ' - lint                    (Run the linter)'
-    echo ' - lint-validate           (Validate linting)'
+    echo ' - lint-diff               (Run the linter on modified files.)'
+    echo ' - lint-extras             (Run pydocstyle, isort, ect.)'
     echo ' - reinstall-requirements  (Reinstall Packages'
     echo ' - sectest                 (Run security tests)'
     echo ' - setup                   (Setup/Reset environment)'

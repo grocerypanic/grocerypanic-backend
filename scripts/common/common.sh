@@ -34,12 +34,7 @@ lint_check() {
 
   pushd "${PROJECT_HOME}" >/dev/null
 
-  echo "Checking docstrings ..."
-  pydocstyle "${PROJECT_NAME}"
-  pydocstyle --config=.pydocstyle.tests "${PROJECT_NAME}"
-
-  echo "Checking imports ..."
-  isort -c
+  lint_extras
 
   echo "Running pylint ..."
   pytest --pylint -m pylint --pylint-rcfile=.pylint.rc --pylint-jobs=3 "${ARGS[@]}"
@@ -50,6 +45,25 @@ lint_check() {
 
   popd >/dev/null
 
+}
+
+lint_diff() {
+  echo "Running pylint on DIFF ..."
+  pushd "${PROJECT_HOME}" >/dev/null
+    FILES=()
+    IFS=" " read -r -a FILES <<< "$(git diff --name-only --diff-filter=d | grep -E '\.py$' | tr '\n' ' ')"
+    pytest --pylint -m pylint --pylint-rcfile=.pylint.rc --pylint-jobs=3 "${FILES[@]}"
+  popd >/dev/null
+}
+
+lint_extras() {
+  echo "Checking docstrings ..."
+  pushd "${PROJECT_HOME}" >/dev/null
+    pydocstyle "${PROJECT_NAME}"
+    pydocstyle --config=.pydocstyle.tests "${PROJECT_NAME}"
+    echo "Checking imports ..."
+    isort -c
+  popd >/dev/null
 }
 
 reinstall_requirements() {
