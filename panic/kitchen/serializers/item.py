@@ -10,12 +10,28 @@ from .bases import RelatedValidatorModelSerializer
 
 DEFAULT_TIMEZONE = pytz.utc.zone
 
+READABLE_FIELDS = (
+    'id',
+    'expired',
+    'has_partial_quantities',
+    'name',
+    'next_expiry_date',
+    'next_expiry_datetime',
+    'next_expiry_quantity',
+    'price',
+    'preferred_stores',
+    'quantity',
+    'shelf',
+    'shelf_life',
+)
+
 
 class ItemSerializer(RelatedValidatorModelSerializer):
   """Serializer for Item."""
 
   user = serializers.HiddenField(default=serializers.CurrentUserDefault())
   next_expiry_date = serializers.ReadOnlyField()
+  next_expiry_datetime = serializers.ReadOnlyField()
   next_expiry_quantity = serializers.ReadOnlyField()
   expired = serializers.ReadOnlyField()
 
@@ -28,10 +44,11 @@ class ItemSerializer(RelatedValidatorModelSerializer):
     )
     read_only_fields = (
         "id",
-        "quantity",
-        "next_expiry_date",
-        "next_expiry_quantity",
         "expired",
+        "next_expiry_date",
+        "next_expiry_datetime",
+        "next_expiry_quantity",
+        "quantity",
     )
     validators = [
         UniqueTogetherValidator(

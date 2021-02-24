@@ -8,7 +8,7 @@ from ...tests.fixtures.fixture_mixins import SerializerTestMixin
 from ...tests.fixtures.fixtures_django import MockRequest
 from ...tests.fixtures.fixtures_item import ItemTestHarness
 from .. import DUPLICATE_OBJECT_MESSAGE
-from ..item import ItemSerializer
+from ..item import READABLE_FIELDS, ItemSerializer
 
 
 class TestItem(SerializerTestMixin, ItemTestHarness):
@@ -68,6 +68,7 @@ class TestItem(SerializerTestMixin, ItemTestHarness):
 
     price = '2.00'
 
+    self.assertEqual(deserialized['id'], item.id)
     self.assertEqual(deserialized['name'], self.create_data['name'])
     self.assertFalse(deserialized['has_partial_quantities'])
     self.assertEqual(deserialized['shelf_life'], self.create_data['shelf_life'])
@@ -77,8 +78,20 @@ class TestItem(SerializerTestMixin, ItemTestHarness):
     self.assertEqual(deserialized['expired'], 0)
     self.assertEqual(deserialized['next_expiry_quantity'], 0)
     self.assertEqual(deserialized['next_expiry_date'], None)
+    self.assertEqual(deserialized['next_expiry_datetime'], None)
+
     preferred_stores = [store.id for store in item.preferred_stores.all()]
     self.assertListEqual(deserialized['preferred_stores'], preferred_stores)
+
+  def test_deserialized_fields(self):
+    item = self.create_test_instance(**self.create_data)
+    serialized = self.serializer(item)
+    deserialized = serialized.data
+
+    self.assertEqual(len(READABLE_FIELDS), len(deserialized))
+    for readable_key in READABLE_FIELDS:
+      self.assertIn(readable_key, deserialized)
+
     assert 'user' not in deserialized
 
   def test_serialize(self):

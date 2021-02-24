@@ -147,6 +147,7 @@ class ItemCrudTest(APICrudTestHarness):
                 'quantity': 0.0,
                 'shelf_life': int(item_data['shelf_life']),
                 'next_expiry_date': None,
+                'next_expiry_datetime': None,
                 'next_expiry_quantity': 0.0,
                 'expired': 0,
                 'shelf': dependencies['shelf_id'],

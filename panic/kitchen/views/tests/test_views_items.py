@@ -7,8 +7,8 @@ from rest_framework import status
 from rest_framework.test import APIClient
 
 from ...models.item import Item
+from ...serializers.item import ItemSerializer
 from ...tests.fixtures.fixtures_item import ItemTestHarness
-from ..item import ItemSerializer
 
 ITEM_URL = reverse("v1:items-list")
 
@@ -208,13 +208,17 @@ class PrivateItemTest(PrivateItemTestHarness):
     assert len(items) == 1
     item = items[0]
 
-    self.assertEqual(item.name, self.serializer_data['name'])
-    self.assertEqual(item.shelf_life, self.serializer_data['shelf_life'])
     self.assertEqual(item.user.id, self.user1.id)
-    self.assertEqual(item.shelf.id, self.shelf1.id)
+    self.assertEqual(item.expired, 0)
+    self.assertFalse(item.has_partial_quantities)
+    self.assertEqual(item.name, self.serializer_data['name'])
+    self.assertEqual(item.next_expiry_date, None)
+    self.assertEqual(item.next_expiry_datetime, None)
+    self.assertEqual(item.next_expiry_quantity, 0)
     self.assertEqual(item.price, self.serializer_data['price'])
     self.assertEqual(item.quantity, 0)
-    self.assertFalse(item.has_partial_quantities)
+    self.assertEqual(item.shelf.id, self.shelf1.id)
+    self.assertEqual(item.shelf_life, self.serializer_data['shelf_life'])
 
     preferred_stores = item.preferred_stores.all()
     assert len(preferred_stores) == 1
@@ -235,14 +239,17 @@ class PrivateItemTest(PrivateItemTestHarness):
     assert len(items) == 1
     item = items[0]
 
-    # Check All Fields
-    self.assertEqual(item.name, self.serializer_data['name'])
-    self.assertEqual(item.shelf_life, self.serializer_data['shelf_life'])
     self.assertEqual(item.user.id, self.user1.id)
-    self.assertEqual(item.shelf.id, self.shelf1.id)
+    self.assertEqual(item.expired, 0)
+    self.assertFalse(item.has_partial_quantities)
+    self.assertEqual(item.name, self.serializer_data['name'])
+    self.assertEqual(item.next_expiry_date, None)
+    self.assertEqual(item.next_expiry_datetime, None)
+    self.assertEqual(item.next_expiry_quantity, 0)
     self.assertEqual(item.price, self.serializer_data['price'])
     self.assertEqual(item.quantity, 0)
-    self.assertFalse(item.has_partial_quantities)
+    self.assertEqual(item.shelf.id, self.shelf1.id)
+    self.assertEqual(item.shelf_life, self.serializer_data['shelf_life'])
 
     preferred_stores = item.preferred_stores.all()
     assert len(preferred_stores) == 1
