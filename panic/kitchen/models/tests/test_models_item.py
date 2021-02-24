@@ -2,16 +2,18 @@
 # pylint: disable=protected-access
 
 import datetime
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 from django.core.exceptions import ValidationError
 from django.utils import timezone
+from django.utils.functional import cached_property
 from freezegun import freeze_time
 
 from ...tests.fixtures.fixture_mixins import ModelTestMixin
 from ...tests.fixtures.fixtures_item import ItemTestHarness
 from .. import constants
 from .. import item as item_module
+from ..decorators.caching import PersistentModelFieldCache
 from ..item import Item
 
 
@@ -159,7 +161,6 @@ class TestItemCalculatedProperties(ItemTestHarness):
         'shelf': cls.shelf1,
         'preferred_stores': [cls.store1],
         'price': 2.00,
-        'quantity': 3,
     }
 
   def setUp(self):
@@ -167,11 +168,35 @@ class TestItemCalculatedProperties(ItemTestHarness):
     self.user1.timezone = "UTC"
     self.user1.save()
 
+  def test_refresh_from_db_clears_cache(self):
+    item = self.create_test_instance(**self.data)
+    persistent_cached_props = []
+    django_cached_props = []
+
+    for key, value in item.__class__.__dict__.items():
+      if isinstance(value, cached_property):
+        django_cached_props.append(key)
+
+    for key, value in item.__class__.__dict__.items():
+      if isinstance(value, PersistentModelFieldCache):
+        persistent_cached_props.append(key)
+
+    self.assertNotEqual(0, len(django_cached_props))
+    self.assertNotEqual(0, len(persistent_cached_props))
+
+    cached_props = django_cached_props + persistent_cached_props
+
+    with patch(item_module.__name__ + ".delattr", MagicMock()) as m_del:
+      item.invalidate_caches()
+      self.assertEqual(m_del.call_count, len(cached_props))
+      for cached_prop in cached_props:
+        m_del.assert_any_call(item, cached_prop)
+
   @patch(item_module.__name__ + ".Inventory.objects.get_expired")
   def test_expired(self, m_func):
-    m_func.return_value = "return_value"
+    m_func.return_value = 1.1
     item = self.create_test_instance(**self.data)
-    self.assertEqual(item.expired, "return_value")
+    self.assertEqual(item.expired, m_func.return_value)
     m_func.assert_called_with(item)
 
   @patch(item_module.__name__ + ".Inventory.objects.get_next_expiry_datetime")
@@ -232,9 +257,16 @@ class TestItemCalculatedProperties(ItemTestHarness):
 
     self.assertNotEqual(tz1_date, tz2_date)
 
+  @patch(item_module.__name__ + ".Inventory.objects.get_next_expiry_datetime")
+  def test_next_expiry_datetime(self, m_func):
+    m_func.return_value = timezone.now()
+    item = self.create_test_instance(**self.data)
+    self.assertEqual(item.next_expiry_datetime, m_func.return_value)
+    m_func.assert_called_with(item)
+
   @patch(item_module.__name__ + ".Inventory.objects.get_next_expiry_quantity")
   def test_next_expiry_quantity(self, m_func):
-    m_func.return_value = "return_value"
+    m_func.return_value = 85.1
     item = self.create_test_instance(**self.data)
-    self.assertEqual(item.next_expiry_quantity, "return_value")
+    self.assertEqual(item.next_expiry_quantity, m_func.return_value)
     m_func.assert_called_with(item)

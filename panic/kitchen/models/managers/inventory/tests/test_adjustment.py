@@ -1,12 +1,14 @@
 """Test the Inventory Transaction Manager."""
 
 from datetime import timedelta
+from unittest.mock import patch
 
 from freezegun import freeze_time
 from rest_framework.serializers import ErrorDetail
 
 from .....exceptions import ProcessingError
 from .....tests.fixtures.fixtures_inventory import InventoryTestHarness
+from .... import item as item_module
 from ....inventory import Inventory
 
 
@@ -212,6 +214,47 @@ class TestAdjustmentManager(InventoryTestHarness):
         ErrorDetail(
             string=expected_error_message, code=ProcessingError.default_code
         )
+    )
+
+  @patch(item_module.__name__ + ".Item.save")
+  @patch(item_module.__name__ + ".Item.invalidate_caches")
+  def test_transaction_positive_invalidates_cache(self, m_cache, m_save):
+    transaction = self.__positive_transaction()
+
+    m_save.reset_mock()
+    m_cache.reset_mock()
+    Inventory.objects.adjust(transaction)
+
+    self.assertEqual(
+        m_cache.call_count,
+        1,
+    )
+    self.assertEqual(
+        m_save.call_count,
+        1,
+    )
+
+  @patch(item_module.__name__ + ".Item.save")
+  @patch(item_module.__name__ + ".Item.invalidate_caches")
+  def test_transaction_full_debit_invalidates_cache(self, m_cache, m_save):
+    initial_transaction = self.__positive_transaction()
+    Inventory.objects.adjust(initial_transaction)
+    transaction = self.create_test_transaction_instance(
+        **self.negative_transaction,
+    )
+
+    m_save.reset_mock()
+    m_cache.reset_mock()
+    Inventory.objects.adjust(transaction)
+
+    self.assertEqual(
+        m_save.call_count,
+        1,
+    )
+
+    self.assertEqual(
+        m_cache.call_count,
+        1,
     )
 
 

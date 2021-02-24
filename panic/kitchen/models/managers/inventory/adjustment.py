@@ -19,6 +19,8 @@ class AdjustmentManager(models.Manager):
     else:
       self.__debit_inventory(transaction)
 
+    self.__clear_transaction_item_cache(transaction)
+
   def __credit_inventory(self, transaction):
     super().get_queryset().create(
         transaction=transaction,
@@ -38,6 +40,11 @@ class AdjustmentManager(models.Manager):
         return
 
     self.__adjustment_error(transaction)
+
+  @staticmethod
+  def __clear_transaction_item_cache(transaction):
+    transaction.item.invalidate_caches()
+    transaction.item.save()
 
   def select_inventory_by_item(self, item):
     """Retrieve the inventory records for this item, sorted by date.

@@ -3,8 +3,13 @@
 from django.contrib.auth import get_user_model
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
+from django.utils.functional import cached_property
 from naturalsortfield import NaturalSortField
 
+from kitchen.models.decorators.caching import (
+    PersistentCachedProperty,
+    PersistentModelFieldCache,
+)
 from spa_security.fields import BlondeCharField
 from . import constants
 from .inventory import Inventory
@@ -74,6 +79,15 @@ class Item(models.Model):
         models.Index(fields=['index']),
     ]
 
+  @PersistentCachedProperty(ttl_field="next_expiry_datetime")
+  def expired(self):
+    """Return the sum quantity of all inventory that is expired.
+
+    :returns: The quantity of items that will expire next
+    :rtype: float
+    """
+    return Inventory.objects.get_expired(self)
+
   @property
   def next_expiry_date(self):
     """Return the date of the next batch of expiring items, if any.
@@ -84,12 +98,26 @@ class Item(models.Model):
     :rtype: None, :class:`datetime.date`
     """
     user_date = None
-    utc_datetime = Inventory.objects.get_next_expiry_datetime(self)
+
+    # pylint: disable=using-constant-test
+    utc_datetime = self.next_expiry_datetime
+
     if utc_datetime:
       user_date = utc_datetime.astimezone(self.user.timezone).date()
     return user_date
 
-  @property
+  @cached_property
+  def next_expiry_datetime(self):
+    """Return the datetime of the next batch of expiring items, if any.
+
+    The datetime is corrected to the User's start of tz day.
+
+    :returns: A date, or None if no items are expiring.
+    :rtype: None, :class:`datetime.date`
+    """
+    return Inventory.objects.get_next_expiry_datetime(self)
+
+  @PersistentCachedProperty(ttl_field="next_expiry_datetime")
   def next_expiry_quantity(self):
     """Return the quantity of the next batch of expiring items, if any.
 
@@ -100,17 +128,20 @@ class Item(models.Model):
     """
     return Inventory.objects.get_next_expiry_quantity(self)
 
-  @property
-  def expired(self):
-    """Return the sum quantity of all inventory that is expired.
-
-    :returns: The quantity of items that will expire next
-    :rtype: float
-    """
-    return Inventory.objects.get_expired(self)
-
   def __str__(self):
     return str(self.name)
+
+  def invalidate_caches(self):
+    """Clear all types of cached properties."""
+    for key, value in self.__class__.__dict__.items():
+      if isinstance(value, (
+          PersistentModelFieldCache,
+          cached_property,
+      )):
+        try:
+          delattr(self, key)
+        except AttributeError:
+          pass
 
   # pylint: disable=signature-differs
   def save(self, *args, **kwargs):
