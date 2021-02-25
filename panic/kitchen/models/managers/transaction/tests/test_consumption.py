@@ -1,14 +1,14 @@
 """Test the Transaction Consumption Manager."""
 
+import random
 from datetime import timedelta
 
 import pytz
 from django.conf import settings
-from django.db.models import Sum
-from django.db.models.functions import TruncDate, TruncDay
 from django.utils import timezone
 from freezegun import freeze_time
 
+from .....tests.fixtures.fixtures_freezegun import to_realdate
 from .....tests.fixtures.fixtures_transaction import TransactionTestHarness
 from ....transaction import Transaction
 
@@ -47,24 +47,52 @@ class TestConsumptionHistoryManagerTwoWeeks(TransactionTestHarness):
   item2: object
 
   @classmethod
+  def create_randomized_instance(cls, **kwargs):
+    offset = random.randint(0, 9600)
+    modified = dict(kwargs)
+    modified.update({
+        'date_object': kwargs['date_object'] + timedelta(seconds=offset)
+    })
+    return cls.create_instance(**modified)
+
+  @classmethod
   def create_data_hook(cls):
     cls.today = timezone.now()
-    cls.tomorrow = timezone.now() + timedelta(days=1)
+    cls.transaction_quantity = -3.0
+    cls.last_week = timezone.now() - timedelta(days=8)
     cls.yesterday = timezone.now() + timedelta(days=-1)
     cls.last_year = timezone.now() + timedelta(days=-365)
 
-    def generate_transaction_data(datetime_object):
+    def generate_transaction_data(datetime_object, quantity=None):
+
+      if quantity is None:
+        quantity = cls.transaction_quantity
+
       return {
           'item': cls.item1,
           'date_object': datetime_object,
           'user': cls.user1,
-          'quantity': 3
+          'quantity': quantity
       }
 
-    cls.transaction1 = generate_transaction_data(cls.today)
-    cls.transaction2 = generate_transaction_data(cls.yesterday)
-    cls.transaction3 = generate_transaction_data(cls.tomorrow)
-    cls.transaction4 = generate_transaction_data(cls.last_year)
+    cls.transaction_init_item1 = generate_transaction_data(cls.last_year, 200)
+    cls.purchase_today = generate_transaction_data(
+        cls.today,
+        abs(cls.transaction_quantity),
+    )
+    cls.purchase_yesterday = generate_transaction_data(
+        cls.yesterday,
+        abs(cls.transaction_quantity),
+    )
+    cls.purchase_last_week = generate_transaction_data(
+        cls.last_week,
+        abs(cls.transaction_quantity),
+    )
+
+    cls.consumption_today = generate_transaction_data(cls.today)
+    cls.consumption_yesterday = generate_transaction_data(cls.yesterday)
+    cls.consumption_last_week = generate_transaction_data(cls.last_week)
+    cls.consumption_last_year = generate_transaction_data(cls.last_year)
 
     test_data = cls.create_dependencies(2)
     cls.user2 = test_data['user']
@@ -72,89 +100,119 @@ class TestConsumptionHistoryManagerTwoWeeks(TransactionTestHarness):
     cls.shelf2 = test_data['shelf']
     cls.item2 = test_data['item']
 
-    cls.__create_lower_bounds_edge_case_transaction()
-    cls.__create_another_user_transaction()
-    cls._create_timebatch()
+    cls._create_initial_item_quantities()
+    cls._create_lower_bounds_edge_case_transaction()
+    cls._create_another_user_transaction()
+    cls._create_test_transactions()
 
   @classmethod
-  def _create_timebatch(cls):
-    t_today = cls.create_instance(**cls.transaction1)
-    t_yesterday = cls.create_instance(**cls.transaction2)
-    t_tomorrow = cls.create_instance(**cls.transaction3)
-    return {"today": t_today, "yesterday": t_yesterday, "tomorrow": t_tomorrow}
+  def _create_initial_item_quantities(cls):
+    cls.transaction_init_item2 = dict(cls.transaction_init_item1)
+    cls.transaction_init_item2.update({
+        'item': cls.item2,
+    })
+
+    cls.create_randomized_instance(**cls.transaction_init_item1)
+    cls.create_randomized_instance(**cls.transaction_init_item2)
 
   @classmethod
-  def __create_lower_bounds_edge_case_transaction(cls):
-    edge_case = (
-        timezone.now() - timedelta(days=settings.TRANSACTION_HISTORY_MAX)
+  def _create_another_user_transaction(cls):
+    another_user_transaction = dict(cls.consumption_today)
+    another_user_transaction.update({
+        'item': cls.item2,
+        'user': cls.user2,
+    })
+    cls.create_randomized_instance(**another_user_transaction)
+
+  @classmethod
+  def _create_lower_bounds_edge_case_transaction(cls):
+    cls.edge_case = (
+        timezone.now() - (
+            timedelta(days=settings.TRANSACTION_HISTORY_MAX,) +
+            timedelta(hours=1,)
+        )
     )
-    edge_case_transaction = {
-        'item': cls.item1,
-        'date_object': edge_case,
-        'user': cls.user1,
-        'quantity': 3
-    }
+    edge_case_transaction = dict(cls.consumption_today)
+    edge_case_transaction.update({
+        'date_object': cls.edge_case,
+    })
     cls.create_instance(**edge_case_transaction)
 
   @classmethod
-  def __create_another_user_transaction(cls):
-    another_user_transaction = {
-        'item': cls.item2,
-        'date_object': timezone.now(),
-        'user': cls.user2,
-        'quantity': 3
-    }
-    cls.create_instance(**another_user_transaction)
+  def _create_test_transactions(cls):
+    cls.create_randomized_instance(**cls.consumption_today)
+    cls.create_randomized_instance(**cls.consumption_today)
+    cls.create_randomized_instance(**cls.consumption_today)
+    cls.create_randomized_instance(**cls.purchase_today)
+    cls.create_randomized_instance(**cls.consumption_yesterday)
+    cls.create_randomized_instance(**cls.consumption_yesterday)
+    cls.create_randomized_instance(**cls.consumption_yesterday)
+    cls.create_randomized_instance(**cls.purchase_yesterday)
+    cls.create_randomized_instance(**cls.consumption_last_week)
+    cls.create_randomized_instance(**cls.consumption_last_week)
+    cls.create_randomized_instance(**cls.consumption_last_week)
+    cls.create_randomized_instance(**cls.purchase_last_week)
 
-  def test_last_two_weeks_tz1(self):
-    start_of_window = timezone.now()
-    end_of_window = start_of_window - timedelta(
-        days=int(settings.TRANSACTION_HISTORY_MAX)
-    )
+  def test_last_two_weeks_utc(self):
+    consumption_amount = abs(self.transaction_quantity)
+    expected_results = [
+        {
+            'date': self.today,
+            'quantity': 3 * consumption_amount
+        },
+        {
+            'date': self.yesterday,
+            'quantity': 3 * consumption_amount
+        },
+        {
+            'date': self.last_week,
+            'quantity': 3 * consumption_amount
+        },
+    ]
 
     received = Transaction.objects.get_last_two_weeks(self.item1)
 
-    expected = Transaction.objects.\
-        filter(
-          item=self.item1,
-          datetime__date__gte=end_of_window.date(),
-        ).\
-        order_by('-datetime').\
-        annotate(
-          date=TruncDate(TruncDay('datetime', tzinfo=pytz.utc)),
-        ).\
-        values('date').\
-        annotate(quantity=Sum('quantity'))
-
-    self.assertQuerysetEqual(received, map(repr, expected))
-
-  def test_last_two_weeks_tz2(self):
-    test_tz = "Pacific/Honolulu"
-    zone = pytz.timezone(test_tz)
-    start_of_window = timezone.now()
-    end_of_window = (
-        start_of_window.astimezone(zone) -
-        timedelta(days=int(settings.TRANSACTION_HISTORY_MAX))
+    self.assertQuerysetEqual(
+        to_realdate(expected_results, 'date'),
+        map(repr, received),
     )
+
+  def test_last_two_weeks_honolulu(self):
+    test_tz = "Pacific/Honolulu"
+
+    consumption_amount = abs(self.transaction_quantity)
+    honolulu_edge_case = self.edge_case + timedelta(days=1)
+
+    expected_results = [
+        {
+            'date': self.today,
+            'quantity': 3 * consumption_amount
+        },
+        {
+            'date': self.yesterday,
+            'quantity': 3 * consumption_amount
+        },
+        {
+            'date': self.last_week,
+            'quantity': 3 * consumption_amount
+        },
+        {
+            'date': honolulu_edge_case,
+            'quantity': consumption_amount
+        },
+    ]
 
     received = Transaction.objects.get_last_two_weeks(
         self.item1,
         zone=test_tz,
     )
 
-    expected = Transaction.objects.\
-        filter(
-          item=self.item1,
-          datetime__date__gte=end_of_window.date(),
-        ).\
-        order_by('-datetime').\
-        annotate(date=TruncDate(TruncDay('datetime', tzinfo=zone))).\
-        values('date').\
-        annotate(quantity=Sum('quantity'))
+    self.assertQuerysetEqual(
+        to_realdate(expected_results, 'date', offset=1),
+        map(repr, received),
+    )
 
-    self.assertQuerysetEqual(received, map(repr, expected))
-
-  def test_last_two_weeks_compare_tz_dates(self):
+  def test_last_two_weeks_tz_diff(self):
     test_tz1 = "Pacific/Honolulu"
     test_tz2 = "Asia/Hong_Kong"
 

@@ -47,7 +47,7 @@ class TestItemHistorySerializer(TransactionTestHarness):
     for obj in self.objects:
       obj.delete()
 
-  def test_deserialize_last_two_weeks(self):
+  def test_deserialize_last_two_weeks_utc(self):
     transaction = self.create_test_instance(**self.consumption_today)
     history = Transaction.objects.get_last_two_weeks(self.item1.id)
     deserialized_transaction = ItemHistorySerializer(history, many=True)
@@ -60,11 +60,11 @@ class TestItemHistorySerializer(TransactionTestHarness):
 
     self.assertEqual(
         deserialized[0]['quantity'],
-        transaction.quantity,
+        abs(transaction.quantity),
     )
 
-  def test_deserialize_last_two_weeks_alternate_timezone(self):
-    test_zone = "Asia/Hong_Kong"
+  def test_deserialize_last_two_weeks_honolulu(self):
+    test_zone = "Pacific/Honolulu"
 
     test_timezone = pytz.timezone(test_zone)
     transaction = self.create_test_instance(**self.consumption_today)
@@ -76,16 +76,14 @@ class TestItemHistorySerializer(TransactionTestHarness):
     deserialized = deserialized_transaction.data
     parsed_date = deserialize_date(deserialized[0]['date'])
 
-    naive_transaction_datetime = transaction.datetime.replace(tzinfo=None)
-
     self.assertEqual(
         parsed_date,
-        test_timezone.localize(naive_transaction_datetime).date(),
+        transaction.datetime.astimezone(test_timezone).date(),
     )
 
     self.assertEqual(
         deserialized[0]['quantity'],
-        transaction.quantity,
+        abs(transaction.quantity),
     )
 
   @patch(item_history.__name__ + ".serializers.Serializer.create")
