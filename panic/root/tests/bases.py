@@ -120,10 +120,16 @@ class APICrudTestHarness(APILiveServerTestCase):
     })
     cls.objects = []
     cls.generator = default_token_generator
-    cls.view = reverse(cls.test_view)
-
     cls.user = None
     cls.email = None
+    cls.view = cls.get_test_view()
+
+  @classmethod
+  def get_test_view(cls):
+    if cls.test_view.endswith("-pk"):
+      actual_view = cls.test_view[:-3]
+      return lambda _, pk: reverse(actual_view, args=[pk])
+    return reverse(cls.test_view)
 
   @classmethod
   def tearDownClass(cls):
@@ -206,6 +212,7 @@ class APICrudTestHarnessUnauthorized(APICrudTestHarness):
   """Test harness for API integration testing authorized endpoints."""
 
   __test__ = False
+  __non_pk_checks__ = True
   __pk_checks__ = True
 
   methods = {
@@ -245,7 +252,7 @@ class APICrudTestHarnessUnauthorized(APICrudTestHarness):
           method=method, expected_status_code=expected_status_code
       ):
         client_method = getattr(self.client, method)
-        response = client_method(self._build_url(self.view) + '1/', data={})
+        response = client_method(self._get_url_from_view(), data={})
 
         self.assertEqual(response.status_code, expected_status_code)
         self.assertEqual(
@@ -253,8 +260,14 @@ class APICrudTestHarnessUnauthorized(APICrudTestHarness):
             {'detail': 'Authentication credentials were not provided.'}
         )
 
+  def _get_url_from_view(self):
+    if callable(self.view):
+      return self._build_url(self.view(1))
+    return self._build_url(self.view) + '1/'
+
   def test_http_methods(self):
-    self._security_methods()
+    if self.__non_pk_checks__:
+      self._security_methods()
 
   def test_http_methods_with_pk(self):
     if self.__pk_checks__:

@@ -19,7 +19,6 @@ class TransactionAPICrudTest(APICrudTestHarness):
   @classmethod
   def setUpClass(cls):
     super().setUpClass()
-    cls.view = reverse(cls.test_view)
     cls.store_view = reverse(cls.store_view)
     cls.shelf_view = reverse(cls.shelf_view)
     cls.item_view = reverse(cls.item_view)
