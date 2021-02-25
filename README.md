@@ -34,6 +34,10 @@ Launch the container (instructions below) then create an admin user so you can l
 
 [Environment Documentation](./environments/README.md)
 
+## Database Schema Information
+
+[Database Schema](./documentation/images/schema.png)
+
 ## Development Dependencies
 
 You'll need to install:
