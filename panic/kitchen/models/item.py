@@ -13,6 +13,7 @@ from kitchen.models.decorators.caching import (
 from spa_security.fields import BlondeCharField
 from . import constants
 from .inventory import Inventory
+from .managers.item import ItemManager
 
 User = get_user_model()
 
@@ -69,7 +70,7 @@ class Item(models.Model):
       ],
   )
 
-  objects = models.Manager()
+  objects = ItemManager()
 
   class Meta:
     constraints = [

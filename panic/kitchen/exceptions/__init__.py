@@ -17,4 +17,8 @@ class ProcessingError(exceptions.APIException):
   default_code = 'processing_error'
 
 
+class ConfirmationRequired(BaseException):
+  """An exception raised when a sensitive operation requires confirmation."""
+
+
 CUSTOM_VALIDATION_CLASSES = (ValidationPermissionError,)

@@ -3,7 +3,7 @@
 from django.test import TestCase
 from rest_framework import serializers, status
 
-from .. import ProcessingError, ValidationPermissionError
+from .. import ConfirmationRequired, ProcessingError, ValidationPermissionError
 
 
 class TestCustomExceptions(TestCase):
@@ -37,3 +37,7 @@ class TestCustomExceptions(TestCase):
     )
 
     assert ProcessingError.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
+
+  def test_confirmation_required(self):
+    with self.assertRaises(ConfirmationRequired):
+      raise ConfirmationRequired()
