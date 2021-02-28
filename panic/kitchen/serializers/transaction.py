@@ -1,10 +1,10 @@
 """Serializer for the transaction model."""
 
 from ..models.transaction import Transaction
-from .bases import RelatedValidatorModelSerializer
+from .bases import KitchenBaseModelSerializer
 
 
-class TransactionSerializer(RelatedValidatorModelSerializer):
+class TransactionSerializer(KitchenBaseModelSerializer):
   """Serializer for Transaction."""
 
   class Meta:

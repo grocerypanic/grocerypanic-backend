@@ -4,9 +4,10 @@ from django.db.models import Model
 from rest_framework import serializers
 
 from ..exceptions import ValidationPermissionError
+from . import UNIQUE_CONSTRAINT_MSG
 
 
-class RelatedValidatorModelSerializer(serializers.ModelSerializer):
+class KitchenBaseModelSerializer(serializers.ModelSerializer):
   """Base class with methods to help validate permissions on related objects."""
 
   def __to_iterable(self, related_instance):
@@ -42,3 +43,26 @@ class RelatedValidatorModelSerializer(serializers.ModelSerializer):
         raise ValidationPermissionError(
             detail=f"Please provide {modifier}valid {field}.",
         )
+
+  def case_unique_validator(self, value, field):
+    """Require a field to be unique (regardless of case) per related user.
+
+    :param value: The value being checked for case uniqueness
+    :type value: str
+    :param field: The model field being checked for case uniqueness
+    :type field: str
+
+    :raises: :class:`rest_framework.exceptions.ValidationError`
+    """
+    is_unchanged = (
+        self.instance and value.lower() == getattr(self.instance, field).lower()
+    )
+
+    model = self.Meta.model
+    user = self.context['request'].user
+    query_filter = {f"{field}__iexact": value, "user": user}
+    count = model.objects.filter(**query_filter).count()
+    unique_limit = 1 if is_unchanged else 0
+
+    if count > unique_limit:
+      raise serializers.ValidationError(detail=UNIQUE_CONSTRAINT_MSG,)

@@ -4,7 +4,7 @@ from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 
 from ..models.suggested import SuggestedItem
-from . import DUPLICATE_OBJECT_MESSAGE
+from . import DUPLICATE_OBJECT_MSG
 
 
 class SuggestedItemSerializer(serializers.ModelSerializer):
@@ -15,7 +15,7 @@ class SuggestedItemSerializer(serializers.ModelSerializer):
       validators=[
           UniqueValidator(
               queryset=SuggestedItem.objects.all(),
-              message=DUPLICATE_OBJECT_MESSAGE
+              message=DUPLICATE_OBJECT_MSG,
           )
       ]
   )

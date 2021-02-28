@@ -1,13 +1,12 @@
 """Serializer for the shelf model."""
 
 from rest_framework import serializers
-from rest_framework.validators import UniqueTogetherValidator
 
 from ..models.shelf import Shelf
-from . import DUPLICATE_OBJECT_MESSAGE
+from .bases import KitchenBaseModelSerializer
 
 
-class ShelfSerializer(serializers.ModelSerializer):
+class ShelfSerializer(KitchenBaseModelSerializer):
   """Serializer for Shelf."""
 
   user = serializers.HiddenField(default=serializers.CurrentUserDefault())
@@ -16,10 +15,14 @@ class ShelfSerializer(serializers.ModelSerializer):
     model = Shelf
     exclude = ('index',)
     read_only_fields = ("id",)
-    validators = [
-        UniqueTogetherValidator(
-            queryset=Shelf.objects.all(),
-            fields=['user', 'name'],
-            message=DUPLICATE_OBJECT_MESSAGE
-        )
-    ]
+
+  def validate_name(self, name):
+    """Ensure the name is unique (regardless of case) per user.
+
+    :param name: The shelf name.
+    :type name: str
+
+    :raises: :class:`rest_framework.serializers.ValidationError`
+    """
+    self.case_unique_validator(name, "name")
+    return name

@@ -5,7 +5,7 @@ from rest_framework.serializers import ValidationError
 from ...tests.fixtures.fixture_mixins import SerializerTestMixin
 from ...tests.fixtures.fixtures_django import MockRequest
 from ...tests.fixtures.fixtures_suggested import SuggestedItemTestHarness
-from .. import DUPLICATE_OBJECT_MESSAGE
+from .. import DUPLICATE_OBJECT_MSG
 from ..suggested import SuggestedItemSerializer
 
 
@@ -41,6 +41,4 @@ class TestItemList(SerializerTestMixin, SuggestedItemTestHarness):
     with self.assertRaises(ValidationError):
       serialized2.is_valid(raise_exception=True)
 
-    self.assertEqual(
-        str(serialized2.errors['name'][0]), DUPLICATE_OBJECT_MESSAGE
-    )
+    self.assertEqual(str(serialized2.errors['name'][0]), DUPLICATE_OBJECT_MSG)

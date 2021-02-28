@@ -6,7 +6,7 @@ from ...models.store import Store
 from ...tests.fixtures.fixture_mixins import SerializerTestMixin
 from ...tests.fixtures.fixtures_django import MockRequest
 from ...tests.fixtures.fixtures_store import StoreTestHarness
-from .. import DUPLICATE_OBJECT_MESSAGE
+from .. import UNIQUE_CONSTRAINT_MSG
 from ..store import StoreSerializer
 
 
@@ -43,7 +43,7 @@ class TestStore(SerializerTestMixin, StoreTestHarness):
     self.assertEqual(query[0].user.id, self.user1.id)
     self.assertEqual(query[0].name, self.create_data['name'])
 
-  def test_unique_constraint(self):
+  def test_case_unique_constraint(self):
     test_value = {"name": "Super Store"}
 
     serialized = self.serializer(
@@ -53,13 +53,40 @@ class TestStore(SerializerTestMixin, StoreTestHarness):
     serialized.is_valid(raise_exception=True)
     serialized.save()
 
+    case_change = dict(self.create_data)
+    case_change.update({"name": self.create_data['name'].lower()})
+
     serialized2 = self.serializer(
         context={'request': self.request},
-        data=test_value,
+        data=case_change,
     )
     with self.assertRaises(ValidationError):
       serialized2.is_valid(raise_exception=True)
 
     self.assertEqual(
-        str(serialized2.errors['non_field_errors'][0]), DUPLICATE_OBJECT_MESSAGE
+        str(serialized2.errors['name'][0]),
+        UNIQUE_CONSTRAINT_MSG,
+    )
+
+  def test_case_unique_constraint_update_instance(self):
+    serialized = self.serializer(
+        context={'request': self.request},
+        data=self.create_data,
+    )
+    serialized.is_valid(raise_exception=True)
+    instance = serialized.save()
+
+    serialized2 = self.serializer(
+        context={'request': self.request},
+        instance=instance,
+        data={"name": self.create_data['name'].lower()},
+        partial=True
+    )
+
+    serialized2.is_valid(raise_exception=True)
+    serialized2.save()
+
+    self.assertEqual(
+        instance.name,
+        self.create_data['name'].lower(),
     )

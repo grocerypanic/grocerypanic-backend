@@ -2,11 +2,9 @@
 
 import pytz
 from rest_framework import serializers
-from rest_framework.validators import UniqueTogetherValidator
 
 from ..models.item import Item
-from . import DUPLICATE_OBJECT_MESSAGE
-from .bases import RelatedValidatorModelSerializer
+from .bases import KitchenBaseModelSerializer
 
 DEFAULT_TIMEZONE = pytz.utc.zone
 
@@ -26,7 +24,7 @@ READABLE_FIELDS = (
 )
 
 
-class ItemSerializer(RelatedValidatorModelSerializer):
+class ItemSerializer(KitchenBaseModelSerializer):
   """Serializer for Item."""
 
   user = serializers.HiddenField(default=serializers.CurrentUserDefault())
@@ -50,13 +48,17 @@ class ItemSerializer(RelatedValidatorModelSerializer):
         "next_expiry_quantity",
         "quantity",
     )
-    validators = [
-        UniqueTogetherValidator(
-            queryset=Item.objects.all(),
-            fields=['user', 'name'],
-            message=DUPLICATE_OBJECT_MESSAGE
-        )
-    ]
+
+  def validate_name(self, name):
+    """Ensure the name is unique (regardless of case) per user.
+
+    :param name: The item name.
+    :type name: str
+
+    :raises: :class:`rest_framework.serializers.ValidationError`
+    """
+    self.case_unique_validator(name, "name")
+    return name
 
   def validate_preferred_stores(self, preferred_stores):
     """Ensure preferred_stores are owned by the current request user.

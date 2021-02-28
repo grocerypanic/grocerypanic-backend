@@ -7,7 +7,7 @@ from ...models.item import Item
 from ...tests.fixtures.fixture_mixins import SerializerTestMixin
 from ...tests.fixtures.fixtures_django import MockRequest
 from ...tests.fixtures.fixtures_item import ItemTestHarness
-from .. import DUPLICATE_OBJECT_MESSAGE
+from .. import UNIQUE_CONSTRAINT_MSG
 from ..item import READABLE_FIELDS, ItemSerializer
 
 
@@ -175,7 +175,7 @@ class TestItem(SerializerTestMixin, ItemTestHarness):
         },
     )
 
-  def test_unique_constraint(self):
+  def test_case_unique_constraint(self):
     serialized = self.serializer(
         context={'request': self.request},
         data=self.serializer_data,
@@ -183,14 +183,40 @@ class TestItem(SerializerTestMixin, ItemTestHarness):
     serialized.is_valid(raise_exception=True)
     serialized.save()
 
+    case_change = dict(self.serializer_data)
+    case_change.update({"name": self.serializer_data['name'].lower()})
+
     serialized2 = self.serializer(
         context={'request': self.request},
-        data=self.serializer_data,
+        data=case_change,
     )
     with self.assertRaises(ValidationError):
       serialized2.is_valid(raise_exception=True)
 
     self.assertEqual(
-        str(serialized2.errors['non_field_errors'][0]),
-        DUPLICATE_OBJECT_MESSAGE,
+        str(serialized2.errors['name'][0]),
+        UNIQUE_CONSTRAINT_MSG,
+    )
+
+  def test_case_unique_constraint_update_instance(self):
+    serialized = self.serializer(
+        context={'request': self.request},
+        data=self.serializer_data,
+    )
+    serialized.is_valid(raise_exception=True)
+    instance = serialized.save()
+
+    serialized2 = self.serializer(
+        context={'request': self.request},
+        instance=instance,
+        data={"name": self.serializer_data['name'].lower()},
+        partial=True
+    )
+
+    serialized2.is_valid(raise_exception=True)
+    serialized2.save()
+
+    self.assertEqual(
+        instance.name,
+        self.serializer_data['name'].lower(),
     )
