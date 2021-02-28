@@ -81,7 +81,7 @@ You can override the values set in this file by setting shell ENV variables prio
 
 #### Production Release Tags
 
-- The tag should constitute a 'vD.DD' format where each D creates the version of the release.
+- The tag should follow [semantic versioning](https://semver.org/): "vDD.DD.DD" 
 
 - Once the tag is created, a github release draft is created, giving you the opportunity to review the changes before a deploy. Any database changes will need to be managed in the admin environment.
 
