@@ -143,11 +143,9 @@ panic/frontend/node_modules
 panic/frontend/static/frontend/main.js
 
 # Prod
-
-terraform-account.json
 scripts/common/.archive
 
 
-# gcloud
+# gcloud service keys
 service-account.json
-
+gcloud*.json
