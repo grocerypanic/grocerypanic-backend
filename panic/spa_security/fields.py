@@ -14,7 +14,7 @@ class BlondeCharField(models.CharField, BleachField):
     Allows for restoring some modified fields after they have been "bleached".
     """
     restored_data = None
-    data = super(BlondeCharField, self).pre_save(model_instance, add)
+    data = super().pre_save(model_instance, add)
     for key, value in getattr(settings, "BLEACH_RESTORE_LIST", {}).items():
       restored_data = data.replace(key, value)
     if restored_data:

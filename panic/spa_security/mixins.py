@@ -123,4 +123,4 @@ class CSRFMixin:
   @method_decorator(csrf_protect)
   def dispatch(self, *args, **kwargs):
     """Override the dispatch implementation in the view."""
-    return super(CSRFMixin, self).dispatch(*args, **kwargs)
+    return super().dispatch(*args, **kwargs)

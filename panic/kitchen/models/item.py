@@ -148,4 +148,4 @@ class Item(models.Model):
   def save(self, *args, **kwargs):
     """Clean and save model."""
     self.full_clean()
-    return super(Item, self).save(*args, **kwargs)
+    super().save(*args, **kwargs)

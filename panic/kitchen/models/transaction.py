@@ -76,4 +76,4 @@ class Transaction(models.Model):
     with transaction.atomic():
       self.full_clean()
       self.apply_transaction_to_item()
-      super(Transaction, self).save(*args, **kwargs)
+      super().save(*args, **kwargs)
