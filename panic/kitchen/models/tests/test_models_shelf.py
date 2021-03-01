@@ -21,16 +21,16 @@ class TestShelf(ModelTestMixin, ShelfTestHarness):
     query = Shelf.objects.filter(name=test_name)
 
     self.assertQuerysetEqual(query, [repr(shelf)])
-    self.assertEqual(query[0].index, self.create_data['name'].lower())
+    self.assertEqual(query[0]._index, self.create_data['name'].lower())
 
   def test_unique(self):
     test_name = "Above Sink"
     _ = self.create_test_instance(user=self.user1, name=test_name)
 
     with self.assertRaises(ValidationError):
-      _ = self.create_test_instance(user=self.user1, name=test_name)
+      _ = self.create_test_instance(user=self.user1, name=test_name.lower())
 
-    count = Shelf.objects.filter(name=test_name).count()
+    count = Shelf.objects.filter(name__iexact=test_name).count()
     assert count == 1
 
   def test_bleach(self):
@@ -41,7 +41,7 @@ class TestShelf(ModelTestMixin, ShelfTestHarness):
     query = Shelf.objects.filter(name=sanitized_name)
 
     assert len(query) == 1
-    self.assertEqual(query[0].index, sanitized_name.lower())
+    self.assertEqual(query[0]._index, sanitized_name.lower())
     self.assertEqual(query[0].name, sanitized_name)
     self.assertEqual(query[0].user.id, self.user1.id)
 

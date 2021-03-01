@@ -17,7 +17,7 @@ class ItemCrudTest(APICrudTestHarness):
 
   mutable_properties = {
       'has_partial_quantities': True,
-      'index': None,
+      '_index': None,
       'id': False,
       'name': True,
       'shelf': True,
@@ -96,7 +96,7 @@ class ItemCrudTest(APICrudTestHarness):
     item_id = item_data['id']
 
     update_data = {
-        'index': item_data['name'] + self.faker.lexify(text='?'),
+        '_index': item_data['name'] + self.faker.lexify(text='?'),
         'id': item_id + 1,
         'name': item_data['name'] + self.faker.lexify(text='?'),
         'shelf': alternate_dependencies['store_id'],

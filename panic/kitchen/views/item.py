@@ -54,7 +54,7 @@ class ItemListCreateViewSet(
   def get_queryset(self):
     """Retrieve the view queryset."""
     queryset = self.queryset
-    return queryset.filter(user=self.request.user).order_by("index")
+    return queryset.filter(user=self.request.user).order_by("_index")
 
   @openapi_ready
   def perform_create(self, serializer):

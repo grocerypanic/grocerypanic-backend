@@ -5,37 +5,30 @@ from django.db import models
 from naturalsortfield import NaturalSortField
 
 from spa_security.fields import BlondeCharField
+from .mixins import UniqueNameConstraintMixin
 
 User = get_user_model()
 
 
-class Store(models.Model):
+class Store(UniqueNameConstraintMixin, models.Model):
   """Store model."""
 
   MAXIMUM_NAME_LENGTH = 255
 
-  index = NaturalSortField(
-      for_field="name",
-      max_length=MAXIMUM_NAME_LENGTH,
-  )  # Pagination Index
   name = BlondeCharField(max_length=MAXIMUM_NAME_LENGTH)
   user = models.ForeignKey(User, on_delete=models.CASCADE)
+
+  _index = NaturalSortField(
+      for_field="name",
+      max_length=MAXIMUM_NAME_LENGTH,
+  )
 
   objects = models.Manager()
 
   class Meta:
-    constraints = [
-        models.UniqueConstraint(fields=['user', 'name'], name='store per user')
-    ]
     indexes = [
-        models.Index(fields=['index']),
+        models.Index(fields=['_index']),
     ]
 
   def __str__(self):
     return str(self.name)
-
-  # pylint: disable=signature-differs
-  def save(self, *args, **kwargs):
-    """Clean and save model."""
-    self.full_clean()
-    super().save(*args, **kwargs)

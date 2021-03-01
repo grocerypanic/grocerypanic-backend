@@ -116,7 +116,7 @@ class PrivateItemTest(PrivateItemTestHarness):
 
     res = self.client.get(ITEM_URL)
 
-    items = Item.objects.all().order_by("index")
+    items = Item.objects.all().order_by("_index")
     serializer = ItemSerializer(items, many=True)
 
     assert items.count() == 2
@@ -163,7 +163,7 @@ class PrivateItemTest(PrivateItemTestHarness):
     url = item_url_with_params({"preferred_stores": self.store1.id})
     res = self.client.get(url)
 
-    items = Item.objects.all().order_by("index")
+    items = Item.objects.all().order_by("_index")
     serializer = ItemSerializer(
         items.filter(preferred_stores__in=[self.store1.id]), many=True
     )
@@ -178,7 +178,7 @@ class PrivateItemTest(PrivateItemTestHarness):
     url = item_url_with_params({"shelf": self.shelf1.id})
     res = self.client.get(url)
 
-    items = Item.objects.all().order_by("index")
+    items = Item.objects.all().order_by("_index")
     serializer = ItemSerializer(items.filter(shelf=self.shelf1.id), many=True)
 
     self.assertEqual(res.status_code, status.HTTP_200_OK)
@@ -191,7 +191,7 @@ class PrivateItemTest(PrivateItemTestHarness):
     res_delete = self.client.delete(ITEM_URL + str(delete.id) + '/')
     res_get = self.client.get(ITEM_URL)
 
-    items = Item.objects.all().order_by("index")
+    items = Item.objects.all().order_by("_index")
     serializer = ItemSerializer(items, many=True)
 
     assert len(items) == 1
@@ -202,7 +202,7 @@ class PrivateItemTest(PrivateItemTestHarness):
   def test_create_item(self):
     res = self.client.post(ITEM_URL, data=self.serializer_data)
 
-    items = Item.objects.all().order_by("index")
+    items = Item.objects.all().order_by("_index")
     self.assertEqual(res.status_code, status.HTTP_201_CREATED)
 
     assert len(items) == 1
@@ -233,7 +233,7 @@ class PrivateItemTest(PrivateItemTestHarness):
     # Ensure the original object has wrong data
     self.assertNotEqual(original.name, self.serializer_data['name'])
 
-    items = Item.objects.all().order_by("index")
+    items = Item.objects.all().order_by("_index")
     self.assertEqual(res.status_code, status.HTTP_200_OK)
 
     assert len(items) == 1

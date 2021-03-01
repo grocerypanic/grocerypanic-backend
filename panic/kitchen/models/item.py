@@ -14,11 +14,12 @@ from spa_security.fields import BlondeCharField
 from . import constants
 from .inventory import Inventory
 from .managers.item import ItemManager
+from .mixins import UniqueNameConstraintMixin
 
 User = get_user_model()
 
 
-class Item(models.Model):
+class Item(UniqueNameConstraintMixin, models.Model):
   """Item model."""
 
   MAXIMUM_NAME_LENGTH = 255
@@ -27,10 +28,6 @@ class Item(models.Model):
   DEFAULT_SHELF_LIFE = 7
 
   has_partial_quantities = models.BooleanField(default=False)
-  index = NaturalSortField(
-      for_field="name",
-      max_length=MAXIMUM_NAME_LENGTH,
-  )  # Pagination Index
   name = BlondeCharField(max_length=MAXIMUM_NAME_LENGTH)
   preferred_stores = models.ManyToManyField('Store')
   price = models.DecimalField(max_digits=10, decimal_places=2)
@@ -60,6 +57,10 @@ class Item(models.Model):
           MaxValueValidator(constants.MAXIMUM_QUANTITY),
       ],
   )
+  _index = NaturalSortField(
+      for_field="name",
+      max_length=MAXIMUM_NAME_LENGTH,
+  )
   _next_expiry_quantity = models.FloatField(
       null=True,
       blank=True,
@@ -73,11 +74,8 @@ class Item(models.Model):
   objects = ItemManager()
 
   class Meta:
-    constraints = [
-        models.UniqueConstraint(fields=['user', 'name'], name='item per user')
-    ]
     indexes = [
-        models.Index(fields=['index']),
+        models.Index(fields=['_index']),
     ]
 
   @PersistentCachedProperty(ttl_field="next_expiry_datetime")
@@ -143,9 +141,3 @@ class Item(models.Model):
           delattr(self, key)
         except AttributeError:
           pass
-
-  # pylint: disable=signature-differs
-  def save(self, *args, **kwargs):
-    """Clean and save model."""
-    self.full_clean()
-    super().save(*args, **kwargs)

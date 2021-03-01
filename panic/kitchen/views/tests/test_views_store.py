@@ -59,7 +59,7 @@ class PrivateStoreTest(StoreTestHarness):
 
     res = self.client.get(STORE_URL)
 
-    shelves = Store.objects.all().order_by("index")
+    shelves = Store.objects.all().order_by("_index")
     serializer = StoreSerializer(shelves, many=True)
 
     assert len(shelves) == 2
@@ -107,7 +107,7 @@ class PrivateStoreTest(StoreTestHarness):
     res_delete = self.client.delete(STORE_URL + str(delete.id) + '/')
     res_get = self.client.get(STORE_URL)
 
-    shelves = Store.objects.all().order_by("index")
+    shelves = Store.objects.all().order_by("_index")
     serializer = StoreSerializer(shelves, many=True)
 
     assert len(shelves) == 1
@@ -120,7 +120,7 @@ class PrivateStoreTest(StoreTestHarness):
 
     res = self.client.post(STORE_URL, data=data)
 
-    shelves = Store.objects.all().order_by("index")
+    shelves = Store.objects.all().order_by("_index")
 
     assert len(shelves) == 1
     self.assertEqual(res.status_code, status.HTTP_201_CREATED)

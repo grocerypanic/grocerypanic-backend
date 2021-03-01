@@ -36,7 +36,7 @@ class ItemSerializer(KitchenBaseModelSerializer):
   class Meta:
     model = Item
     exclude = (
-        'index',
+        '_index',
         '_next_expiry_quantity',
         '_expired',
     )

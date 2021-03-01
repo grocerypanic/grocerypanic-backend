@@ -38,15 +38,20 @@ class TestItem(ModelTestMixin, ItemTestHarness):
     query = Item.objects.filter(name=self.create_data['name'])
 
     self.assertQuerysetEqual(query, map(repr, [created]))
-    self.assertEqual(query[0].index, self.create_data['name'].lower())
+    self.assertEqual(query[0]._index, self.create_data['name'].lower())
 
   def test_unique(self):
     _ = self.create_test_instance(**self.create_data)
 
-    with self.assertRaises(ValidationError):
-      _ = self.create_test_instance(**self.create_data)
+    case_data = dict(self.create_data)
+    case_data.update({
+        'name': self.create_data['name'].lower(),
+    })
 
-    count = Item.objects.filter(name=self.create_data['name']).count()
+    with self.assertRaises(ValidationError):
+      _ = self.create_test_instance(**case_data)
+
+    count = Item.objects.filter(name__iexact=self.create_data['name']).count()
     assert count == 1
 
   def test_bleach(self):
@@ -63,7 +68,7 @@ class TestItem(ModelTestMixin, ItemTestHarness):
     assert len(query) == 1
 
     item = query[0]
-    self.assertEqual(item.index, sanitized_name.lower())
+    self.assertEqual(item._index, sanitized_name.lower())
     self.assertEqual(item.name, sanitized_name)
     self.assertEqual(item.shelf_life, self.create_data['shelf_life'])
     self.assertEqual(item.user.id, self.user1.id)

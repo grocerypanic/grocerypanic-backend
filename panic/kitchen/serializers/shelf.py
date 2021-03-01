@@ -13,7 +13,7 @@ class ShelfSerializer(KitchenBaseModelSerializer):
 
   class Meta:
     model = Shelf
-    exclude = ('index',)
+    exclude = ('_index',)
     read_only_fields = ("id",)
 
   def validate_name(self, name):

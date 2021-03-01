@@ -21,3 +21,5 @@ JWT_AUTH_COOKIE = 'panic_auth_prod'
 CSRF_COOKIE_NAME = "panic_csrf_prod"
 
 CORS_ALLOW_HEADERS = default_headers + ('Access-Control-Allow-Origin',)
+
+DEFAULT_FROM_EMAIL = "no-reply@grocerypanic.com"

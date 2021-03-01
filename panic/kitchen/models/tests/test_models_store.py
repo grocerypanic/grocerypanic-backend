@@ -22,16 +22,17 @@ class TestStore(ModelTestMixin, StoreTestHarness):
     query = Store.objects.filter(name=test_name)
 
     self.assertQuerysetEqual(query, map(repr, [created]))
-    self.assertEqual(query[0].index, test_name.lower())
+    # pylint: disable=protected-access
+    self.assertEqual(query[0]._index, test_name.lower())
 
   def test_unique(self):
     test_name = "Loblaws"
     _ = self.create_test_instance(user=self.user1, name=test_name)
 
     with self.assertRaises(ValidationError):
-      _ = self.create_test_instance(user=self.user1, name=test_name)
+      _ = self.create_test_instance(user=self.user1, name=test_name.lower())
 
-    count = Store.objects.filter(name=test_name).count()
+    count = Store.objects.filter(name__iexact=test_name).count()
     assert count == 1
 
   def test_bleach(self):
