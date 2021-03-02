@@ -248,27 +248,6 @@ class PrivateTransactionAnotherUser(TestHarnessWithData):
     self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
 
   @freeze_time("2020-01-14")
-  def test_list_transactions_by_another_item_filter(self):
-    self.item2.user = self.user1
-    self.item2.save()
-
-    self.create_test_instance(**self.transaction_now)
-    self.create_test_instance(**self.transaction_one_second)
-    self.create_test_instance(**self.transaction_two_seconds_another_item)
-
-    res = self.client.get(transaction_query_url({"item": self.item2.id}))
-
-    items = Transaction.objects.filter(item=self.item2).order_by("-datetime")
-    serializer = TransactionSerializer(items, many=True)
-
-    assert len(items) == 1
-    self.assertEqual(res.status_code, status.HTTP_200_OK)
-    self.assertEqual(res.data['results'], serializer.data)
-
-    self.item2.user = self.user2
-    self.item2.save()
-
-  @freeze_time("2020-01-14")
   def test_list_transactions_by_item_of_different_user(self):
     self.create_test_instance(**self.transaction_now)
     self.create_test_instance(**self.transaction_one_second)
