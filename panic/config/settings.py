@@ -62,6 +62,7 @@ INSTALLED_APPS = [
     'spa_security',
     'social_accounts',
     'django_bleach',
+    'utilities',
     'watchman',
 ]
 

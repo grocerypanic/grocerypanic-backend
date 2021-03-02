@@ -10,3 +10,5 @@ panic
    social_accounts/index.rst
    spa_security/index.rst
    user/index.rst
+   utilities/index.rst
+
