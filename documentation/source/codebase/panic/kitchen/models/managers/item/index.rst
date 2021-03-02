@@ -1,0 +1,6 @@
+item
+====
+.. toctree::
+   :glob:
+
+   *

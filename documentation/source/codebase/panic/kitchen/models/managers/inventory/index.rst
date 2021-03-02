@@ -1,0 +1,6 @@
+inventory
+=========
+.. toctree::
+   :glob:
+
+   *
