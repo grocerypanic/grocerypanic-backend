@@ -3,9 +3,13 @@
 from django.db import models
 
 from spa_security.fields import BlondeCharField
+from .mixins import FullCleanMixin
 
 
-class SuggestedItem(models.Model):
+class SuggestedItem(
+    FullCleanMixin,
+    models.Model,
+):
   """Suggest Item model."""
 
   MAXIMUM_NAME_LENGTH = 255
@@ -16,9 +20,3 @@ class SuggestedItem(models.Model):
 
   def __str__(self):
     return str(self.name)
-
-  # pylint: disable=signature-differs
-  def save(self, *args, **kwargs):
-    """Clean and save model."""
-    self.full_clean()
-    super().save(*args, **kwargs)

@@ -5,12 +5,16 @@ from django.db import models
 from naturalsortfield import NaturalSortField
 
 from spa_security.fields import BlondeCharField
-from .mixins import UniqueNameConstraintMixin
+from .mixins import FullCleanMixin, UniqueNameConstraintMixin
 
 User = get_user_model()
 
 
-class Store(UniqueNameConstraintMixin, models.Model):
+class Store(
+    FullCleanMixin,
+    UniqueNameConstraintMixin,
+    models.Model,
+):
   """Store model."""
 
   MAXIMUM_NAME_LENGTH = 255

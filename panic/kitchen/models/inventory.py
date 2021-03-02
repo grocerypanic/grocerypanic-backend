@@ -6,11 +6,16 @@ from django.db import models
 
 from . import constants
 from .managers.inventory import InventoryManager
+from .mixins import FullCleanMixin, RelatedFieldEnforcementMixin
 
 User = get_user_model()
 
 
-class Inventory(models.Model):
+class Inventory(
+    FullCleanMixin,
+    RelatedFieldEnforcementMixin,
+    models.Model,
+):
   """Inventory model."""
 
   item = models.ForeignKey('Item', on_delete=models.CASCADE)
@@ -34,8 +39,8 @@ class Inventory(models.Model):
         self.transaction.datetime,
     )
 
-  # pylint: disable=signature-differs
-  def save(self, *args, **kwargs):
-    """Clean and save model."""
-    self.full_clean()
-    super().save(*args, **kwargs)
+  def clean(self):
+    """Clean model."""
+    super().clean()
+    fields = ["transaction"]
+    self.related_validator(fields, owner_field="item")

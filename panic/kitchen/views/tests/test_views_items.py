@@ -41,7 +41,7 @@ class PrivateItemTestHarness(ItemTestHarness):
         'shelf_life': 104,
         'user': cls.user1,
         'shelf': cls.shelf1,
-        'preferred_stores': [cls.store2],
+        'preferred_stores': [cls.store1],
         'price': 2.00,
         'quantity': 3
     }

@@ -5,12 +5,16 @@ from django.db import models
 from naturalsortfield import NaturalSortField
 
 from spa_security.fields import BlondeCharField
-from .mixins import UniqueNameConstraintMixin
+from .mixins import FullCleanMixin, UniqueNameConstraintMixin
 
 User = get_user_model()
 
 
-class Shelf(UniqueNameConstraintMixin, models.Model):
+class Shelf(
+    FullCleanMixin,
+    UniqueNameConstraintMixin,
+    models.Model,
+):
   """Shelf model."""
 
   MAXIMUM_NAME_LENGTH = 255

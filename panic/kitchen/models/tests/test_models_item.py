@@ -275,3 +275,51 @@ class TestItemCalculatedProperties(ItemTestHarness):
     item = self.create_test_instance(**self.data)
     self.assertEqual(item.next_expiry_quantity, m_func.return_value)
     m_func.assert_called_with(item)
+
+
+class TestItemRelatedFields(ItemTestHarness):
+  """Test the Item model's related fields."""
+
+  @classmethod
+  def create_data_hook(cls):
+    cls.create_data = {
+        'user': cls.user1,
+        'name': "Canned Beans",
+        'shelf_life': 99,
+        'shelf': cls.shelf1,
+        'preferred_stores': [cls.store1],
+        'price': 2.00,
+    }
+
+  def setUp(self):
+    super().setUp()
+    self.create_second_test_set()
+
+  def test_wrong_preferred_stores(self):
+    wrong_related_item = dict(self.create_data)
+    wrong_related_item.update({'preferred_stores': [self.store2]})
+
+    with self.assertRaises(ValidationError) as raised:
+      self.create_test_instance(**wrong_related_item)
+
+    self.assertDictEqual(
+        raised.exception.message_dict, {
+            'user': ["This must match the 'preferred_stores' field."],
+            'preferred_stores':
+                ["These selections must match the 'user' field."],
+        }
+    )
+
+  def test_wrong_shelf(self):
+    wrong_related_item = dict(self.create_data)
+    wrong_related_item.update({'shelf': self.shelf2})
+
+    with self.assertRaises(ValidationError) as raised:
+      self.create_test_instance(**wrong_related_item)
+
+    self.assertDictEqual(
+        raised.exception.message_dict, {
+            'user': ["This must match the 'shelf' field."],
+            'shelf': ["This field must match the 'user' field."],
+        }
+    )

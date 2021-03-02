@@ -50,3 +50,53 @@ class TestItem(ModelTestMixin, InventoryTestHarness):
     inventory.remaining = constants.MAXIMUM_QUANTITY + 1
     with self.assertRaises(ValidationError):
       inventory.save()
+
+
+class TestInventoryRelatedFields(InventoryTestHarness):
+  """Test the Inventory model's related fields."""
+
+  @classmethod
+  def create_data_hook(cls):
+    cls.data = {
+        'item': cls.item1,
+        'remaining': cls.initial_quantity,
+        'transaction': cls.transaction1,
+    }
+
+  def setUp(self):
+    super().setUp()
+    dependency_kwargs = {
+        'datetime_object': self.today,
+        'quantity': self.initial_quantity
+    }
+    test_data = self.create_dependencies(2, **dependency_kwargs)
+    self.item2 = test_data['item']
+    self.transaction2 = test_data['transaction']
+
+  def test_wrong_item(self):
+    wrong_related_item = dict(self.data)
+    wrong_related_item.update({'item': self.item2})
+
+    with self.assertRaises(ValidationError) as raised:
+      self.create_test_instance(**wrong_related_item)
+
+    self.assertDictEqual(
+        raised.exception.message_dict, {
+            'item': ["This must match the 'transaction' field."],
+            'transaction': ["This field must match the 'item' field."],
+        }
+    )
+
+  def test_wrong_transaction(self):
+    wrong_related_item = dict(self.data)
+    wrong_related_item.update({'transaction': self.transaction2})
+
+    with self.assertRaises(ValidationError) as raised:
+      self.create_test_instance(**wrong_related_item)
+
+    self.assertDictEqual(
+        raised.exception.message_dict, {
+            'item': ["This must match the 'transaction' field."],
+            'transaction': ["This field must match the 'item' field."],
+        }
+    )

@@ -14,12 +14,21 @@ from spa_security.fields import BlondeCharField
 from . import constants
 from .inventory import Inventory
 from .managers.item import ItemManager
-from .mixins import UniqueNameConstraintMixin
+from .mixins import (
+    FullCleanMixin,
+    RelatedFieldEnforcementMixin,
+    UniqueNameConstraintMixin,
+)
 
 User = get_user_model()
 
 
-class Item(UniqueNameConstraintMixin, models.Model):
+class Item(
+    FullCleanMixin,
+    UniqueNameConstraintMixin,
+    RelatedFieldEnforcementMixin,
+    models.Model,
+):
   """Item model."""
 
   MAXIMUM_NAME_LENGTH = 255
@@ -141,3 +150,9 @@ class Item(UniqueNameConstraintMixin, models.Model):
           delattr(self, key)
         except AttributeError:
           pass
+
+  def clean(self):
+    """Clean model."""
+    super().clean()
+    fields = ["preferred_stores", "shelf"]
+    self.related_validator(fields)
