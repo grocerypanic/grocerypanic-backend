@@ -1,6 +1,7 @@
 """Shared Item model test fixtures."""
 
 from django.contrib.auth import get_user_model
+from django.db import transaction
 from django.db.models import Model
 from django.utils import timezone
 
@@ -27,16 +28,17 @@ class ItemTestHarness(KitchenModelTestFixture, MutableSignalsBaseTestCase):
 
   @staticmethod
   def create_instance(**kwargs):
-    item = Item.objects.create(
-        name=kwargs['name'],
-        user=kwargs['user'],
-        shelf_life=kwargs['shelf_life'],
-        shelf=kwargs['shelf'],
-        price=kwargs['price'],
-    )
-    for store in kwargs['preferred_stores']:
-      item.preferred_stores.add(store)
-    item.save()
+    with transaction.atomic():
+      item = Item.objects.create(
+          name=kwargs['name'],
+          user=kwargs['user'],
+          shelf_life=kwargs['shelf_life'],
+          shelf=kwargs['shelf'],
+          price=kwargs['price'],
+      )
+      for store in kwargs['preferred_stores']:
+        item.preferred_stores.add(store)
+      item.save()
     return item
 
   @staticmethod

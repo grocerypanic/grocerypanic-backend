@@ -154,5 +154,5 @@ class Item(
   def clean(self):
     """Clean model."""
     super().clean()
-    fields = ["preferred_stores", "shelf"]
+    fields = ["shelf"]
     self.related_validator(fields)

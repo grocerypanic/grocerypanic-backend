@@ -36,26 +36,20 @@ class RelatedFieldEnforcementMixin:
       raise ValidationError(errors)
 
   def __check_related_field(self, errors, related_field, owner_field):
-    instances, plural = self.__get_instances(related_field)
+    instances = self.__get_instances(related_field)
     for instance in instances:
       if getattr(instance, owner_field) != getattr(self, owner_field):
         errors[related_field] = [
-            f"{plural} must match the '{owner_field}' field."
+            f"This field must match the '{owner_field}' field."
         ]
         errors[owner_field] += [f"This must match the '{related_field}' field."]
     return errors
 
   def __get_instances(self, field_name):
     model = getattr(self.__class__, field_name).field.related_model
-    keys, plural = self.__to_iterable(forms.model_to_dict(self)[field_name])
-    instances = model.objects.filter(pk__in=keys)
-    return instances, plural
-
-  @staticmethod
-  def __to_iterable(related_instance):
-    if isinstance(related_instance, list):
-      return [instance.id for instance in related_instance], "These selections"
-    return [related_instance], "This field"
+    pk = forms.model_to_dict(self)[field_name]
+    instances = model.objects.filter(pk=pk)
+    return instances
 
 
 class UniqueNameConstraintMixin:

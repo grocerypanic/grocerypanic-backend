@@ -11,4 +11,4 @@ class KitchenConfig(AppConfig):
   def ready(self):
     """Load Signals."""
     # pylint: disable=unused-import, import-outside-toplevel
-    from .signals import transaction
+    from .signals import transaction, item
