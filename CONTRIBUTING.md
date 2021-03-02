@@ -1,43 +1,43 @@
-# Contributing Guide
-
-## Design
-
-There are some UI sketches available, and a design doc on google drive.
-Please reach out to `niall-byrne` and I'll connect you with resources.
+# Contribution Guide
 
 ## API Spec
 
 https://app.swaggerhub.com/apis/niall-byrne/panic/v1
 
+---
+
 ## Branching
 
-- Please create feature branches for your work.
-- Send PR's for a merge to develop.
-- Master will contain releases.
-- Use [commitizen](https://github.com/commitizen/cz-cli) for all commits. (It's installed in the container.)
+- Use [gitlabflow](https://docs.gitlab.com/ee/topics/gitlab_flow.html) methodology for your work
+- Use [commitizen](https://github.com/commitizen/cz-cli) to format commits
+- Send PR's when merging features to `master`
+- `master` is deployed to [api.stage.grocerypanic.com](https://api.stage.grocerypanic.com)  
+- `production` is used to create tagged releases
+- `v` + `maj.min.patch` formatted tags are deployed to [api.grocerypanic.com](http://api.grocerypanic.com)  
 
-## Authentication
+---
 
-#### Registration Library
-https://django-allauth.readthedocs.io/en/latest/
+## Related Reading
 
-#### Social Logins Library
-https://github.com/jazzband/dj-rest-auth
+### Registration / Authentication Libraries
 
-#### Security Implementation
+- https://django-allauth.readthedocs.io/en/latest/
+- https://github.com/jazzband/dj-rest-auth
 
-[panic/spa_security/README.md](panic/spa_security/README.md)
+### Environment Variable Documentation
 
-## Backend
+- [README.md](environments/README.md)
 
-- Write unittests for management commands, views, serializers, and models
-- There should be coverage for these 5 components
-- The kitchen app contains examples of how to name your components and test files:
-    - `test_[models|serializers|views|management]_[component_name].py`
-- Please use the linter as a style guide, and ensure you're in compliance before submitting a PR.
-- It's basically PEP, but with a two space indent for readability
+### Security Application
 
-## Frontend
+- [spa_security](panic/spa_security/README.md)
 
-Now decoupled - repository pending.
-Please see the API Spec and the [spa_security]((panic/spa_security/README.md)) documentation for integration instructions.
+---
+
+## Style Guide
+
+- Please follow the various linter's configured suggestions for docstrings, indent size (2 spaces), import sorting, and general style
+- Compartmentalize models, views, signals, and serializers as soon as there is more than a single class in their own sub-folders
+- Try to centralize [test fixtures](./kitchen/tests/fixtures) in each app's top level tests folder, keep the same naming convention 
+- Keep [integration tests](./root/tests) in the root app
+- Update the [Toc Tree](./documentation/source) to keep Sphinx documentation up to date
