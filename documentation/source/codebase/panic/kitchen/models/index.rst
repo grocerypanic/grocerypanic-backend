@@ -1,5 +1,8 @@
 models
 ======
+.. automodule:: kitchen.models
+   :members:
+
 .. toctree::
    :glob:
 

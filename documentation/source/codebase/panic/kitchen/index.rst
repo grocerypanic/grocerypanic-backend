@@ -1,11 +1,14 @@
 kitchen
 =======
+.. automodule:: kitchen
+   :members:
+
 .. toctree::
    :glob:
 
    admin/index.rst
    exceptions/index.rst
-   management/commands/index.rst
+   management/index.rst
    models/index.rst
    serializers/index.rst
    signals/index.rst

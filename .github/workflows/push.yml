@@ -26,9 +26,9 @@ jobs:
       run: |
         docker-compose build
         docker-compose up -d
-    - name: Run Linter
+    - name: Run Toc Tree Checker
       run: |
-        docker-compose exec -T panic bash -l -c 'scripts/commander.sh lint'
+        docker-compose exec -T panic bash -l -c 'scripts/commander.sh check-toctree'
     - name: Run Type Checker
       run: |
         docker-compose exec -T panic bash -l -c 'scripts/commander.sh types'
@@ -41,10 +41,13 @@ jobs:
         sudo pip3 install wheel setuptools
         sudo pip3 install safety
         safety check -r safety.txt
+    - name: Run Linter
+      run: |
+        docker-compose exec -T panic bash -l -c 'scripts/commander.sh lint'
     - name: Run Unit Tests
       run: |
         docker-compose exec -T panic bash -l -c 'scripts/commander.sh test coverage'
-    - name: Run Functional Tests
+    - name: Run Integration Tests
       run: |
         docker-compose exec -T panic bash -l -c 'scripts/commander.sh test integration'
     - name: Report Job Status (Success)

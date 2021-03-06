@@ -1,5 +1,8 @@
-settings
-========
+config
+======
+.. automodule:: config
+   :members:
+
 .. toctree::
    :glob:
 

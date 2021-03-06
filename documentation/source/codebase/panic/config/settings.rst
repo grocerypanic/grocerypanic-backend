@@ -1,4 +1,4 @@
 settings.py
 ===========
 .. automodule:: config.settings
-    :members:
+   :members:

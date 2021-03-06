@@ -1,4 +1,4 @@
-item.py
+shelf.py
 ========
-.. automodule:: kitchen.views.item
-    :members:
+.. automodule:: kitchen.views.shelf
+   :members:

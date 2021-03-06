@@ -1,5 +1,8 @@
 panic
 =====
+.. automodule:: panic
+   :members:
+
 .. toctree::
    :glob:
 
@@ -11,4 +14,4 @@ panic
    spa_security/index.rst
    user/index.rst
    utilities/index.rst
-
+   *

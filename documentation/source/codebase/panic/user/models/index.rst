@@ -1,5 +1,8 @@
 models
 ======
+.. automodule:: user.models
+   :members:
+
 .. toctree::
    :glob:
 

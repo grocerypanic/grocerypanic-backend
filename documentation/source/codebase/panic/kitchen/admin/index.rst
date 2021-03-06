@@ -1,7 +1,8 @@
 admin
 =====
 .. automodule:: kitchen.admin
-    :members:
+   :members:
+
 .. toctree::
    :glob:
 

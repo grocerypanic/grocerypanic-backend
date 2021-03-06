@@ -1,7 +1,8 @@
 exceptions
 ==========
 .. automodule:: kitchen.exceptions
-    :members:
+   :members:
+
 .. toctree::
    :glob:
 

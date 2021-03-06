@@ -29,6 +29,16 @@ case $1 in
     source_environment
     build_documentation "$@"
     ;;
+  'build-toctree')
+    shift
+    source_environment
+    build_toctree "$@"
+    ;;
+  'check-toctree')
+    shift
+    source_environment
+    check_toctree "$@"
+    ;;
   'deploy-stage')
     shift
     source_environment
@@ -75,7 +85,7 @@ case $1 in
     setup_python "$@"
     ;;
   'shortlist')
-    echo "build-docs deploy-prod deploy-stage fmt lint lint-diff lint-extras reinstall-requirements sectest setup test test-coverage test-integration types update"
+    echo "build-docs build-toctree check-toctree deploy-prod deploy-stage fmt lint lint-diff lint-extras reinstall-requirements sectest setup test test-coverage test-integration types update"
     ;;
   'test')
     shift
@@ -104,6 +114,8 @@ case $1 in
   *)
     echo "Valid Commands:"
     echo ' - build-docs              (Build Documentation)'
+    echo ' - build-toctree           (re/Build Documentation TocTree)'
+    echo ' - check-toctree           (Check Documentation TocTree)'
     echo ' - deploy-prod             (Deploy to Cloud RUn)'
     echo ' - deploy-stage            (Deploy to App Engine)'
     echo ' - fmt                     (Run the code formatters)'

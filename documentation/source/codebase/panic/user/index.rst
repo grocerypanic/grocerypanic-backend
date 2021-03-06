@@ -1,5 +1,8 @@
 user
 ====
+.. automodule:: user
+   :members:
+
 .. toctree::
    :glob:
 
