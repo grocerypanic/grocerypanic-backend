@@ -2,16 +2,16 @@
 
 from django.core.management.base import BaseCommand
 
+from utilities.management.shared.confirmation import ManagementConfirmation
 from ...models.inventory import Inventory
 from ...models.transaction import Transaction
-from .utils.confirmation import AdminConfirmation
 
 MESSAGE_WIPING = "Wiping the Inventory table ..."
 MESSAGE_REBUILDING = "Rebuilding for Inventory Table..."
 MESSAGE_SUCCESS = "Inventory table has been rebuilt!"
 
 
-class Confirmation(AdminConfirmation):
+class Confirmation(ManagementConfirmation):
   """Confirmation dialogue."""
 
   confirm_message = (

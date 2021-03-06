@@ -2,14 +2,14 @@
 
 from django.core.management.base import BaseCommand
 
+from utilities.management.shared.confirmation import ManagementConfirmation
 from ...models.item import Item
-from .utils.confirmation import AdminConfirmation
 
 MESSAGE_REBUILDING = "Rebuilding Item quantities from Inventory Table..."
 MESSAGE_SUCCESS = "Item quantities have been rebuilt!"
 
 
-class Confirmation(AdminConfirmation):
+class Confirmation(ManagementConfirmation):
   """Confirmation dialogue."""
 
   confirm_message = (

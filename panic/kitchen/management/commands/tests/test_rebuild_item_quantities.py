@@ -6,8 +6,10 @@ from unittest.mock import patch
 from django.core.management import call_command
 from django.test import TestCase
 
-from .. import rebuild_item_quantities as module
+from .. import rebuild_item_quantities as command_module
 from ..rebuild_item_quantities import MESSAGE_REBUILDING, MESSAGE_SUCCESS
+
+COMMAND_MODULE = command_module.__name__
 
 
 class TestCommand(TestCase):
@@ -26,7 +28,7 @@ class TestCommand(TestCase):
 
   def _call_command(self):
     with patch(
-        module.__name__ + '.Item.objects.rebuild_quantities_from_inventory'
+        COMMAND_MODULE + '.Item.objects.rebuild_quantities_from_inventory'
     ) as self.rebuilder:
       call_command(
           'rebuild_item_quantities',
@@ -35,19 +37,17 @@ class TestCommand(TestCase):
           no_color=True
       )
 
-  @patch(
-      module.__name__ + ".AdminConfirmation.are_you_sure", return_value=False
-  )
+  @patch(COMMAND_MODULE + ".Confirmation.are_you_sure", return_value=False)
   def test_command_no_confirmation(self, _):
     self._call_command()
     self.rebuilder.assert_not_called()
 
-  @patch(module.__name__ + ".AdminConfirmation.are_you_sure", return_value=True)
+  @patch(COMMAND_MODULE + ".Confirmation.are_you_sure", return_value=True)
   def test_command_calls_rebuild_manager_method_yes(self, _):
     self._call_command()
     self.rebuilder.assert_called_once_with(confirm=True)
 
-  @patch(module.__name__ + ".AdminConfirmation.are_you_sure", return_value=True)
+  @patch(COMMAND_MODULE + ".Confirmation.are_you_sure", return_value=True)
   def test_generates_no_stdout_or_stderr(self, _):
     self._call_command()
 
