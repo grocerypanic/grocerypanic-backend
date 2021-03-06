@@ -7,7 +7,7 @@ from io import StringIO
 
 @contextmanager
 def capture_stdout():
-  """Capture stdout for a specific command."""
+  """Capture stdout from within a context manager."""
 
   out, sys.stdout = sys.stdout, StringIO()
   try:

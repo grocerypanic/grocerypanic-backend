@@ -1,4 +1,4 @@
-"""App config for the utilities app."""
+"""AppConfig for the utilities app."""
 
 from django.apps import AppConfig
 
