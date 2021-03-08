@@ -8,7 +8,7 @@ from ..models.shelf import Shelf
 from ..models.store import Store
 from ..models.suggested import SuggestedItem
 from ..models.transaction import Transaction
-from .item_admin import ItemAdmin
+from .item_model_admin import ItemAdmin
 
 admin.site.register(Inventory)
 admin.site.register(Item, ItemAdmin)
