@@ -82,7 +82,6 @@ security() {
   set -e
 
   pushd "${PROJECT_HOME}" >/dev/null
-  gitleaks --path=. --redact -v
   bandit -r "${PROJECT_NAME}" -c .bandit.rc --ini .bandit
   safety check
   popd >/dev/null
@@ -174,7 +173,7 @@ unittests() {
     if [[ $1 == "coverage" ]]; then
       shift
       set +e
-      pytest --cov-config=.coveragerc --cov-report term-missing --cov-fail-under=100 --cov="${PROJECT_NAME}" "${PROJECT_NAME}/" "$@"
+      pytest --cov-config=.coveragerc --cov-report term-missing --cov-fail-under=100 --cov="${PROJECT_NAME}" "$@"
       exit_code="$?"
       coverage html
       set -e
