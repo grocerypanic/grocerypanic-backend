@@ -1,34 +1,12 @@
-"""Kitchen app exceptions and exception handling."""
+"""Validation exception handling for the kitchen app."""
 
 from django.contrib.admin.utils import flatten
-from rest_framework import serializers, views
+from rest_framework import serializers
 
 from . import CUSTOM_VALIDATION_CLASSES
 
 
-def exception_handler(exc, context):
-  """Handle exceptions and manage status codes for custom validation errors.
-
-  :param exc: An exception
-  :type exc: :class:`BaseException`
-  :param context: A dictionary produced by the API view
-  :type context: dict
-
-  :returns: A rest_framework response object
-  :rtype: :class:`rest_framework.response.Response`
-  """
-
-  response = views.exception_handler(exc, context)
-
-  if response is not None:
-    handler = CustomValidationExceptionHandler(exc, response)
-    handler.process()
-    response = handler.response
-
-  return response
-
-
-class CustomValidationExceptionHandler:
+class ValidationExceptionHandler:
   """Handle custom validation errors that are hidden by DRF.
 
   :param exc: An exception

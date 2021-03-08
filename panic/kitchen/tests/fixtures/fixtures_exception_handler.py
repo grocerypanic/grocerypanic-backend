@@ -6,9 +6,7 @@ from rest_framework.response import Response
 
 
 class HandlerTestHarness(TestCase):
-  """Test harness for the exception handler."""
-
-  __test__ = False
+  """Test harness for the exception handlers."""
 
   def setUp(self):
     self.validation_error = 'a validation error message'

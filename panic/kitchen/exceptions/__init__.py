@@ -11,14 +11,14 @@ class ValidationPermissionError(serializers.ValidationError):
 
 
 class ProcessingError(exceptions.APIException):
-  """An exception due to processing problems."""
+  """Exception due to processing problems."""
 
   default_detail = 'An error occurred during processing.'
   default_code = 'processing_error'
 
 
 class ConfirmationRequired(BaseException):
-  """An exception raised when a sensitive operation requires confirmation."""
+  """Exception raised when a sensitive operation requires confirmation."""
 
 
 CUSTOM_VALIDATION_CLASSES = (ValidationPermissionError,)
