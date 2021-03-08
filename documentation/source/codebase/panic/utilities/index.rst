@@ -6,6 +6,7 @@ utilities
 .. toctree::
    :glob:
 
+   config/index.rst
    database/index.rst
    filesystem/index.rst
    management/index.rst

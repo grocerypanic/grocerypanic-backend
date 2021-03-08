@@ -1,38 +1,26 @@
 """Views for the appengine app."""
 
-from importlib import import_module
-
 from django.conf import settings
 from django.http import HttpResponse
 from django.views.generic import View
 from rest_framework import status
 
+from utilities.config.module_cache import warm_module_cache
 from utilities.database.connection import wait_for_database_connection
-
-DATABASE_WAIT_INTERVAL = 0.5
 
 
 class WarmUp(View):
-  """Handle Requests Related to App Engine's 'warm up' feature.
+  """Handle App Engine `warm up` requests.
 
-  `App Engine Warm Up Documentation
+  `App Engine `warm up` documentation
   <https://cloud.google.com/appengine/docs/standard/python3/
   configuring-warmup-requests>`__
   """
 
   def get(self, request, *args, **kwargs):  # pylint: disable=unused-argument
-    """Process an App Engine Warmup Request."""
+    """Process an App Engine `warm up` request."""
 
-    wait_for_database_connection(DATABASE_WAIT_INTERVAL)
-    self._import_installed_apps()
+    wait_for_database_connection(settings.WARM_UP_DATABASE_WAIT_INTERVAL)
+    warm_module_cache()
 
     return HttpResponse('OK', status=status.HTTP_200_OK)
-
-  @staticmethod
-  def _import_installed_apps():
-    for app in settings.INSTALLED_APPS:
-      for name in ('urls', 'views', 'models'):
-        try:
-          import_module('%s.%s' % (app, name))
-        except ImportError:
-          pass

@@ -2,24 +2,24 @@
 
 from unittest.mock import patch
 
-from django.http import HttpRequest
+from django.conf import settings
 from django.test import TestCase
-from django.urls import resolve, reverse
+from django.urls import reverse
 from rest_framework import status
 
 from .. import views as views_module
-from ..views import DATABASE_WAIT_INTERVAL, WarmUp
+
+WARMUP_URL = reverse("appengine_warmup")
+VIEWS_MODULE = views_module.__name__
 
 
+@patch(f"{VIEWS_MODULE}.wait_for_database_connection")
+@patch(f"{VIEWS_MODULE}.warm_module_cache")
 class AppEngineWarmUpTest(TestCase):
   """Test the APP Engine public endpoint."""
 
-  def setUp(self):
-    self.request = HttpRequest()
-    self.request.method = 'GET'
-
-  def test_warmup_returns_correct_html(self):
-    response = WarmUp.as_view()(self.request)
+  def test_warmup_returns_correct_html(self, _unused1, _unused2):
+    response = self.client.get(WARMUP_URL)
 
     self.assertEqual(
         response.status_code,
@@ -30,17 +30,10 @@ class AppEngineWarmUpTest(TestCase):
         'OK',
     )
 
-  def test_warmup_routing(self):
-    url = reverse('appengine_warmup')
-    found = resolve(url)
-    self.assertEqual(found.func.view_class, WarmUp)
+  def test_warm_up_waits_for_database(self, _, m_wait):
+    self.client.get(WARMUP_URL)
+    m_wait.assert_called_once_with(settings.WARM_UP_DATABASE_WAIT_INTERVAL)
 
-  @patch(views_module.__name__ + ".wait_for_database_connection")
-  def test_warm_up_waits_for_database(self, m_wait):
-    WarmUp.as_view()(self.request)
-    m_wait.assert_called_once_with(DATABASE_WAIT_INTERVAL)
-
-  @patch(views_module.__name__ + ".import_module")
-  def test_warm_up_imports_modules(self, m_import):
-    WarmUp.as_view()(self.request)
-    m_import.assert_called()
+  def test_warm_up_imports_modules(self, m_warm, _):
+    self.client.get(WARMUP_URL)
+    m_warm.assert_called()
