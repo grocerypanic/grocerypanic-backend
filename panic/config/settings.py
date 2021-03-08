@@ -8,30 +8,34 @@ https://docs.djangoproject.com/en/3.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.0/ref/settings/
 """
-# pylint: disable=unused-import, wildcard-import, unused-wildcard-import
 
-from django.contrib.messages import constants as message_constants
+import os
+
+from split_settings.tools import include
 
 from . import BASE_DIR
 from .settings_database import DATABASES_AVAILABLE
-from .settings_email import *
-from .settings_jwt import *
-from .settings_registration import *
 from .settings_restframework import REST_FRAMEWORK_AVAILABLE
 
-# Select Runtime Environment
+BASE_SETTINGS = [
+    'settings_apps.py',
+    'settings_email.py',
+    'settings_jwt.py',
+    'settings_registration.py',
+]
+
+include(*BASE_SETTINGS)
+
+# Environment Configuration
+
 ENVIRONMENT = os.environ.get('DJANGO_ENVIRONMENT', 'local')
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
+
 SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = ["*"]
 
 # Application definition
 
@@ -154,6 +158,9 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
 STATIC_URL = '/static/'
+MEDIA_URL = '/media/'
+STATIC_ROOT = os.path.join(BASE_DIR, "static")
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
 # Session
 
@@ -162,20 +169,12 @@ SESSION_COOKIE_SAMESITE = "Strict"
 # Rest Framework Configuration
 
 REST_FRAMEWORK = REST_FRAMEWORK_AVAILABLE[ENVIRONMENT]
-REST_COOKIES_SECURE = False  # Development
 REST_USE_JWT = True
-JWT_AUTH_COOKIE = 'panic_dev_auth'
-JWT_AUTH_COOKIE_SAMESITE = 'lax'  # Development
 
 # CSRF
 
 CSRF_USE_SESSIONS = False
-CSRF_COOKIE_SAMESITE = 'lax'  # Development
-CSRF_COOKIE_HTTPONLY = True  # Development
-CSRF_COOKIE_SECURE = False  # Development
-CSRF_TRUSTED_ORIGINS = ['localhost', '127.0.0.1']
 CSRF_FAILURE_VIEW = "spa_security.views.csrf_error"
-CSRF_COOKIE_NAME = "panic_dev_csrf"
 
 # CORS
 
@@ -193,18 +192,10 @@ LOGIN_REDIRECT_URL = "/api/v1/auth/login/"
 LOGOUT_REDIRECT_URL = None
 ACCOUNT_LOGOUT_REDIRECT_URL = LOGIN_URL
 
-# Default Message Level
-
-MESSAGE_LEVEL = message_constants.WARNING
-
 # API Versioning
 
 DEFAULT_VERSION = "v1"
 ALLOWED_VERSIONS = ("v1",)
-
-# Bleach
-
-BLEACH_RESTORE_LIST = {"&amp;": "&"}
 
 # Watchman Settings
 
@@ -217,19 +208,8 @@ PAGE_SIZE = 50
 PAGE_SIZE_MAX = 100
 PAGE_SIZE_PARAM = "page_size"
 PAGE_QUERY_PARAM = "page"
-PAGINATION_OVERRIDE_PARAM = "all_results"
-TOCTREE_FACTORY_SETTINGS = 'root.toctree.factory_settings'
-
-TRANSACTION_HISTORY_MAX = 14
-LEGACY_TRANSACTION_HISTORY_UPPER_BOUND = 150
 
 # Environment Specific Settings
-
-if ENVIRONMENT == "stage":
-  from .environments.settings_stage import *  # nocover
-
-if ENVIRONMENT == "prod":
-  from .environments.settings_prod import *  # nocover
-
-if ENVIRONMENT == "admin":
-  from .environments.settings_admin import *  # nocover
+ENVIRONMENT_SETTINGS = f"./environments/settings_{ENVIRONMENT}.py"
+include(ENVIRONMENT_SETTINGS)
+print(f"Loaded: {ENVIRONMENT_SETTINGS}")

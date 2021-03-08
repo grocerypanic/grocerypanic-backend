@@ -1,4 +1,4 @@
-"""Panic `admin` environment settings."""
+"""Panic `local` environment configuration."""
 
 from corsheaders.defaults import default_headers
 from django.contrib.messages import constants as message_constants
@@ -22,10 +22,10 @@ CSRF_COOKIE_HTTPONLY = True
 CSRF_COOKIE_SECURE = False
 
 CSRF_TRUSTED_ORIGINS = ['localhost', '127.0.0.1']
-CSRF_COOKIE_NAME = "panic_csrf_prod"
-JWT_AUTH_COOKIE = 'panic_auth_prod'
+CSRF_COOKIE_NAME = "panic_csrf_dev"
+JWT_AUTH_COOKIE = "panic_auth_dev"
 
-DEFAULT_FROM_EMAIL = "no-reply@grocerypanic.com"
+DEFAULT_FROM_EMAIL = "no-reply@example.com"
 
 MESSAGE_LEVEL = message_constants.WARNING
 
