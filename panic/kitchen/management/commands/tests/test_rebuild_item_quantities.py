@@ -1,4 +1,4 @@
-"""Test rebuild_item_quantities admin command."""
+"""Test rebuild_item_quantities management command."""
 
 from io import StringIO
 from unittest.mock import patch

@@ -18,17 +18,13 @@ class TestMaintenanceManager(TransactionTestHarness):
   mute_signals = False
 
   @classmethod
-  def setUpTestData(cls):
-    super().setUpTestData()
+  def create_data_hook(cls):
     test_data = cls.create_dependencies(2)
     cls.user2 = test_data['user']
     cls.store2 = test_data['store']
     cls.shelf2 = test_data['shelf']
     cls.item2 = test_data['item']
-    cls.create_data_hook()
 
-  @classmethod
-  def create_data_hook(cls):
     cls.today = timezone.now()
 
     cls.one_year_ago = cls.today - timedelta(days=365)
@@ -39,17 +35,11 @@ class TestMaintenanceManager(TransactionTestHarness):
         timedelta(days=cls.item1.shelf_life, hours=10)
     )
 
-  def setUp(self):
-    super().setUp()
+    cls.purchases1 = cls._create_scenarios(30.1, cls.item1)
+    cls.consumptions1 = cls._create_scenarios(-1, cls.item1)
 
-    self.item2.quantity = 0
-    self.item2.save()
-
-    self.purchases1 = self._create_scenarios(30.1, self.item1)
-    self.consumptions1 = self._create_scenarios(-1, self.item1)
-
-    self.purchases2 = self._create_scenarios(60.1, self.item2)
-    self.consumptions2 = self._create_scenarios(-2, self.item2)
+    cls.purchases2 = cls._create_scenarios(60.1, cls.item2)
+    cls.consumptions2 = cls._create_scenarios(-2, cls.item2)
 
     activities = [
         'p-last_year',
@@ -60,44 +50,51 @@ class TestMaintenanceManager(TransactionTestHarness):
         'p-today',
     ]
 
-    self._generate_test_data(activities)
+    cls._generate_transactions_from_activities(activities)
+    cls._snapshot_inventory_table()
 
-  def tearDown(self):
-    super().tearDown()
-    Inventory.objects.all().delete()
-
-  def assertListAllEqual(self, iterable):
-    if len(set(iterable)) > 1:
-      raise self.failureException(f"List Contents: {iterable} not all equal.")
-
-  def _generate_test_data(self, activities):
-    for activity in activities:
-      activity_type, when = activity.split('-')
-      if activity_type == 'p':
-        self._create_test_transaction(**self.purchases1[when])
-        self._create_test_transaction(**self.purchases2[when])
-      if activity_type == 'c':
-        self._create_test_transaction(**self.consumptions1[when])
-        self._create_test_transaction(**self.consumptions2[when])
-
-  def _create_scenarios(self, quantity, item):
+  @classmethod
+  def _create_scenarios(cls, quantity, item):
 
     def generate_transaction_data(date_object):
       return {'item': item, 'datetime': date_object, 'quantity': quantity}
 
     return {
-        'today': generate_transaction_data(self.today),
-        'last_week': generate_transaction_data(self.one_week_ago),
-        'last_month': generate_transaction_data(self.one_month_ago),
-        'last_year': generate_transaction_data(self.one_year_ago),
-        'timezone_edgecase': generate_transaction_data(self.timezone_edgecase),
+        'today': generate_transaction_data(cls.today),
+        'last_week': generate_transaction_data(cls.one_week_ago),
+        'last_month': generate_transaction_data(cls.one_month_ago),
+        'last_year': generate_transaction_data(cls.one_year_ago),
+        'timezone_edgecase': generate_transaction_data(cls.timezone_edgecase),
     }
 
-  def _create_test_transaction(self, **kwargs):
+  @classmethod
+  def _create_test_transaction(cls, **kwargs):
     transaction = Transaction(**kwargs)
     transaction.save()
-    self.objects.append(transaction)
     return transaction
+
+  @classmethod
+  def _generate_transactions_from_activities(cls, activities):
+    for activity in activities:
+      activity_type, when = activity.split('-')
+      if activity_type == 'p':
+        cls._create_test_transaction(**cls.purchases1[when])
+        cls._create_test_transaction(**cls.purchases2[when])
+      if activity_type == 'c':
+        cls._create_test_transaction(**cls.consumptions1[when])
+        cls._create_test_transaction(**cls.consumptions2[when])
+
+  @classmethod
+  def _snapshot_inventory_table(cls):
+    cls.original_inventory_count = Inventory.objects.all().count()
+    cls.original_item1_quantity = Inventory.objects.get_quantity(cls.item1)
+    cls.original_item2_quantity = Inventory.objects.get_quantity(cls.item2)
+    cls.original_item1_expired = Inventory.objects.get_expired(cls.item1)
+    cls.original_item2_expired = Inventory.objects.get_expired(cls.item2)
+
+  def assertListAllEqual(self, iterable):
+    if len(set(iterable)) > 1:
+      raise self.failureException(f"List Contents: {iterable} not all equal.")
 
   def _refresh_items(self):
     self.item1.invalidate_caches()
@@ -113,62 +110,46 @@ class TestMaintenanceManager(TransactionTestHarness):
     Transaction.objects.rebuild_inventory_table(confirm=True)
 
   def test_rebuild_same_record_count(self):
-    old_inventory_count = Inventory.objects.all().count()
-
-    Inventory.objects.all().delete()
     Transaction.objects.rebuild_inventory_table(confirm=True)
-
     new_inventory_count = Inventory.objects.all().count()
 
     self.assertEqual(
-        old_inventory_count,
+        self.original_inventory_count,
         new_inventory_count,
     )
 
   def test_rebuild_same_record_quantity(self):
-    old_inventory_quantity1 = Inventory.objects.get_quantity(self.item1)
-    old_inventory_quantity2 = Inventory.objects.get_quantity(self.item2)
-
-    Inventory.objects.all().delete()
     Transaction.objects.rebuild_inventory_table(confirm=True)
-
     new_inventory_quantity1 = Inventory.objects.get_quantity(self.item1)
     new_inventory_quantity2 = Inventory.objects.get_quantity(self.item2)
 
     self._refresh_items()
 
-    self.assertListAllEqual([
-        old_inventory_quantity1,
+    self.assertEqual(
+        self.original_item1_quantity,
         new_inventory_quantity1,
-        self.item1.quantity,
-    ])
+    )
 
-    self.assertListAllEqual([
-        old_inventory_quantity2,
+    self.assertEqual(
+        self.original_item2_quantity,
         new_inventory_quantity2,
-        self.item2.quantity,
-    ])
+    )
 
   def test_rebuild_same_record_expired(self):
-    old_inventory_expired1 = Inventory.objects.get_expired(self.item1)
-    old_inventory_expired2 = Inventory.objects.get_expired(self.item2)
-
-    Inventory.objects.all().delete()
     Transaction.objects.rebuild_inventory_table(confirm=True)
-
     new_inventory_expired1 = Inventory.objects.get_expired(self.item1)
     new_inventory_expired2 = Inventory.objects.get_expired(self.item2)
 
     self._refresh_items()
 
     self.assertListAllEqual([
-        old_inventory_expired1,
+        self.original_item1_expired,
         new_inventory_expired1,
         self.item1.expired,
     ])
 
     self.assertListAllEqual([
-        old_inventory_expired2,
+        self.original_item2_expired,
         new_inventory_expired2,
         self.item2.expired,
     ])

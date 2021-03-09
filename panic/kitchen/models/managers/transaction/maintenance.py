@@ -13,7 +13,7 @@ class MaintenanceManager(models.Manager):
   """Perform maintenance tasks related to Transaction models."""
 
   def rebuild_inventory_table(self, confirm=False):
-    """Wipe and rebuild total inventory table based on transaction data.
+    """Wipe and rebuild the inventory table based on transaction data.
 
     :param confirm: A boolean indicating you REALLY want to do this
     :type confirm: bool
@@ -22,6 +22,8 @@ class MaintenanceManager(models.Manager):
     """
     if not confirm:
       raise ConfirmationRequired("Are you sure you want to do this?")
+
+    Inventory.objects.all().delete()
 
     all_transactions = super().get_queryset().all().order_by('datetime')
     paginator = Paginator(all_transactions, TRANSACTION_PAGE_SIZE)

@@ -1,4 +1,4 @@
-"""Test wait_for_db admin command."""
+"""Test wait_for_db management command."""
 
 from io import StringIO
 from unittest.mock import patch
@@ -8,20 +8,19 @@ from django.db.utils import OperationalError
 from django.test import TestCase
 
 from .. import wait_for_db as command_module
-from ..wait_for_db import INITIALIZATION_MESSAGE, SUCCESS_MESSAGE
+from ..wait_for_db import INITIALIZATION_MESSAGE, SUCCESS_MESSAGE, WAIT_TIME
+
+COMMAND_MODULE = command_module.__name__
 
 
 class CommandTests(TestCase):
-  """Test the wait_for_db admin command."""
+  """Test the wait_for_db management command."""
 
-  def test_wait_for_db_ready(self):
+  @patch(f"{COMMAND_MODULE}.wait_for_database_connection")
+  def test_wait_for_db_ready(self, m_wait):
     capture = StringIO()
-
-    with patch(
-        command_module.__name__ + ".wait_for_database_connection"
-    ) as wait:
-      call_command("wait_for_db", stdout=capture)
-      self.assertEqual(wait.call_count, 1)
+    call_command("wait_for_db", stdout=capture)
+    self.assertEqual(m_wait.call_count, WAIT_TIME)
 
   @patch("time.sleep", return_value=True)
   def test_wait_for_db(self, _):

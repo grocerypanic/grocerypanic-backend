@@ -1,14 +1,16 @@
-"""A django admin command to create test data."""
+"""A management command to create test data."""
 
-from django.contrib.auth import get_user_model
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.management.base import BaseCommand
 
-from .utils.generate_testdata import DataGenerator
+from ...tests.fixtures.bulk_testdata import BulkTestDataGenerator
+
+ERROR_MESSAGE = 'The specified user does not exist.'
+SUCCESS_MESSAGE = 'Test data created.'
 
 
 class Command(BaseCommand):
-  """Django command that loads test data into the database."""
+  """Management command that loads test data into the database."""
 
   help = 'Loads sets of pre-defined test data into the database'
 
@@ -20,18 +22,15 @@ class Command(BaseCommand):
         type=str,
     )
 
-  def __get_user(self, username):
-    try:
-      return get_user_model().objects.get(username=username)
-    except ObjectDoesNotExist:
-      return None
-
   def handle(self, *args, **options):
     """Command implementation."""
     username = options['user'][0]
-    user = self.__get_user(username)
-    if user:
-      generator = DataGenerator(user)
-      generator.generate_data()
-    else:
-      self.stderr.write(self.style.ERROR('The specified user does not exist.'))
+
+    try:
+      generator = BulkTestDataGenerator(username)
+    except ObjectDoesNotExist:
+      self.stderr.write(self.style.ERROR(ERROR_MESSAGE))
+      return
+
+    generator.generate_data()
+    self.stdout.write(self.style.SUCCESS(SUCCESS_MESSAGE))

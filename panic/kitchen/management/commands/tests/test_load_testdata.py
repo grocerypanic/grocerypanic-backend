@@ -1,4 +1,4 @@
-"""Test wait_for_db admin command."""
+"""Test load_testdata management command."""
 
 from io import StringIO
 from unittest.mock import Mock, patch
@@ -8,10 +8,13 @@ from django.core.management import call_command
 from django.test import TestCase
 
 from .... import management
+from ..load_testdata import ERROR_MESSAGE, SUCCESS_MESSAGE
+
+MANAGEMENT_MODULE = management.__name__
 
 
 class CommandTestInvalid(TestCase):
-  """Test the wait_for_db command with a valid syntax."""
+  """Test the load_testdata command with an invalid user."""
 
   def test_invalid_user_specified_stdout(self):
     output_stdout = StringIO()
@@ -25,13 +28,14 @@ class CommandTestInvalid(TestCase):
     )
 
     self.assertIn(
-        'The specified user does not exist.', output_stderr.getvalue()
+        ERROR_MESSAGE,
+        output_stderr.getvalue(),
     )
     self.assertEqual(output_stdout.getvalue(), "")
 
 
 class CommandTestValid(TestCase):
-  """Test the wait_for_db command with an invalid syntax."""
+  """Test the load_testdata command with a valid user."""
 
   @classmethod
   def setUpTestData(cls):
@@ -46,7 +50,7 @@ class CommandTestValid(TestCase):
   def setUp(self):
 
     with patch(
-        management.__name__ + '.commands.load_testdata.DataGenerator'
+        f"{MANAGEMENT_MODULE}.commands.load_testdata.BulkTestDataGenerator"
     ) as generator:
 
       self.mock_generator = Mock()
@@ -62,13 +66,10 @@ class CommandTestValid(TestCase):
           no_color=True
       )
 
-  def tearDown(self):
-    pass
-
   def test_instantiates_the_generator_class(self):
-    self.generator.assert_called_once_with(self.user)
+    self.generator.assert_called_once_with(self.user.username)
     self.mock_generator.generate_data.assert_called_once()
-
-  def test_generates_no_stdout_or_stderr(self):
-    self.assertEqual(self.output_stdout.getvalue(), "")
-    self.assertEqual(self.output_stderr.getvalue(), "")
+    self.assertIn(
+        SUCCESS_MESSAGE,
+        self.output_stdout.getvalue(),
+    )

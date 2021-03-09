@@ -6,5 +6,4 @@ commands
 .. toctree::
    :glob:
 
-   utils/index.rst
    *
