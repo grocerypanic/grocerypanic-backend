@@ -6,5 +6,6 @@ root
 .. toctree::
    :glob:
 
+   exceptions/index.rst
    toctree/index.rst
    *

@@ -2,7 +2,9 @@
 
 from rest_framework import views
 
-from .validation_exception_handler import ValidationExceptionHandler
+from kitchen.exceptions.validation_exception_handler import (
+    ValidationExceptionHandler,
+)
 
 
 def root_exception_handler(exc, context):

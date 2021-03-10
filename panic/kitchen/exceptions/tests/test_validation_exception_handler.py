@@ -2,7 +2,7 @@
 
 from rest_framework import serializers
 
-from ...tests.fixtures.fixtures_exception_handler import HandlerTestHarness
+from root.tests.fixtures.fixtures_exception_handler import HandlerTestHarness
 from .. import ValidationPermissionError
 from ..validation_exception_handler import ValidationExceptionHandler
 

@@ -31,10 +31,10 @@ class TocTreeFactorySettings(AbstractTocTreeFactorySettings):
   files_filter_list = ['manage.py']
   folders_filter_list = [
       '__pycache__',
-      'static',
-      'migrations',
-      'tests',
       'fixtures',
+      'migrations',
+      'static',
+      'tests',
   ]
 
 
