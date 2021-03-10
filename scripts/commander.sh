@@ -54,6 +54,11 @@ case $1 in
     source_environment
     fmt "$@"
     ;;
+  'fmt-diff')
+    shift
+    source_environment
+    fmt_diff "$@"
+    ;;
   'lint')
     shift
     source_environment
@@ -85,7 +90,7 @@ case $1 in
     setup_python "$@"
     ;;
   'shortlist')
-    echo "build-docs build-toctree check-toctree deploy-prod deploy-stage fmt lint lint-diff lint-extras reinstall-requirements sectest setup test test-coverage test-integration types update"
+    echo "build-docs build-toctree check-toctree deploy-prod deploy-stage fmt fmt-diff lint lint-diff lint-extras reinstall-requirements sectest setup test test-coverage test-integration types update"
     ;;
   'test')
     shift
@@ -119,6 +124,7 @@ case $1 in
     echo ' - deploy-prod             (Deploy to Cloud RUn)'
     echo ' - deploy-stage            (Deploy to App Engine)'
     echo ' - fmt                     (Run the code formatters)'
+    echo ' - fmt-diff                (Run the code formatters on modified files.)'
     echo ' - lint                    (Run the linter)'
     echo ' - lint-diff               (Run the linter on modified files.)'
     echo ' - lint-extras             (Run pydocstyle, isort, ect.)'

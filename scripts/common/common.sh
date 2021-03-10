@@ -9,12 +9,25 @@ fmt() {
   set -e
 
   pushd "${PROJECT_HOME}" >/dev/null
-  echo "Running yapf ..."
-  yapf -i --recursive --exclude '**/*_pb2.py' --style='{based_on_style: google, INDENT_WIDTH: 2, ALIGN_CLOSING_BRACKET_WITH_VISUAL_INDENT: false, COALESCE_BRACKETS:true, DEDENT_CLOSING_BRACKETS: true}' "${PROJECT_NAME}/"
-  echo "Running isort ..."
-  isort -y
+    echo "Running yapf ..."
+    yapf -i --recursive --exclude '**/*_pb2.py' --style='{based_on_style: google, INDENT_WIDTH: 2, ALIGN_CLOSING_BRACKET_WITH_VISUAL_INDENT: false, COALESCE_BRACKETS:true, DEDENT_CLOSING_BRACKETS: true}' "${PROJECT_NAME}/"
+    echo "Running isort ..."
+    isort -y
   popd >/dev/null
 
+}
+
+fmt_diff() {
+  set -e
+
+  pushd "${PROJECT_HOME}" >/dev/null
+    echo "Running yapf on DIFF ..."
+    FILES=()
+    IFS=" " read -r -a FILES <<< "$(git diff --name-only --diff-filter=d | grep -E '\.py$' | tr '\n' ' ')"
+    yapf -i --recursive --exclude '**/*_pb2.py' --style='{based_on_style: google, INDENT_WIDTH: 2, ALIGN_CLOSING_BRACKET_WITH_VISUAL_INDENT: false, COALESCE_BRACKETS:true, DEDENT_CLOSING_BRACKETS: true}' "${FILES[@]}"
+    echo "Running isort on DIFF ..."
+    isort -y "${FILES[@]}"
+  popd >/dev/null
 }
 
 lint() {
