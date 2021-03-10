@@ -24,13 +24,13 @@ class TestItemPreferredStoreValidation(ItemTestHarness):
     super().setUp()
     self.create_second_test_set()
 
-  @patch(item_module.__name__ + '.ManyToManyValidator.validate')
+  @patch(item_module.__name__ + '.ManyToManyRelatedValidator.validate')
   def test_add(self, m_validator):
     item = self.create_test_instance(**self.create_data)
     item.preferred_stores.add(self.store1)
     m_validator.assert_called_once_with(item, {self.store1.id})
 
-  @patch(item_module.__name__ + '.ManyToManyValidator.validate')
+  @patch(item_module.__name__ + '.ManyToManyRelatedValidator.validate')
   def test_remove(self, m_validator):
     item = self.create_test_instance(**self.create_data)
     item.preferred_stores.add(self.store1)

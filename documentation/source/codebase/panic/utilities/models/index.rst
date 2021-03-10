@@ -1,11 +1,11 @@
 models
 ======
-.. automodule:: kitchen.models
+.. automodule:: utilities.models
    :members:
 
 .. toctree::
    :glob:
 
-   managers/index.rst
+   decorators/index.rst
    validators/index.rst
    *

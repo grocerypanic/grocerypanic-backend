@@ -6,11 +6,11 @@ from django.db import models
 from django.utils.functional import cached_property
 from naturalsortfield import NaturalSortField
 
-from kitchen.models.decorators.caching import (
+from spa_security.fields import BlondeCharField
+from utilities.models.decorators.caching import (
     PersistentCachedProperty,
     PersistentModelFieldCache,
 )
-from spa_security.fields import BlondeCharField
 from . import constants
 from .inventory import Inventory
 from .managers.item import ItemManager

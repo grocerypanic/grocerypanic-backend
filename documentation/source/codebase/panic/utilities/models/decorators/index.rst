@@ -1,6 +1,6 @@
 decorators
 ==========
-.. automodule:: kitchen.models.decorators
+.. automodule:: utilities.models.decorators
    :members:
 
 .. toctree::

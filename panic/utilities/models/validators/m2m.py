@@ -3,7 +3,7 @@
 from django.core.exceptions import ValidationError
 
 
-class ManyToManyValidator:
+class ManyToManyRelatedValidator:
   """Validator for Many to Many fields.
 
   This validator checks that a named field matches on both an instance, and
