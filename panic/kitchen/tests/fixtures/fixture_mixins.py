@@ -1,5 +1,7 @@
 """Mixin classes for kitchen model test fixtures."""
 
+from typing import Type
+
 from django.core.exceptions import ValidationError
 from django.db.models import signals as django_signals
 from rest_framework import serializers
@@ -73,7 +75,7 @@ class SerializerTestMixin:
   create_data: dict
   fields: dict
   request: object
-  serializer: serializers.Serializer
+  serializer: Type[serializers.Serializer]
 
   @staticmethod
   def generate_overload(fields):

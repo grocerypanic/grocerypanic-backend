@@ -1,4 +1,4 @@
-"""Serializer for the store model."""
+"""Serializer for the Store model."""
 
 from rest_framework import serializers
 

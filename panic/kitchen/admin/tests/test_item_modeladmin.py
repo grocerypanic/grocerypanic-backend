@@ -1,10 +1,10 @@
-"""Test the Django ModelAdmin for the Item model."""
+"""Test the ModelAdmin for the Item model."""
 
 from django.contrib.admin import AdminSite
 
 from ...models.item import Item
 from ...tests.fixtures.fixtures_item import ItemTestHarness
-from ..item_model_admin import ItemAdmin
+from ..item_modeladmin import ItemModelAdmin
 
 
 class TestItemAdmin(ItemTestHarness):
@@ -23,7 +23,7 @@ class TestItemAdmin(ItemTestHarness):
 
   def test_save_new_instance(self):
     item = Item(**self.create_data)
-    admin = ItemAdmin(model=item, admin_site=AdminSite())
+    admin = ItemModelAdmin(model=item, admin_site=AdminSite())
 
     self.assertEqual(admin.expired(item), 0)
     self.assertEqual(admin.next_expiry_datetime(item), None)
@@ -34,7 +34,7 @@ class TestItemAdmin(ItemTestHarness):
     item = Item(**self.create_data)
     item.save()
 
-    admin = ItemAdmin(model=item, admin_site=AdminSite())
+    admin = ItemModelAdmin(model=item, admin_site=AdminSite())
 
     self.assertEqual(admin.expired(item), 0)
     self.assertEqual(admin.next_expiry_datetime(item), None)

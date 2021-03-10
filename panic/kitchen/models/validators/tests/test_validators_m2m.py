@@ -6,7 +6,7 @@ from ....tests.fixtures.fixtures_item import ItemTestHarness
 from ..m2m import ManyToManyValidator
 
 
-class TestValidatePreferredStores(ItemTestHarness):
+class TestValidatePreferredStore(ItemTestHarness):
   """Test the preferred_stores_validator function."""
 
   @classmethod

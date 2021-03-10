@@ -8,7 +8,7 @@ from ...tests.fixtures.fixture_mixins import SerializerTestMixin
 from ...tests.fixtures.fixtures_django import MockRequest
 from ...tests.fixtures.fixtures_item import ItemTestHarness
 from .. import UNIQUE_CONSTRAINT_MSG
-from ..item import READABLE_FIELDS, ItemSerializer
+from ..item import ItemSerializer
 
 
 class TestItem(SerializerTestMixin, ItemTestHarness):
@@ -28,29 +28,25 @@ class TestItem(SerializerTestMixin, ItemTestHarness):
         'preferred_stores': [cls.store1],
         'price': 2.00,
     }
+
+    cls.create_data_wrong_shelf = dict(cls.create_data)
+    cls.create_data_wrong_shelf.update({
+        'shelf': cls.shelf2.id,
+        'preferred_stores': [cls.store1.id],
+    })
+
+    cls.create_data_wrong_store = dict(cls.create_data)
+    cls.create_data_wrong_store.update({
+        'shelf': cls.shelf1.id,
+        'preferred_stores': [cls.store2.id],
+    })
+
     cls.serializer_data = {
         'name': "Canned Beans",
         'shelf_life': 109,
         'shelf': cls.shelf1.id,
         'preferred_stores': [cls.store1.id],
         'price': 2.00,
-        'quantity': 3
-    }
-    cls.serializer_data_wrong_shelf = {
-        'name': "Canned Beans",
-        'shelf_life': 109,
-        'shelf': cls.shelf2.id,
-        'preferred_stores': [cls.store1.id],
-        'price': 2.00,
-        'quantity': 3
-    }
-    cls.serializer_data_wrong_store = {
-        'name': "Canned Beans",
-        'shelf_life': 109,
-        'shelf': cls.shelf1.id,
-        'preferred_stores': [cls.store2.id],
-        'price': 2.00,
-        'quantity': 3
     }
 
   @classmethod
@@ -65,34 +61,16 @@ class TestItem(SerializerTestMixin, ItemTestHarness):
     item = self.create_test_instance(**self.create_data)
     serialized = self.serializer(item)
     deserialized = serialized.data
+    excluded_fields = [
+        'user',
+        '_expired',
+        '_next_expiry_quantity',
+    ]
 
-    price = '2.00'
-
-    self.assertEqual(deserialized['id'], item.id)
-    self.assertEqual(deserialized['name'], self.create_data['name'])
-    self.assertFalse(deserialized['has_partial_quantities'])
-    self.assertEqual(deserialized['shelf_life'], self.create_data['shelf_life'])
-    self.assertEqual(deserialized['shelf'], self.shelf1.id)
-    self.assertEqual(deserialized['price'], price)
-    self.assertEqual(deserialized['quantity'], 0)
-    self.assertEqual(deserialized['expired'], 0)
-    self.assertEqual(deserialized['next_expiry_quantity'], 0)
-    self.assertEqual(deserialized['next_expiry_date'], None)
-    self.assertEqual(deserialized['next_expiry_datetime'], None)
-
-    preferred_stores = [store.id for store in item.preferred_stores.all()]
-    self.assertListEqual(deserialized['preferred_stores'], preferred_stores)
-
-  def test_deserialized_fields(self):
-    item = self.create_test_instance(**self.create_data)
-    serialized = self.serializer(item)
-    deserialized = serialized.data
-
-    self.assertEqual(len(READABLE_FIELDS), len(deserialized))
-    for readable_key in READABLE_FIELDS:
-      self.assertIn(readable_key, deserialized)
-
-    assert 'user' not in deserialized
+    self.assertDictEqual(
+        self._represent_item_as_create_data(item, exclude=excluded_fields),
+        deserialized
+    )
 
   def test_serialize(self):
     serialized = self.serializer(
@@ -107,13 +85,10 @@ class TestItem(SerializerTestMixin, ItemTestHarness):
     assert len(query) == 1
     item = query[0]
 
-    self.assertEqual(item.name, self.serializer_data['name'])
-    self.assertEqual(item.shelf_life, self.serializer_data['shelf_life'])
-    self.assertEqual(item.user.id, self.user1.id)
-    self.assertEqual(item.shelf.id, self.shelf1.id)
-    self.assertEqual(item.price, self.serializer_data['price'])
-    self.assertEqual(item.quantity, 0)
-    self.assertFalse(item.has_partial_quantities)
+    representation = self._represent_item_as_serializer_data(item)
+    representation['price'] = float(item.price)
+
+    self.assertDictEqual(representation, self.serializer_data)
 
   def test_serialize_fractional_quantities(self):
     fractional_quantities = dict(self.serializer_data)
@@ -138,7 +113,7 @@ class TestItem(SerializerTestMixin, ItemTestHarness):
   def test_serialize_wrong_shelf(self):
     serialized = self.serializer(
         context={'request': self.request},
-        data=self.serializer_data_wrong_shelf,
+        data=self.create_data_wrong_shelf,
     )
     with self.assertRaises(ValidationError) as raised:
       serialized.is_valid(raise_exception=True)
@@ -158,10 +133,12 @@ class TestItem(SerializerTestMixin, ItemTestHarness):
   def test_serialize_wrong_store(self):
     serialized = self.serializer(
         context={'request': self.request},
-        data=self.serializer_data_wrong_store,
+        data=self.create_data_wrong_store,
     )
     with self.assertRaises(ValidationError) as raised:
       serialized.is_valid(raise_exception=True)
+
+    print(raised.exception.detail)
 
     self.assertEqual(
         raised.exception.detail,

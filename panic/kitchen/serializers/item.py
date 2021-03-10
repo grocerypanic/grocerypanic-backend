@@ -1,33 +1,20 @@
-"""Serializer for the item model."""
+"""Serializer for the Item model."""
 
 import pytz
 from rest_framework import serializers
 
 from ..models.item import Item
 from .bases import KitchenBaseModelSerializer
+from .fields.preferred_stores import PreferredStoreSerializerField
 
 DEFAULT_TIMEZONE = pytz.utc.zone
-
-READABLE_FIELDS = (
-    'id',
-    'expired',
-    'has_partial_quantities',
-    'name',
-    'next_expiry_date',
-    'next_expiry_datetime',
-    'next_expiry_quantity',
-    'price',
-    'preferred_stores',
-    'quantity',
-    'shelf',
-    'shelf_life',
-)
 
 
 class ItemSerializer(KitchenBaseModelSerializer):
   """Serializer for Item."""
 
   user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+  preferred_stores = PreferredStoreSerializerField(many=True)
   next_expiry_date = serializers.ReadOnlyField()
   next_expiry_datetime = serializers.ReadOnlyField()
   next_expiry_quantity = serializers.ReadOnlyField()

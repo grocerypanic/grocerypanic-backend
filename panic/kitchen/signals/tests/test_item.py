@@ -6,7 +6,7 @@ from ...tests.fixtures.fixtures_item import ItemTestHarness
 from .. import item as item_module
 
 
-class TestItemPreferredStoresValidation(ItemTestHarness):
+class TestItemPreferredStoreValidation(ItemTestHarness):
   """Test the item_preferred_stores_validator signal handler."""
 
   @classmethod

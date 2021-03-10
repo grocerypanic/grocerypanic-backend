@@ -1,4 +1,4 @@
-"""Serializer for the shelf model."""
+"""Serializer for the Shelf model."""
 
 from rest_framework import serializers
 

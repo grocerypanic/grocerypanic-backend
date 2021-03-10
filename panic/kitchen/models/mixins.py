@@ -7,7 +7,7 @@ from . import constants
 
 
 class FullCleanMixin:
-  """Mixin class for Kitchen models, ensures full_clean is called on save."""
+  """Ensures full_clean is called on save."""
 
   # pylint: disable=signature-differs
   def save(self, *args, **kwargs):
@@ -17,7 +17,7 @@ class FullCleanMixin:
 
 
 class RelatedFieldEnforcementMixin:
-  """Mixin class for Kitchen models, enforces properties on related models."""
+  """Enforces properties on related models."""
 
   def related_validator(self, related_fields, owner_field="user"):
     """Require the 'owner_field' of a related instance to match this instance.
@@ -53,7 +53,7 @@ class RelatedFieldEnforcementMixin:
 
 
 class UniqueNameConstraintMixin:
-  """Mixin class for Kitchen models, uniqueness on names regardless of case."""
+  """Enforces uniqueness on the `name` field, regardless of case."""
 
   def clean(self):
     """Validate the field `name` is unique regardless of case, per user.

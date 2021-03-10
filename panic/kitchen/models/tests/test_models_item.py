@@ -295,6 +295,15 @@ class TestItemRelatedFields(ItemTestHarness):
     super().setUp()
     self.create_second_test_set()
 
+    self.create_data2 = {
+        'user': self.user2,
+        'name': "Organic Canned Beans",
+        'shelf_life': 99,
+        'shelf': self.shelf2,
+        'preferred_stores': [self.store2],
+        'price': 2.00,
+    }
+
   def test_wrong_preferred_stores(self):
     wrong_related_item = dict(self.create_data)
     wrong_related_item.update({'preferred_stores': [self.store2]})
@@ -322,4 +331,23 @@ class TestItemRelatedFields(ItemTestHarness):
             'user': ["This must match the 'shelf' field."],
             'shelf': ["This field must match the 'user' field."],
         }
+    )
+
+  def test_deleting_shelf(self):
+    item = self.create_test_instance(**self.create_data2)
+    self.shelf2.delete()
+    item.refresh_from_db()
+
+    self.assertEqual(
+        item.shelf,
+        None,
+    )
+
+  def test_delete_store(self):
+    created = self.create_test_instance(**self.create_data)
+    self.store1.delete()
+
+    self.assertEqual(
+        created.preferred_stores.all().count(),
+        0,
     )

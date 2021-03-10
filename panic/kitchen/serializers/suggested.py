@@ -1,4 +1,4 @@
-"""Serializer for the suggested item model."""
+"""Serializer for the suggested Item model."""
 
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator

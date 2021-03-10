@@ -1,4 +1,4 @@
-"""Serializer for the transaction model."""
+"""Serializer for the Transaction model."""
 
 from ..models.transaction import Transaction
 from .bases import KitchenBaseModelSerializer

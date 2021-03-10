@@ -6,5 +6,6 @@ serializers
 .. toctree::
    :glob:
 
+   fields/index.rst
    reports/index.rst
    *
