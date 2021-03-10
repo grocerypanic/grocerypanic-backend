@@ -26,8 +26,6 @@ class TestItemConsumptionHistorySerializer(TransactionTestHarness):
     cls.two_days_ago = timezone.now() + timedelta(days=-2)
     cls.start_of_month = timezone.now() + timedelta(days=-13)
 
-    cls.fields = {"name": 255}
-
     cls.positive_transaction = {
         'item': cls.item1,
         'date_object': cls.today - timedelta(days=365),
@@ -57,10 +55,6 @@ class TestItemConsumptionHistorySerializer(TransactionTestHarness):
     self.create_test_instance(**self.positive_transaction)
     self.user1.timezone = pytz.utc.zone
     self.user1.save()
-
-  def tearDown(self):
-    for obj in self.objects:
-      obj.delete()
 
   def test_deserialize_first_consumption(self):
     self.create_test_instance(**self.consumption_today)

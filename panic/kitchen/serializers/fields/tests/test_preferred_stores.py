@@ -14,6 +14,14 @@ class TestPreferredStore(ItemTestHarness):
     cls.serializer = ItemSerializer
     cls.request = MockRequest(cls.user1)
 
+    cls.calculated_properties = {
+        'expired',
+        'next_expiry_date',
+        'next_expiry_datetime',
+        'next_expiry_quantity',
+    }
+    cls.m2m_fields = {'preferred_stores'}
+
     cls.create_data = {
         'name': "Canned Beans",
         'shelf_life': 99,
@@ -51,6 +59,14 @@ class TestPreferredStore(ItemTestHarness):
     cls.shelf2 = test_data1['shelf']
     super().setUpTestData()
 
+  def _expected_serialized_value(self):
+    expected = dict(self.serializer_data)
+    expected['next_expiry_quantity'] = 0
+    expected['expired'] = 0
+    expected['next_expiry_date'] = None
+    expected['next_expiry_datetime'] = None
+    return expected
+
   def test_deserialize(self):
     item = self.create_test_instance(**self.create_data)
     serialized = self.serializer(item)
@@ -61,9 +77,12 @@ class TestPreferredStore(ItemTestHarness):
         '_next_expiry_quantity',
     ]
 
+    representation = self._instance_to_dict(item, exclude=excluded_fields)
+    representation['price'] = "%.2f" % representation['price']
+
     self.assertDictEqual(
-        self._represent_item_as_create_data(item, exclude=excluded_fields),
-        deserialized
+        representation,
+        deserialized,
     )
 
   def test_serialize_ps_as_int(self):
@@ -79,10 +98,11 @@ class TestPreferredStore(ItemTestHarness):
     assert len(query) == 1
     item = query[0]
 
-    representation = self._represent_item_as_serializer_data(item)
+    expected = self._expected_serialized_value()
+    representation = self._instance_to_dict_subset(item, expected)
     representation['price'] = float(item.price)
 
-    self.assertDictEqual(representation, self.serializer_data)
+    self.assertDictEqual(representation, expected)
 
   def test_serialize_ps_as_instance(self):
     serialized = self.serializer(
@@ -92,15 +112,18 @@ class TestPreferredStore(ItemTestHarness):
     serialized.is_valid(raise_exception=True)
     serialized.save()
 
-    query = Item.objects.filter(name=self.serializer_data['name'])
+    query = Item.objects.filter(
+        name=self.serializer_data_ps_as_instance['name']
+    )
 
     assert len(query) == 1
     item = query[0]
 
-    representation = self._represent_item_as_serializer_data(item)
+    expected = self._expected_serialized_value()
+    representation = self._instance_to_dict_subset(item, expected)
     representation['price'] = float(item.price)
 
-    self.assertDictEqual(representation, self.serializer_data)
+    self.assertDictEqual(representation, expected)
 
   def test_serialize_ps_as_str(self):
     serialized = self.serializer(
@@ -115,7 +138,8 @@ class TestPreferredStore(ItemTestHarness):
     assert len(query) == 1
     item = query[0]
 
-    representation = self._represent_item_as_serializer_data(item)
+    expected = self._expected_serialized_value()
+    representation = self._instance_to_dict_subset(item, expected)
     representation['price'] = float(item.price)
 
-    self.assertDictEqual(representation, self.serializer_data)
+    self.assertDictEqual(representation, expected)

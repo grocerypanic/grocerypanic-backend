@@ -14,11 +14,22 @@ from ..item import ItemSerializer
 class TestItem(SerializerTestMixin, ItemTestHarness):
   """Test the Item serializer."""
 
+  serializer_data: dict
+  fields: dict
+
   @classmethod
   def create_data_hook(cls):
     cls.serializer = ItemSerializer
     cls.fields = {"name": 255}
     cls.request = MockRequest(cls.user1)
+
+    cls.calculated_properties = {
+        'expired',
+        'next_expiry_date',
+        'next_expiry_datetime',
+        'next_expiry_quantity',
+    }
+    cls.m2m_fields = {'preferred_stores'}
 
     cls.create_data = {
         'name': "Canned Beans",
@@ -67,10 +78,10 @@ class TestItem(SerializerTestMixin, ItemTestHarness):
         '_next_expiry_quantity',
     ]
 
-    self.assertDictEqual(
-        self._represent_item_as_create_data(item, exclude=excluded_fields),
-        deserialized
-    )
+    representation = self._instance_to_dict(item, exclude=excluded_fields)
+    representation['price'] = "%.2f" % representation['price']
+
+    self.assertDictEqual(representation, deserialized)
 
   def test_serialize(self):
     serialized = self.serializer(
@@ -85,10 +96,31 @@ class TestItem(SerializerTestMixin, ItemTestHarness):
     assert len(query) == 1
     item = query[0]
 
-    representation = self._represent_item_as_serializer_data(item)
+    expected = dict(self.serializer_data)
+    expected['next_expiry_quantity'] = 0
+    expected['expired'] = 0
+    expected['next_expiry_date'] = None
+    expected['next_expiry_datetime'] = None
+
+    representation = self._instance_to_dict_subset(item, expected)
     representation['price'] = float(item.price)
 
-    self.assertDictEqual(representation, self.serializer_data)
+    self.assertDictEqual(representation, expected)
+
+  def test_serializer_user(self):
+    serialized = self.serializer(
+        context={'request': self.request},
+        data=self.serializer_data,
+    )
+    serialized.is_valid(raise_exception=True)
+    serialized.save()
+
+    query = Item.objects.filter(name=self.serializer_data['name'])
+
+    assert len(query) == 1
+    shelf = query[0]
+
+    self.assertEqual(shelf.user.id, self.user1.id)
 
   def test_serialize_fractional_quantities(self):
     fractional_quantities = dict(self.serializer_data)
@@ -137,8 +169,6 @@ class TestItem(SerializerTestMixin, ItemTestHarness):
     )
     with self.assertRaises(ValidationError) as raised:
       serialized.is_valid(raise_exception=True)
-
-    print(raised.exception.detail)
 
     self.assertEqual(
         raised.exception.detail,

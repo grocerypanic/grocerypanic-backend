@@ -23,7 +23,6 @@ class TestItemHistorySerializer(TransactionTestHarness):
   @classmethod
   def create_data_hook(cls):
     cls.today = timezone.now()
-    cls.fields = {"name": 255}
 
     cls.positive_transaction = {
         'item': cls.item1,
@@ -43,10 +42,6 @@ class TestItemHistorySerializer(TransactionTestHarness):
     self.reset_item1()
     self.create_test_instance(**self.positive_transaction)
 
-  def tearDown(self):
-    for obj in self.objects:
-      obj.delete()
-
   def test_deserialize_last_two_weeks_utc(self):
     transaction = self.create_test_instance(**self.consumption_today)
     history = Transaction.objects.get_last_two_weeks(self.item1.id)
@@ -65,8 +60,8 @@ class TestItemHistorySerializer(TransactionTestHarness):
 
   def test_deserialize_last_two_weeks_honolulu(self):
     test_zone = "Pacific/Honolulu"
-
     test_timezone = pytz.timezone(test_zone)
+
     transaction = self.create_test_instance(**self.consumption_today)
     history = Transaction.objects.get_last_two_weeks(
         self.item1.id,

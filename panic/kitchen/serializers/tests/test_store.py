@@ -13,48 +13,77 @@ from ..store import StoreSerializer
 class TestStore(SerializerTestMixin, StoreTestHarness):
   """Test the Store serializer."""
 
+  serializer_data: dict
+  fields: dict
+
   @classmethod
   def create_data_hook(cls):
     cls.serializer = StoreSerializer
     cls.fields = {"name": 255}
-    cls.create_data = {"name": "Super Store"}
     cls.request = MockRequest(cls.user1)
 
-  def test_deserialize(self):
-    test_value = "Loblaws"
-    store = self.create_test_instance(user=self.user1, name=test_value)
+    cls.calculated_properties = set()
+    cls.m2m_fields = set()
 
+    cls.create_data = {
+        "name": "Metro",
+        "user": cls.user1,
+    }
+
+    cls.serializer_data = {
+        "name": "Metro",
+    }
+
+  def test_deserialize(self):
+    store = self.create_test_instance(**self.create_data)
     serialized = self.serializer(store)
-    self.assertEqual(serialized.data['name'], test_value)
+    representation = self._instance_to_dict(store, exclude=['user'])
+
+    self.assertEqual(serialized.data, representation)
 
   def test_serialize(self):
     serialized = self.serializer(
         context={'request': self.request},
-        data=self.create_data,
+        data=self.serializer_data,
     )
     serialized.is_valid(raise_exception=True)
     serialized.save()
 
-    self.assertEqual(serialized.data['name'], self.create_data['name'])
-
-    query = Store.objects.filter(name=self.create_data['name'])
+    query = Store.objects.filter(name=self.serializer_data['name'])
 
     assert len(query) == 1
-    self.assertEqual(query[0].user.id, self.user1.id)
-    self.assertEqual(query[0].name, self.create_data['name'])
+    store = query[0]
 
-  def test_case_unique_constraint(self):
-    test_value = {"name": "Super Store"}
+    expected = dict(self.serializer_data)
+    representation = self._instance_to_dict_subset(store, expected)
 
+    self.assertDictEqual(representation, expected)
+
+  def test_serializer_user(self):
     serialized = self.serializer(
         context={'request': self.request},
-        data=test_value,
+        data=self.serializer_data,
     )
     serialized.is_valid(raise_exception=True)
     serialized.save()
 
-    case_change = dict(self.create_data)
-    case_change.update({"name": self.create_data['name'].lower()})
+    query = Store.objects.filter(name=self.serializer_data['name'])
+
+    assert len(query) == 1
+    store = query[0]
+
+    self.assertEqual(store.user.id, self.user1.id)
+
+  def test_case_unique_constraint(self):
+    serialized = self.serializer(
+        context={'request': self.request},
+        data=self.serializer_data,
+    )
+    serialized.is_valid(raise_exception=True)
+    serialized.save()
+
+    case_change = dict(self.serializer_data,)
+    case_change.update({"name": self.serializer_data['name'].lower()})
 
     serialized2 = self.serializer(
         context={'request': self.request},
@@ -71,7 +100,7 @@ class TestStore(SerializerTestMixin, StoreTestHarness):
   def test_case_unique_constraint_update_instance(self):
     serialized = self.serializer(
         context={'request': self.request},
-        data=self.create_data,
+        data=self.serializer_data,
     )
     serialized.is_valid(raise_exception=True)
     instance = serialized.save()
@@ -79,7 +108,7 @@ class TestStore(SerializerTestMixin, StoreTestHarness):
     serialized2 = self.serializer(
         context={'request': self.request},
         instance=instance,
-        data={"name": self.create_data['name'].lower()},
+        data={"name": self.serializer_data['name'].lower()},
         partial=True
     )
 
@@ -88,5 +117,5 @@ class TestStore(SerializerTestMixin, StoreTestHarness):
 
     self.assertEqual(
         instance.name,
-        self.create_data['name'].lower(),
+        self.serializer_data['name'].lower(),
     )

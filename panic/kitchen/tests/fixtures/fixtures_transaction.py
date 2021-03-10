@@ -104,9 +104,5 @@ class TransactionTestHarness(
     Inventory.objects.filter(item=self.item1).delete()
 
   def setUp(self):
+    super().setUp()
     self.reset_item1()
-    self.objects = list()
-
-  def tearDown(self):
-    for obj in self.objects:
-      obj.delete()

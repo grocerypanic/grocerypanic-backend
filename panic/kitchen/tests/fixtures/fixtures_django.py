@@ -13,7 +13,7 @@ class MockRequest:
 
 
 def deserialize_datetime(string):
-  """Convert a deserialized datetime into a python datetime object."""
+  """Convert a serialized datetime into a python datetime object."""
 
   return pytz.utc.localize(
       datetime.datetime.strptime(string, "%Y-%m-%dT%H:%M:%SZ")
@@ -21,5 +21,5 @@ def deserialize_datetime(string):
 
 
 def deserialize_date(string):
-  """Convert a deserialized date into a python datetime object."""
+  """Convert a serialized date into a python datetime object."""
   return datetime.datetime.strptime(string, "%Y-%m-%d").date()

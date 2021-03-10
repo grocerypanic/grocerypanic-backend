@@ -10,5 +10,6 @@ utilities
    database/index.rst
    filesystem/index.rst
    management/index.rst
+   serializers/index.rst
    toctree/index.rst
    *

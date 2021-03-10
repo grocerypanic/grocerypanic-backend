@@ -4,7 +4,11 @@ from rest_framework import serializers
 
 
 class M2MThroughSerializerField(serializers.RelatedField):
-  """Serializer field for M2M through models with original M2M functionality."""
+  """Serializer field for M2M through models with original M2M functionality.
+
+  This field will deserialize a list of `pk`'s, and serialize data in this
+  format as well.
+  """
 
   def to_internal_value(self, data):
     """Transform the *incoming* primitive data into a native value."""

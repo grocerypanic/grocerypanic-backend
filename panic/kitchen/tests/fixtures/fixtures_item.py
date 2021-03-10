@@ -3,7 +3,6 @@
 from django.contrib.auth import get_user_model
 from django.db import transaction
 from django.db.models import Model
-from django.forms import model_to_dict
 from django.utils import timezone
 
 from ...models.item import Item
@@ -90,44 +89,3 @@ class ItemTestHarness(KitchenModelTestFixture, MutableSignalsBaseTestCase):
     cls.store1 = test_data1['store']
     cls.shelf1 = test_data1['shelf']
     cls.create_data_hook()
-
-  def setUp(self):
-    self.objects = list()
-
-  def tearDown(self):
-    for obj in self.objects:
-      if obj.id:
-        obj.delete()
-
-  @staticmethod
-  def _represent_item_as_create_data(instance, exclude=()):
-    representation = model_to_dict(instance,)
-    representation['price'] = "%.2f" % representation['price']
-    representation['next_expiry_quantity'] = instance.next_expiry_quantity
-    representation['expired'] = instance.expired
-    representation['next_expiry_date'] = instance.next_expiry_date
-    representation['next_expiry_datetime'] = instance.next_expiry_datetime
-    representation['preferred_stores'] = [
-        store.id for store in instance.preferred_stores.all()
-    ]
-    for value in exclude:
-      del representation[value]
-
-    return representation
-
-  def _represent_item_as_serializer_data(self, instance):
-    return self._represent_item_as_create_data(
-        instance,
-        exclude=[
-            'id',
-            'quantity',
-            'user',
-            '_expired',
-            '_next_expiry_quantity',
-            'expired',
-            'next_expiry_date',
-            'next_expiry_datetime',
-            'next_expiry_quantity',
-            'has_partial_quantities',
-        ]
-    )

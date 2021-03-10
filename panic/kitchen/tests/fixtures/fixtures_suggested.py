@@ -40,10 +40,3 @@ class SuggestedItemTestHarness(KitchenModelTestFixture, TestCase):
   def setUpTestData(cls):
     cls.create_dependencies(1)
     cls.create_data_hook()
-
-  def setUp(self):
-    self.objects = list()
-
-  def tearDown(self):
-    for obj in self.objects:
-      obj.delete()

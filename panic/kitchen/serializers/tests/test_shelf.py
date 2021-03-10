@@ -13,54 +13,77 @@ from ..shelf import ShelfSerializer
 class TestShelf(SerializerTestMixin, ShelfTestHarness):
   """Test the Shelf serializer."""
 
+  serializer_data: dict
+  fields: dict
+
   @classmethod
   def create_data_hook(cls):
     cls.serializer = ShelfSerializer
     cls.fields = {"name": 255}
     cls.request = MockRequest(cls.user1)
-    cls.create_data = {"name": "Pantry"}
 
-  def setUp(self):
-    self.objects = list()
+    cls.calculated_properties = set()
+    cls.m2m_fields = set()
 
-  def tearDown(self):
-    for obj in self.objects:
-      obj.delete()
+    cls.create_data = {
+        "name": "Pantry",
+        "user": cls.user1,
+    }
+
+    cls.serializer_data = {
+        "name": "Pantry",
+    }
 
   def test_deserialize(self):
-    test_value = "Refrigerator"
-
-    shelf = self.create_test_instance(user=self.user1, name=test_value)
+    shelf = self.create_test_instance(**self.create_data)
     serialized = self.serializer(shelf)
+    representation = self._instance_to_dict(shelf, exclude=['user'])
 
-    self.assertEqual(serialized.data['name'], test_value)
+    self.assertEqual(serialized.data, representation)
 
   def test_serialize(self):
     serialized = self.serializer(
         context={'request': self.request},
-        data=self.create_data,
+        data=self.serializer_data,
     )
     serialized.is_valid(raise_exception=True)
     serialized.save()
 
-    self.assertEqual(serialized.data['name'], self.create_data['name'])
-
-    query = Shelf.objects.filter(name="Pantry")
+    query = Shelf.objects.filter(name=self.serializer_data['name'])
 
     assert len(query) == 1
-    self.assertEqual(query[0].user.id, self.user1.id)
-    self.assertEqual(query[0].name, "Pantry")
+    shelf = query[0]
+
+    expected = dict(self.serializer_data)
+    representation = self._instance_to_dict_subset(shelf, expected)
+
+    self.assertDictEqual(representation, expected)
+
+  def test_serializer_user(self):
+    serialized = self.serializer(
+        context={'request': self.request},
+        data=self.serializer_data,
+    )
+    serialized.is_valid(raise_exception=True)
+    serialized.save()
+
+    query = Shelf.objects.filter(name=self.serializer_data['name'])
+
+    assert len(query) == 1
+    shelf = query[0]
+
+    self.assertEqual(shelf.user.id, self.user1.id)
 
   def test_case_unique_constraint(self):
     serialized = self.serializer(
         context={'request': self.request},
-        data=self.create_data,
+        data=self.serializer_data,
     )
     serialized.is_valid(raise_exception=True)
     serialized.save()
 
-    case_change = dict(self.create_data)
-    case_change.update({"name": self.create_data['name'].lower()})
+    case_change = dict(self.serializer_data)
+    case_change.update({"name": self.serializer_data['name'].lower()})
 
     serialized2 = self.serializer(
         context={'request': self.request},
@@ -77,7 +100,7 @@ class TestShelf(SerializerTestMixin, ShelfTestHarness):
   def test_case_unique_constraint_update_instance(self):
     serialized = self.serializer(
         context={'request': self.request},
-        data=self.create_data,
+        data=self.serializer_data,
     )
     serialized.is_valid(raise_exception=True)
     instance = serialized.save()
@@ -85,7 +108,7 @@ class TestShelf(SerializerTestMixin, ShelfTestHarness):
     serialized2 = self.serializer(
         context={'request': self.request},
         instance=instance,
-        data={"name": self.create_data['name'].lower()},
+        data={"name": self.serializer_data['name'].lower()},
         partial=True
     )
 
@@ -94,5 +117,5 @@ class TestShelf(SerializerTestMixin, ShelfTestHarness):
 
     self.assertEqual(
         instance.name,
-        self.create_data['name'].lower(),
+        self.serializer_data['name'].lower(),
     )

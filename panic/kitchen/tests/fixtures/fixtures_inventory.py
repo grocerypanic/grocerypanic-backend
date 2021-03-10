@@ -116,10 +116,3 @@ class InventoryTestHarness(KitchenModelTestFixture, MutableSignalsBaseTestCase):
 
     cls.transaction1 = test_data['transaction']
     cls.create_data_hook()
-
-  def setUp(self):
-    self.objects = list()
-
-  def tearDown(self):
-    for obj in self.objects:
-      obj.delete()

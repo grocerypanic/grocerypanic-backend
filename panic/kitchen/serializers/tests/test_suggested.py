@@ -6,34 +6,59 @@ from ...tests.fixtures.fixture_mixins import SerializerTestMixin
 from ...tests.fixtures.fixtures_django import MockRequest
 from ...tests.fixtures.fixtures_suggested import SuggestedItemTestHarness
 from .. import DUPLICATE_OBJECT_MSG
-from ..suggested import SuggestedItemSerializer
+from ..suggested import SuggestedItem, SuggestedItemSerializer
 
 
 class TestItemList(SerializerTestMixin, SuggestedItemTestHarness):
   """Test the Suggested Item serializer."""
 
+  serializer_data: dict
+  fields: dict
+
   @classmethod
   def create_data_hook(cls):
-    cls.fields = {"name": 255}
-    cls.create_data = {"name": "Grape"}
     cls.serializer = SuggestedItemSerializer
+    cls.fields = {"name": 255}
     cls.request = MockRequest("MockUser")
-    cls.test_item_name = "Red Beans"
+
+    cls.calculated_properties = set()
+    cls.m2m_fields = set()
+
+    cls.create_data = {
+        "name": "Grape",
+    }
+
+    cls.serializer_data = {
+        "name": "Grape",
+    }
 
   def test_deserialize(self):
-    item = self.create_test_instance(name=self.test_item_name)
-
+    item = self.create_test_instance(**self.create_data)
     serialized = self.serializer(item)
-    self.assertEqual(serialized.data['name'], self.test_item_name)
+    representation = self._instance_to_dict(item, exclude=['user'])
+
+    self.assertEqual(serialized.data, representation)
 
   def test_serialize(self):
-    serialized = self.serializer(data=self.create_data)
-    serialized.is_valid()
+    serialized = self.serializer(
+        context={'request': self.request},
+        data=self.serializer_data,
+    )
+    serialized.is_valid(raise_exception=True)
+    serialized.save()
 
-    self.assertEqual(serialized.data['name'], self.create_data['name'])
+    query = SuggestedItem.objects.filter(name=self.serializer_data['name'])
+
+    assert len(query) == 1
+    suggested = query[0]
+
+    expected = dict(self.serializer_data)
+    representation = self._instance_to_dict_subset(suggested, expected)
+
+    self.assertDictEqual(representation, expected)
 
   def test_unique_constraint(self):
-    serialized = self.serializer(data=self.create_data,)
+    serialized = self.serializer(data=self.serializer_data,)
     serialized.is_valid(raise_exception=True)
     serialized.save()
 

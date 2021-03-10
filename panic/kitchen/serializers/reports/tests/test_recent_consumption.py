@@ -27,8 +27,6 @@ class TestRecentConsumptionReportSerializer(TransactionTestHarness):
     cls.two_days_ago = timezone.now() + timedelta(days=-2)
     cls.start_of_month = timezone.now() + timedelta(days=-13)
 
-    cls.fields = {"name": 255}
-
     cls.positive_transaction = {
         'item': cls.item1,
         'date_object': cls.today - timedelta(days=365),
@@ -65,7 +63,7 @@ class TestRecentConsumptionReportSerializer(TransactionTestHarness):
         str(self.user1.timezone),
     )
 
-  def test_deserialize_past_two_weeks(self):
+  def test_deserialize_past_two_weeks_utc(self):
     self.create_test_instance(**self.consumption_today)
     history = Transaction.objects.get_last_two_weeks(self.item1.id)
     deserialized_transaction = ItemHistorySerializer(history, many=True)
@@ -82,8 +80,8 @@ class TestRecentConsumptionReportSerializer(TransactionTestHarness):
         json.dumps(deserialized_transaction.data),
     )
 
-  def test_deserialize_past_two_weeks_alternate_timezone(self):
-    test_zone = "Asia/Hong_Kong"
+  def test_deserialize_past_two_weeks_honolulu(self):
+    test_zone = "Pacific/Honolulu"
 
     self.create_test_instance(**self.consumption_today)
     self.user1.timezone = test_zone
@@ -106,7 +104,7 @@ class TestRecentConsumptionReportSerializer(TransactionTestHarness):
         json.dumps(deserialized_transaction.data),
     )
 
-  def test_deserialize_consumption_past_week(self):
+  def test_deserialize_consumption_past_week_utc(self):
     self.create_test_instance(**self.consumption_today)
 
     serialized = self.serializer(
@@ -121,7 +119,7 @@ class TestRecentConsumptionReportSerializer(TransactionTestHarness):
         3,
     )
 
-  def test_deserialize_consumption_past_week_tz(self):
+  def test_deserialize_consumption_past_week_honolulu(self):
     zone = "Pacific/Honolulu"
     self.user1.timezone = zone
     self.user1.save()
@@ -140,7 +138,7 @@ class TestRecentConsumptionReportSerializer(TransactionTestHarness):
         0,
     )
 
-  def test_deserialize_consumption_past_month(self):
+  def test_deserialize_consumption_past_month_utc(self):
     self.create_test_instance(**self.consumption_today)
 
     serialized = self.serializer(
@@ -155,7 +153,7 @@ class TestRecentConsumptionReportSerializer(TransactionTestHarness):
         3,
     )
 
-  def test_deserialize_consumption_past_month_tz(self):
+  def test_deserialize_consumption_past_month_honolulu(self):
     zone = "Pacific/Honolulu"
     self.user1.timezone = zone
     self.user1.save()

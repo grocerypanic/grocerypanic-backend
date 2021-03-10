@@ -57,10 +57,3 @@ class StoreTestHarness(KitchenModelTestFixture, MutableSignalsBaseTestCase):
     test_data1 = cls.create_dependencies(1)
     cls.user1 = test_data1['user']
     cls.create_data_hook()
-
-  def setUp(self):
-    self.objects = list()
-
-  def tearDown(self):
-    for obj in self.objects:
-      obj.delete()
