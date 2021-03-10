@@ -10,11 +10,11 @@ from freezegun import freeze_time
 from rest_framework import status
 from rest_framework.test import APIClient
 
+from utilities.views.deprecation import DEPRECATED_WARNING
 from ...models.item import Item
 from ...models.transaction import Transaction
 from ...serializers.transaction import TransactionSerializer
 from ...tests.fixtures.fixtures_transaction import TransactionTestHarness
-from ..deprecation import DEPRECATED_WARNING
 from ..transaction import TRANSACTION_LIST_SUNSET
 
 TRANSACTION_URL = reverse("v1:transactions-list")

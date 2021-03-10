@@ -8,13 +8,13 @@ from django_filters import rest_framework as filters
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import mixins, viewsets
 
+from utilities.views.deprecation import deprecated_warning
 from ..filters import TransactionFilter
 from ..models.transaction import Transaction
 from ..pagination import LegacyTransactionPagination
 from ..serializers.transaction import TransactionSerializer
 from ..swagger import custom_transaction_view_parm, openapi_ready
 from .bases import KitchenBaseView
-from .deprecation import deprecated_warning
 
 TRANSACTION_LIST_SUNSET = datetime.date(year=2021, month=3, day=21)
 
