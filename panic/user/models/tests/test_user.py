@@ -1,4 +1,4 @@
-"""Test custom user model fields."""
+"""Test User model custom fields."""
 
 from django.core.exceptions import ValidationError
 from django.test import TestCase
@@ -7,7 +7,7 @@ from ..user import CUSTOM_USER_MODEL_FIELDS, User
 
 
 class TestCustomUserModelFields(TestCase):
-  """Test custom user model fields."""
+  """Test User model custom fields."""
 
   def setUp(self):
     self.data = {

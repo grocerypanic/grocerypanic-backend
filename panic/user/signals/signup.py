@@ -1,4 +1,4 @@
-"""Handles the django-allauth `user_signed_up` signal."""
+"""Handles the allauth `user_signed_up` signal."""
 
 from allauth.account.signals import user_signed_up
 from django.dispatch import receiver

@@ -1,4 +1,4 @@
-"""Custom user model."""
+"""User model with custom fields."""
 
 import pytz
 from django.contrib.auth.models import AbstractUser
@@ -15,7 +15,7 @@ CUSTOM_USER_MODEL_FIELDS = (
 
 
 class User(AbstractUser):
-  """Custom user model."""
+  """User model with custom fields."""
 
   DEFAULT_TIMEZONE = pytz.utc.zone
   DEFAULT_LANGUAGE_CODE = 'en'

@@ -1,4 +1,4 @@
-"""Custom user model validators."""
+"""User model validators."""
 
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
@@ -16,8 +16,7 @@ def validate_language(value):
   try:
     Language.get(value).is_valid()
   except LanguageTagError:
-    # pylint: disable=raise-missing-from
     raise ValidationError(
         _("Invalid language_code '%(value)s'"),
         params={'value': value},
-    )
+    ) from LanguageTagError

@@ -1,14 +1,11 @@
-"""Custom user admin integration."""
+"""ModelAdmin for the User model."""
 
-from django.contrib import admin
-from django.contrib.auth.admin import UserAdmin as DjangoUserAdmin
+from django.contrib.auth.admin import UserAdmin
 from django.utils.translation import gettext_lazy as _
 
-from .models.user import User
 
-
-class UserAdmin(DjangoUserAdmin):
-  """Custom user admin integration."""
+class UserModelAdmin(UserAdmin):
+  """ModelAdmin for the User model."""
 
   list_display = [
       "email",
@@ -75,6 +72,3 @@ class UserAdmin(DjangoUserAdmin):
           )
       },
   ),)
-
-
-admin.site.register(User, UserAdmin)

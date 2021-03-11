@@ -1,4 +1,4 @@
-"""Test the custom user details serializer."""
+"""Test the UserDetailsSerializer class."""
 
 from django.contrib.auth import get_user_model
 

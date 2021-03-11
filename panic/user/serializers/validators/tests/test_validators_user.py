@@ -1,12 +1,12 @@
-"""Test custom user serializer validators."""
+"""Test User model serializer validators."""
 
-from django.test import TestCase
+from django.test import SimpleTestCase
 from rest_framework import serializers
 
 from ..user import validate_language
 
 
-class TestUserModel(TestCase):
+class TestUserModel(SimpleTestCase):
   """Test the validate_language function."""
 
   def setUp(self):

@@ -1,4 +1,4 @@
-"""Custom user serializer mixin."""
+"""User model serializer base classes."""
 
 from rest_framework import serializers
 from timezone_field.rest_framework import TimeZoneSerializerField
@@ -7,8 +7,8 @@ from ..models.user import User
 from .validators.user import validate_language
 
 
-class CustomUserBase(serializers.Serializer):
-  """Custom user serializer base class to add additional fields."""
+class UserBase(serializers.Serializer):
+  """User model serializer base class with custom fields."""
 
   language_code = serializers.CharField(
       max_length=20,

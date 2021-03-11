@@ -1,4 +1,4 @@
-"""Custom user serializer validators."""
+"""User model serializer validators."""
 
 from langcodes import Language
 from langcodes.tag_parser import LanguageTagError

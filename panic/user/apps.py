@@ -1,10 +1,10 @@
-"""Custom user app AppConfig."""
+"""AppConfig for the user app."""
 
 from django.apps import AppConfig
 
 
 class UserConfig(AppConfig):
-  """Custom user app AppConfig."""
+  """AppConfig for the user app."""
 
   name = 'user'
 

@@ -1,18 +1,18 @@
-"""Detail serializers for the custom user model."""
+"""Detail serializer for the User model."""
 
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
-from .bases import CustomUserBase
+from .bases import UserBase
 
 UserModel = get_user_model()
 
 
 class UserDetailsSerializer(
-    CustomUserBase,
+    UserBase,
     serializers.ModelSerializer,
 ):
-  """Custom user details serializer."""
+  """User details serializer."""
 
   class Meta:
     model = UserModel
