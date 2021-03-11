@@ -7,5 +7,6 @@ models
    :glob:
 
    decorators/index.rst
+   generators/index.rst
    validators/index.rst
    *

@@ -1,29 +1,12 @@
 """Signals test fixtures."""
 
-from unittest.mock import Mock
-
 from django.contrib.auth import get_user_model
 from django.db.models import Model
 from django.test import TestCase
 
+from .fixtures_allauth import MockEmail
+
 User = get_user_model()
-
-
-def get_mock_social_login():
-  """Generate a django-allauth sociallogin test double."""
-
-  mock_social_login = Mock()
-  mock_social_login.connect = Mock()
-  mock_social_login.email_addresses = []
-
-  return mock_social_login
-
-
-class MockEmail:
-  """Test double for a django-allauth email model object."""
-
-  def __init__(self, email):
-    self.email = email
 
 
 class SignalsTestHarness(TestCase):

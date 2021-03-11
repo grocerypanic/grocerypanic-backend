@@ -1,10 +1,10 @@
 """Ensure all social account views are present."""
 
-from django.test import TestCase
+from django.test import SimpleTestCase
 from django.urls import reverse
 
 
-class TestSocialViewsArePresent(TestCase):
+class TestSocialViewsArePresent(SimpleTestCase):
   """Test resolution of social login views."""
 
   def test_google_login(self):

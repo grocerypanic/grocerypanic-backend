@@ -1,10 +1,10 @@
-"""Social_accounts app AppConfig."""
+"""AppConfig for the social_accounts app."""
 
 from django.apps import AppConfig
 
 
 class SocialAccountsConfig(AppConfig):
-  """Social_accounts app AppConfig."""
+  """AppConfig for the social_accounts app."""
 
   name = 'social_accounts'
 

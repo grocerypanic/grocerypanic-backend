@@ -6,10 +6,8 @@ from allauth.account.models import EmailAddress
 from allauth.socialaccount.signals import pre_social_login
 from django.test import override_settings
 
-from ...tests.fixtures.fixtures_signals import (
-    SignalsTestHarness,
-    get_mock_social_login,
-)
+from ...tests.fixtures.fixtures_allauth import MockSocialLogin
+from ...tests.fixtures.fixtures_signals import SignalsTestHarness
 from .. import presocial_login
 
 
@@ -25,7 +23,7 @@ class TestPreSocialLoginSignalHandler(SignalsTestHarness):
 
   @mock.patch(presocial_login.__name__ + '.PreSocialConnector')
   def test_social_connect_instantiates_connector_class(self, mock_class):
-    mock_login = get_mock_social_login()
+    mock_login = MockSocialLogin()
     presocial_login.process_social_connect(None, mock_login)
     mock_class.assert_called_once_with(mock_login)
 
@@ -35,7 +33,7 @@ class TestPreSocialLoginSignalHandler(SignalsTestHarness):
   def test_social_connect_no_email_returned(self, mock_func):
     mock_func.return_value = None
 
-    sociallogin = get_mock_social_login()
+    sociallogin = MockSocialLogin()
     presocial_login.process_social_connect(None, sociallogin)
 
     mock_func.assert_called_once()
@@ -47,7 +45,7 @@ class TestPreSocialLoginSignalHandler(SignalsTestHarness):
   def test_social_connect_valid_email_returned(self, mock_func):
     mock_func.return_value = self.user
 
-    sociallogin = get_mock_social_login()
+    sociallogin = MockSocialLogin()
     presocial_login.process_social_connect(None, sociallogin)
 
     mock_func.assert_called_once()
@@ -61,7 +59,7 @@ class TestPreSocialConnectClass(SignalsTestHarness):
   def setUpTestData(cls):
     super().setUpTestData()
     cls.instance = None
-    cls.sociallogin = get_mock_social_login()
+    cls.sociallogin = MockSocialLogin()
     cls.email_address = EmailAddress(user=cls.user, email=cls.mock_email.email)
 
   def create_test_instance(self):

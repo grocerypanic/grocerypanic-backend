@@ -7,6 +7,6 @@ social_accounts
    :glob:
 
    management/index.rst
-   models/index.rst
    signals/index.rst
+   utilities/index.rst
    *

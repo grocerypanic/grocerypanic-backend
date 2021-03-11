@@ -1,109 +1,71 @@
-"""Test the autosocial.facebook management command."""
+"""Test the autosocial management command."""
 
 from io import StringIO
-from unittest import mock
+from unittest.mock import patch
 
-from allauth.socialaccount.models import SocialApp
-from django.contrib.auth import get_user_model
-from django.core.management import call_command
-from django.test import TestCase
-from parameterized import parameterized_class
+from django.core.management import CommandError, call_command
+from django.test import SimpleTestCase
 
-User = get_user_model()
+from .. import autosocial as command_module
+from ..autosocial import SUCCESS_MESSAGE
 
-PROVIDERS = [{"provider": "facebook"}, {"provider": "google"}]
+COMMAND_MODULE = command_module.__name__
 
 
-@parameterized_class(PROVIDERS)
-class AutoSocialTestCase1(TestCase):
-  """Test the autosocial.facebook management command."""
+@patch(COMMAND_MODULE + ".create_social_app")
+class AutoSocialTestCase(SimpleTestCase):
+  """Test the autosocial management command."""
 
-  def __clear_social_accounts(self):
-    query = SocialApp.objects.all()
-    if query is not None:
-      for row in query:
-        row.delete()
+  def _call_command(self, provider):
+    call_command(
+        'autosocial',
+        provider,
+        stdout=self.output_stdout,
+        stderr=self.output_stderr,
+        no_color=True
+    )
+
+  def _validate_success(self):
+    self.assertIn(
+        SUCCESS_MESSAGE,
+        self.output_stdout.getvalue(),
+    )
+    self.assertEqual(
+        self.output_stderr.getvalue(),
+        "",
+    )
 
   def setUp(self):
-    self.__clear_social_accounts()
+    self.output_stdout = StringIO()
+    self.output_stderr = StringIO()
 
-  def tearDown(self):
-    self.__clear_social_accounts()
+  def test_autosocial_create_google(self, _):
+    self._call_command("google")
+    self._validate_success()
 
-  @mock.patch('os.getenv')
-  def test_autoadmin_create_no_env_vars(self, environ):
-    environ.return_value = None
-    query = SocialApp.objects.all().filter(provider=self.provider)
-    assert len(query) == 0
+  def test_autosocial_create_facebook(self, _):
+    self._call_command("facebook")
+    self._validate_success()
 
-    output_stdout = StringIO()
-    output_stderr = StringIO()
-    call_command(
-        'autosocial',
-        self.provider,
-        stdout=output_stdout,
-        stderr=output_stderr,
-        no_color=True
+  def test_autosocial_create_invalid(self, _):
+    with self.assertRaises(CommandError):
+      self._call_command("invalid")
+
+  def test_autosocial_exception(self, m_create):
+    m_create.side_effect = Exception("error")
+
+    with self.assertRaises(CommandError) as raised:
+      self._call_command("facebook")
+
+    self.assertEqual(
+        raised.exception.args[0],
+        "error",
     )
-    assert 'The required env vars are not set.' in output_stderr.getvalue()
-    assert output_stdout.getvalue() == ""
-
-    query = SocialApp.objects.all().filter(provider=self.provider)
-    assert len(query) == 0
-
-  @mock.patch('os.getenv')
-  def test_autoadmin_create(self, environ):
-    environ.return_value = "not_very_random_string"
-
-    query = SocialApp.objects.all().filter(provider=self.provider)
-    assert len(query) == 0
-
-    output_stdout = StringIO()
-    output_stderr = StringIO()
-    call_command(
-        'autosocial',
-        self.provider,
-        stdout=output_stdout,
-        stderr=output_stderr,
-        no_color=True
+    self.assertEqual(
+        self.output_stdout.getvalue(),
+        "",
     )
-    assert 'Successfully created social app account.' in output_stdout.getvalue(
+    self.assertEqual(
+        self.output_stderr.getvalue(),
+        "",
     )
-    assert output_stderr.getvalue() == ""
-
-    query = SocialApp.objects.get(provider=self.provider)
-    assert query.client_id == "not_very_random_string"
-    assert query.secret == "not_very_random_string"
-
-  @mock.patch('os.getenv')
-  def test_autoadmin_create_twice(self, environ):
-    environ.return_value = "not_very_random_string"
-
-    output_stdout = StringIO()
-    output_stderr = StringIO()
-    call_command(
-        'autosocial',
-        self.provider,
-        stdout=output_stdout,
-        stderr=output_stderr,
-        no_color=True
-    )
-
-    output_stdout = StringIO()
-    output_stderr = StringIO()
-    call_command(
-        'autosocial',
-        self.provider,
-        stdout=output_stdout,
-        stderr=output_stderr,
-        no_color=True
-    )
-    assert 'The social app already exists.' in output_stderr.getvalue()
-    assert output_stdout.getvalue() == ""
-
-    query = SocialApp.objects.get(provider=self.provider)
-    assert query.client_id == "not_very_random_string"
-    assert query.secret == "not_very_random_string"
-
-    query = SocialApp.objects.all().filter(provider=self.provider)
-    assert len(query) == 1

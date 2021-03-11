@@ -1,4 +1,4 @@
-"""Url patterns for the social_accounts app."""
+"""URLs for the social_accounts app."""
 
 from django.urls import path
 

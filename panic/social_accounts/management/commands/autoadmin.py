@@ -1,13 +1,14 @@
-"""A django admin command to create a default admin user."""
+"""A Django management command to create an admin superuser."""
 
-from django.contrib.auth import get_user_model
-from django.core.management.base import BaseCommand
+from django.core.management.base import BaseCommand, CommandError
 
-User = get_user_model()
+from utilities.models.generators.superuser import create_superuser
+
+SUCCESS_MESSAGE = 'Successfully created admin user.'
 
 
 class Command(BaseCommand):
-  """Bootstrap the django admin, by creating a user with a set of credentials.
+  """Creates an admin superuser with a set of credentials.
 
   - Generate Admin Account::
 
@@ -18,20 +19,13 @@ class Command(BaseCommand):
     Password: admin
   """
 
-  help = 'Adds a default admin user without user interaction.'
+  help = 'Adds a admin user without user interaction.'
 
   def handle(self, *args, **options):
     """Command implementation."""
-    query = User.objects.all().filter(username="admin").count()
-    if query > 0:
-      self.stdout.write(self.style.ERROR('The admin user already exists.'))
+    try:
+      create_superuser()
+    except Exception as raised:
+      raise CommandError(*raised.args) from raised
 
-    else:
-      user = User(username='admin')
-      user.email = "test@example.com"
-      user.set_password('admin')
-      user.is_superuser = True
-      user.is_staff = True
-      user.save()
-
-      self.stdout.write(self.style.SUCCESS('Successfully created admin user.'))
+    self.stdout.write(self.style.SUCCESS(SUCCESS_MESSAGE))

@@ -1,15 +1,16 @@
-"""A django admin command to create add a social login provider."""
+"""A Django management command to add a social login provider."""
 
-import os
+from django.core.management.base import BaseCommand, CommandError
 
-from allauth.socialaccount.models import SocialApp
-from django.core.management.base import BaseCommand
+from ...utilities.social_app import create_social_app
+
+SUCCESS_MESSAGE = 'Successfully created social login provider.'
 
 
 class Command(BaseCommand):
-  """Bootstrap creating a social login provider via environment variables.
+  """Adds a social login provider configured via environment variables.
 
-  - Generate Social Login Authorization::
+  - Generate Social Login Provider::
 
     ./manage.py autosocial [PROVIDER]
 
@@ -24,10 +25,10 @@ class Command(BaseCommand):
     - facebook
   """
 
-  help = 'Adds social app configuration without user interaction.'
+  help = 'Adds a social login provider without user interaction.'
 
   def add_arguments(self, parser):
-    """Add argument to the parser."""
+    """Add arguments to the parser."""
     parser.add_argument(
         'provider', nargs=1, type=str, choices=['google', 'facebook']
     )
@@ -36,28 +37,9 @@ class Command(BaseCommand):
     """Command implementation."""
     provider = options['provider'][0]
 
-    client_id = os.getenv(('%s_ID' % provider).upper(), None)
-    secret = os.getenv(('%s_SECRET_KEY' % provider).upper(), None)
+    try:
+      create_social_app(provider)
+    except Exception as raised:
+      raise CommandError(*raised.args) from raised
 
-    if client_id is None or secret is None:
-      self.stderr.write(self.style.ERROR('The required env vars are not set.'))
-      return
-
-    query = SocialApp.objects.all().filter(provider=provider).count()
-    if query > 0:
-      self.stderr.write(self.style.ERROR('The social app already exists.'))
-      return
-
-    social_app = SocialApp(
-        provider=provider,
-        name='%s oauth login' % provider,
-        client_id=client_id,
-        secret=secret
-    )
-
-    social_app.save()
-    social_app.sites.add(1)
-
-    self.stdout.write(
-        self.style.SUCCESS('Successfully created social app account.')
-    )
+    self.stdout.write(self.style.SUCCESS(SUCCESS_MESSAGE))

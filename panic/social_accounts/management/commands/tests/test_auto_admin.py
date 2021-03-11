@@ -1,25 +1,26 @@
 """Test the autoadmin management command."""
 
 from io import StringIO
+from unittest.mock import patch
 
-from django.contrib.auth import get_user_model
-from django.core.management import call_command
-from django.test import TestCase
+from django.core.management import CommandError, call_command
+from django.test import SimpleTestCase
 
-User = get_user_model()
+from .. import autoadmin as command_module
+from ..autoadmin import SUCCESS_MESSAGE
+
+COMMAND_MODULE = command_module.__name__
 
 
-class AutoAdminTestCase(TestCase):
+@patch(COMMAND_MODULE + ".create_superuser")
+class AutoAdminTestCase(SimpleTestCase):
   """Test the autoadmin management command."""
 
   def setUp(self):
     self.output_stdout = StringIO()
     self.output_stderr = StringIO()
 
-  def test_autoadmin_create(self):
-    query = User.objects.all().filter(username="admin")
-    assert len(query) == 0
-
+  def test_autoadmin_create(self, _):
     call_command(
         'autoadmin',
         stdout=self.output_stdout,
@@ -27,35 +28,35 @@ class AutoAdminTestCase(TestCase):
         no_color=True
     )
 
-    assert "Successfully created admin user." in self.output_stdout.getvalue()
-    assert self.output_stderr.getvalue() == ""
-
-    query = User.objects.get(username="admin")
-    assert query.username == "admin"
-    assert query.email == "test@example.com"
-
-  def test_autoadmin_create_twice(self):
-    call_command(
-        'autoadmin', stdout=StringIO(), stderr=StringIO(), no_color=True
+    self.assertIn(
+        SUCCESS_MESSAGE,
+        self.output_stdout.getvalue(),
+    )
+    self.assertEqual(
+        self.output_stderr.getvalue(),
+        "",
     )
 
-    call_command(
-        'autoadmin',
-        stdout=self.output_stdout,
-        stderr=self.output_stderr,
-        no_color=True
+  def test_autoadmin_exception(self, m_create):
+    m_create.side_effect = Exception("error")
+
+    with self.assertRaises(CommandError) as raised:
+      call_command(
+          'autoadmin',
+          stdout=self.output_stdout,
+          stderr=self.output_stderr,
+          no_color=True
+      )
+
+    self.assertEqual(
+        raised.exception.args[0],
+        "error",
     )
-    assert "The admin user already exists." in self.output_stdout.getvalue()
-    assert self.output_stderr.getvalue() == ""
-
-    query = User.objects.get(username="admin")
-    assert query.username == "admin"
-
-    query = User.objects.all().filter(username="admin")
-    assert len(query) == 1
-
-  def tearDown(self):
-    query = User.objects.all().filter(username="admin")
-    if query is not None:
-      for row in query:
-        row.delete()
+    self.assertEqual(
+        self.output_stdout.getvalue(),
+        "",
+    )
+    self.assertEqual(
+        self.output_stderr.getvalue(),
+        "",
+    )
