@@ -71,7 +71,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    'spa_security.mixins.SameSiteMiddleware',
+    'spa_security.middlewares.samesite.SameSiteMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'corsheaders.middleware.CorsMiddleware',
@@ -174,7 +174,7 @@ REST_USE_JWT = True
 # CSRF
 
 CSRF_USE_SESSIONS = False
-CSRF_FAILURE_VIEW = "spa_security.views.csrf_error"
+CSRF_FAILURE_VIEW = "spa_security.views.csrf_error.csrf_error_view"
 
 # CORS
 

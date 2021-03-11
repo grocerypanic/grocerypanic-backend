@@ -1,11 +1,11 @@
 """Test the custom model field."""
 
-from django.test import TestCase, override_settings
+from django.test import SimpleTestCase, override_settings
 
 from ..fields import BlondeCharField
 
 
-class BlondeCharFieldTest(TestCase):
+class BlondeCharFieldTest(SimpleTestCase):
   """Test the BlondeCharField class."""
 
   def setUp(self):

@@ -1,6 +1,6 @@
 # Single Page Application Security App
 
-This Django app provides some mechanisms for protecting a DRF backed with a SPA frontend implementation.
+This Django app provides some helpful content for protecting a DRF backed with a SPA frontend implementation.
 
 ## Pre-requisites
 
@@ -21,19 +21,20 @@ This can surely work with a broader range of versions, YMMV.  Test!
 1. **Bleached Char Fields for Models:**
     - protects char fields from javascript injection, has standard char field properties and validators
     - `spa_security.fields.BlondeCharField`
-    - provides BLEACH_RESTORE_LIST, as a dictionary of key, value pairs that allow restoring specify bleached values
+    - provides the `BLEACH_RESTORE_LIST` Django setting, as a dictionary of key, value pairs that allow restoring specific bleached values (for example, ampersand)
 2. **DRF Authentication via JWT over HTTP Cookies:**
-    - allows use of http only cookies, which cannot be accessed client side
-    - `spa-security.auth.JWTCookieAuthentication`
-3. **View CSRF Cookie Protection:**
+    - allows authentication with http only cookies, which cannot be accessed client side
+    - `spa_security.auth.JWTCookieAuthentication`
+3. **CSRF Cookie Protection View Mixin:**
     - add this mixin to the leftmost baseclass of your view to ensure it performs CSRF validation
-    - `spa-security.mixins.CSRFMixin`
+    - `spa_security.mixins.csrf.CSRFMixin`
 4. **CSRF Token Generation View:**
-    - presents an authenticated view which returns a CSRF token as a cookie
-    - `spa-security.views.CSRFView`
+    - presents an authenticated view which returns a CSRF token as a JSON response
+    - `spa_security.views.csrf_token.CSRFTokenView`
 5. **Compliant SameSite Cookies:**
-    - Correctly sets the SameSite "None" option on reponses
+    - Correctly sets the SameSite "None" option on responses
     - the "Secure" cookie flag can be toggled on and off via the setting "REST_COOKIES_SECURE"
+    - `spa_security.middlewares.samesite.SameSiteMiddleware`
 
 ## Configuration / Example Usage
 
@@ -61,7 +62,7 @@ class ItemList(models.Model):
 
   def save(self, *args, **kwargs):
     self.full_clean()
-    return super(ItemList, self).save(*args, **kwargs)
+    super().save(*args, **kwargs)
 ```
 
 ### 2. DRF Authentication via JWT over HTTP Cookies
@@ -89,16 +90,16 @@ You should also review the [dj-auth-rest](https://github.com/jazzband/dj-rest-au
 In your settings file add:
 ```python
 CSRF_USE_SESSIONS = False
-CSRF_COOKIE_HTTPONLY = False
+CSRF_COOKIE_HTTPONLY = True
 CSRF_TRUSTED_ORIGINS = ['localhost']
-CSRF_FAILURE_VIEW = "spa_security.views.csrf_error"
+CSRF_FAILURE_VIEW = "spa_security.views.csrf_error.csrf_error_view"
 ```
 
 Then construct your views like this:
 ```python
 from rest_framework import mixins, viewsets
 
-from spa_security.mixins import CSRFMixin
+from spa_security.mixins.csrf import CSRFMixin
 from kitchen.models.item import Item
 from kitchen.serializers.item import ItemSerializer
 
@@ -129,21 +130,32 @@ urlpatterns = [
 ]
 ```
 
+Authenticated requests to this endpoint will also be sent a cookie containing the CSRF value.
+Ensure you are configuring the cookie [name](https://docs.djangoproject.com/en/3.0/ref/settings/#std:setting-CSRF_COOKIE_NAME) to what you really want.
+
+You can use the cookie value, or JSON response, to create a `X-CSRFToken` header in your client's REST requests, so that CSRF validation is performed.  On a CSRF error, your client can simply request a new token and retry the request.
+For more information please read [this documentation](https://docs.djangoproject.com/en/3.0/ref/csrf/#ajax).
+
+
 ### 5. SameSite Cookies
 
-This existing Django setting for CSRF, will now render correctly on reponses:
+Add the following to your middlewares:
 ```python
-CSRF_COOKIE_SAMESITE = None
+MIDDLEWARE = [
+    'spa_security.middlewares.samesite.SameSiteMiddleware',
+    "...",
+]
+```
+
+This existing Django setting for CSRF and dj_rest_auth's JWT_AUTH, will now render correctly on responses:
+```python
+CSRF_COOKIE_SAMESITE = None # (None, "Lax", "Strict")
+JWT_AUTH_COOKIE_SAMESITE = None  # (None, "Lax", "Strict")
 ```
 
 Toggle the secure option on both the JWT Authentication Cookie and the CSRF Cookie by using this Django setting:
 ```python
 REST_COOKIES_SECURE = True
-JWT_AUTH_COOKIE_SAMESITE = None  # (None, "Lax", "Strict")
 ```
 
 The JWT Authentication Cookies are SameSite 'None' by default.
-
-
-Authenticated requests to this endpoint will be sent a cookie containing the CSRF value.
-Ensure you are configuring the cookie [name](https://docs.djangoproject.com/en/3.0/ref/settings/#std:setting-CSRF_COOKIE_NAME) to what you really want.

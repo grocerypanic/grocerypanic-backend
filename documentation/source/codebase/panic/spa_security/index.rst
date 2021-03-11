@@ -6,4 +6,8 @@ spa_security
 .. toctree::
    :glob:
 
+   cookies/index.rst
+   middlewares/index.rst
+   mixins/index.rst
+   views/index.rst
    *

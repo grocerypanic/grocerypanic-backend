@@ -6,7 +6,7 @@ from django.test import TestCase
 from rest_framework import status
 from rest_framework.test import APIRequestFactory, force_authenticate
 
-from ..views import csrf_error
+from ..csrf_error import csrf_error_view
 
 
 class PublicCSRFErrorTest(TestCase):
@@ -16,7 +16,7 @@ class PublicCSRFErrorTest(TestCase):
     self.factory = APIRequestFactory(enforce_csrf_checks=True)
     self.get = self.factory.get('/someView')
     self.post = self.factory.post('/someView')
-    self.csrf_error = csrf_error
+    self.csrf_error = csrf_error_view
 
   def test_login_required(self):
     resp = self.csrf_error(self.get)
@@ -43,7 +43,7 @@ class PrivateCSRFErrorTest(TestCase):
     self.factory = APIRequestFactory(enforce_csrf_checks=True)
     self.get = self.factory.get('/someView')
     self.post = self.factory.post('/someView')
-    self.csrf_error = csrf_error
+    self.csrf_error = csrf_error_view
     force_authenticate(self.get, user=self.user)
     force_authenticate(self.post, user=self.user)
 

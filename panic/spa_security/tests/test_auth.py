@@ -1,16 +1,16 @@
-"""Test custom authorizations."""
+"""Test spa_security authentications."""
 
 from unittest.mock import patch
 
 from django.conf import settings
-from django.test import TestCase
+from django.test import SimpleTestCase
 from django.test.client import RequestFactory
 from rest_framework_simplejwt.exceptions import InvalidToken
 
 from ..auth import JWTCookieAuthentication
 
 
-class CookieAuthenticatorTest(TestCase):
+class CookieAuthenticatorTest(SimpleTestCase):
   """Test the JWTCookieAuthentication class."""
 
   def setUp(self):

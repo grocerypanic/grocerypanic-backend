@@ -1,11 +1,11 @@
-"""Custom rest_framework authentication."""
+"""Authentication classes for the rest_framework library."""
 
 from django.conf import settings
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
 
 class JWTCookieAuthentication(JWTAuthentication):
-  """An authentication plugin that parses JWT tokens from cookies.
+  """Authentication that parses JWT tokens from cookies.
 
   Overrides: :class:`rest_framework_simplejwt.authentication.JWTAuthentication`
 
