@@ -8,4 +8,5 @@ root
 
    exceptions/index.rst
    toctree/index.rst
+   urls/index.rst
    *

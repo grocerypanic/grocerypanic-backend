@@ -1,4 +1,4 @@
-"""Test the root exception handler."""
+"""Test the root_exception_handler function."""
 
 from unittest.mock import Mock, patch
 

@@ -16,4 +16,4 @@ BLEACH_RESTORE_LIST = {"&amp;": "&"}
 
 # utilities
 
-TOCTREE_FACTORY_SETTINGS = 'root.toctree.factory_settings'
+TOCTREE_FACTORY_SETTINGS = 'root.toctree.settings'

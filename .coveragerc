@@ -6,10 +6,10 @@ omit =
     */urls.py,
     */migrations/*.py,
     panic/config/environments/*.py,
-    panic/setup.py,
     panic/manage.py,
     panic/root/asgi.py,
-    panic/root/wsgi.py
+    panic/root/wsgi.py,
+    panic/root/urls/*
 source = panic
 
 [report]

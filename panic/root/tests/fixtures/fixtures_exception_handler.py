@@ -1,11 +1,11 @@
-"""Test fixtures for the exception handler."""
+"""Test fixtures for exception handlers."""
 
-from django.test import TestCase
+from django.test import SimpleTestCase
 from rest_framework import serializers, status
 from rest_framework.response import Response
 
 
-class HandlerTestHarness(TestCase):
+class HandlerTestHarness(SimpleTestCase):
   """Test harness for the exception handlers."""
 
   def setUp(self):

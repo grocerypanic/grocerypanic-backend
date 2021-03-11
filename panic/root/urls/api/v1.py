@@ -1,10 +1,10 @@
-"""Root v1 API URLs."""
+"""URLS for the Panic v1 API."""
 
 from dj_rest_auth.registration.views import ConfirmEmailView, VerifyEmailView
 from dj_rest_auth.views import PasswordResetConfirmView
 from django.urls import include, path
 
-v1_urlpatterns = [
+urlpatterns = [
     path(
         "api/",
         include(
