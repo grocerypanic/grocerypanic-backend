@@ -3,7 +3,7 @@
 from unittest.mock import patch
 
 from django.conf import settings
-from django.test import TestCase
+from django.test import SimpleTestCase
 from django.urls import reverse
 from rest_framework import status
 
@@ -15,7 +15,7 @@ VIEWS_MODULE = views_module.__name__
 
 @patch(f"{VIEWS_MODULE}.wait_for_database_connection")
 @patch(f"{VIEWS_MODULE}.warm_module_cache")
-class AppEngineWarmUpTest(TestCase):
+class AppEngineWarmUpTest(SimpleTestCase):
   """Test the APP Engine public endpoint."""
 
   def test_warmup_returns_correct_html(self, _unused1, _unused2):

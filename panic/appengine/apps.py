@@ -1,9 +1,9 @@
-"""Appengine app App Config."""
+"""AppConfig for the appengine app."""
 
 from django.apps import AppConfig
 
 
 class AppEngineConfig(AppConfig):
-  """Appengine app App Config."""
+  """AppConfig for the appengine app."""
 
   name = 'appengine'
