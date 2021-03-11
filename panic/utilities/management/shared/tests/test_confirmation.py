@@ -3,20 +3,20 @@
 from io import StringIO
 from unittest.mock import patch
 
-from django.test import TestCase
+from django.test import SimpleTestCase
 
 from .. import confirmation as confirmation_module
 from ..confirmation import ManagementConfirmation
 
 
 class TestConfirmation(ManagementConfirmation):
-  """Test class based from ManagementConfirmation."""
+  """Test class derived ManagementConfirmation."""
 
   confirm_message = "Are you sure [Y/n] ?"
   confirm_yes = "Y"
 
 
-class TestManagementConfirmation(TestCase):
+class TestManagementConfirmation(SimpleTestCase):
   """Test the ManagementConfirmation class."""
 
   def setUp(self):

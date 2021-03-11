@@ -3,7 +3,7 @@
 from unittest.mock import Mock
 
 from django.core.exceptions import ValidationError
-from django.test import TestCase
+from django.test import SimpleTestCase
 
 from ..m2m import ManyToManyRelatedValidator
 
@@ -35,7 +35,7 @@ class MockModelWithM2M:
     self.__class__.related.field.related_model = mock_m2m
 
 
-class TestValidatePreferredStores(TestCase):
+class TestValidatePreferredStores(SimpleTestCase):
   """Test the ManyToManyRelatedValidator class."""
 
   def setUp(self):

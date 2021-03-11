@@ -5,7 +5,7 @@ from unittest.mock import patch
 
 from django.core.management import call_command
 from django.db.utils import OperationalError
-from django.test import TestCase
+from django.test import SimpleTestCase
 
 from .. import wait_for_db as command_module
 from ..wait_for_db import INITIALIZATION_MESSAGE, SUCCESS_MESSAGE, WAIT_TIME
@@ -13,7 +13,7 @@ from ..wait_for_db import INITIALIZATION_MESSAGE, SUCCESS_MESSAGE, WAIT_TIME
 COMMAND_MODULE = command_module.__name__
 
 
-class CommandTests(TestCase):
+class CommandTests(SimpleTestCase):
   """Test the wait_for_db management command."""
 
   @patch(f"{COMMAND_MODULE}.wait_for_database_connection")

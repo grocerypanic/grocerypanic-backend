@@ -5,7 +5,7 @@ from unittest.mock import patch
 
 from django.core.management import call_command
 from django.core.management.base import CommandError
-from django.test import TestCase, override_settings
+from django.test import SimpleTestCase, override_settings
 
 from ....toctree import factory as factory_module
 from .. import toctree as command_module
@@ -21,7 +21,7 @@ COMMAND_MODULE = command_module.__name__
 
 
 @override_settings(TOCTREE_FACTORY_SETTINGS=None)
-class CommandTests(TestCase):
+class CommandTests(SimpleTestCase):
   """Test the wait_for_db admin command."""
 
   def test_no_selection(self):

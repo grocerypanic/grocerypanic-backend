@@ -14,41 +14,6 @@ from ..caching import (
 )
 
 
-class Model:
-  """A mock model for testing."""
-
-  def __init__(self, instance_id, initial, expiry):
-    self.id = instance_id
-    self.initial = initial
-    self.expiry_date = expiry
-    self._cached_calculated = None
-    self._save_calls = 0
-
-  def save(self):
-    self._save_calls += 1
-
-  def increment_cached_value(self):
-    self.initial += 1
-
-  @property
-  def get_expiry_date(self):
-    return self.expiry_date
-
-  def calculation(self):
-    return self.initial + 1
-
-  @PersistentCachedProperty(
-      ttl_field="get_expiry_date",
-      cached_field="_cached_calculated",
-  )
-  def alias_calculation(self):
-    return self.calculation()
-
-  @PersistentCachedProperty(ttl_field="get_expiry_date")
-  def cached_calculated(self):
-    return self.calculation()
-
-
 class TestCachingDecoratorNonTTLRelated(SimpleTestCase):
   """Test the PersistentCachedProperty class for non TTL bounded conditions."""
 
@@ -227,3 +192,38 @@ class TestCachingDecoratorTTLInvalid(TestCachingDecoratorTTLTestHarness):
 
   __test__ = True
   ttl_until = pendulum.datetime(year=2020, month=1, day=14, tz="UTC")
+
+
+class Model:
+  """A mock model for testing."""
+
+  def __init__(self, instance_id, initial, expiry):
+    self.id = instance_id
+    self.initial = initial
+    self.expiry_date = expiry
+    self._cached_calculated = None
+    self._save_calls = 0
+
+  def save(self):
+    self._save_calls += 1
+
+  def increment_cached_value(self):
+    self.initial += 1
+
+  @property
+  def get_expiry_date(self):
+    return self.expiry_date
+
+  def calculation(self):
+    return self.initial + 1
+
+  @PersistentCachedProperty(
+      ttl_field="get_expiry_date",
+      cached_field="_cached_calculated",
+  )
+  def alias_calculation(self):
+    return self.calculation()
+
+  @PersistentCachedProperty(ttl_field="get_expiry_date")
+  def cached_calculated(self):
+    return self.calculation()

@@ -1,9 +1,9 @@
-"""Test the app engine app views."""
+"""Test the appengine app views."""
 
 from unittest.mock import patch
 
 from django.conf import settings
-from django.test import TestCase
+from django.test import SimpleTestCase
 
 from .. import module_cache
 from ..module_cache import warm_module_cache
@@ -12,7 +12,7 @@ MODULE_CACHE = module_cache.__name__
 
 
 @patch(f"{MODULE_CACHE}.import_module")
-class LoadInstalledAppsTest(TestCase):
+class LoadInstalledAppsTest(SimpleTestCase):
   """Test the load_installed_apps function."""
 
   def test_load_installed_apps(self, m_import):

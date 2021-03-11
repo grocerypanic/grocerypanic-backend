@@ -1,10 +1,10 @@
-"""Custom validators for Kitchen models."""
+"""Validators for Django models with M2M fields."""
 
 from django.core.exceptions import ValidationError
 
 
 class ManyToManyRelatedValidator:
-  """Validator for Many to Many fields.
+  """Validator for Many to Many fields, ensures a related field matches.
 
   This validator checks that a named field matches on both an instance, and
   each related model in the M2M collection.

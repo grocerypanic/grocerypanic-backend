@@ -2,12 +2,12 @@
 
 from unittest.mock import Mock
 
-from django.test import TestCase
+from django.test import SimpleTestCase
 
 from ..m2m import M2MThroughSerializerField
 
 
-class TestM2MThroughSerializerField(TestCase):
+class TestM2MThroughSerializerField(SimpleTestCase):
   """Test the M2MThroughSerializerField class."""
 
   def setUp(self):

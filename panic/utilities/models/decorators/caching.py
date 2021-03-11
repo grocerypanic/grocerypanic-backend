@@ -1,4 +1,4 @@
-"""Custom Caching Decorators."""
+"""Caching Decorators."""
 
 from django.utils.timezone import now
 
@@ -6,7 +6,7 @@ SETTER_ERROR = "This attribute can not be assigned directly."
 
 
 class PersistentCachedProperty:
-  """Implementation of a persistent version of the cached_property decorator.
+  """Persisting version of the cached_property decorator.
 
   Generates a decorator for a model method with the PersistentCachedProperty
   class.  Specify another model field (storing a datetime) that can be used to
