@@ -1,5 +1,6 @@
 """Item model."""
 
+import pendulum
 from django.contrib.auth import get_user_model
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
@@ -19,6 +20,7 @@ from .mixins import (
     RelatedFieldEnforcementMixin,
     UniqueNameConstraintMixin,
 )
+from .transaction import Transaction
 
 User = get_user_model()
 
@@ -89,6 +91,28 @@ class Item(
         models.Index(fields=['_index']),
     ]
 
+  @cached_property
+  def activity_first(self):
+    """Search for the first transaction for this item, and return the datetime.
+    The returned datetime is in in UTC.
+
+    :returns: The datetime, or None
+    :rtype: :class:`datetime.datetime`, None
+    """
+    return Transaction.objects.get_activity_first(self.id,)
+
+  @property
+  def activity_last_two_weeks(self):
+    """Retrieve the last two weeks of transaction activity.
+    The activity is summed by each timezone adjusted day.
+
+    :returns: A queryset representing the activity
+    :rtype: :class:`django.db.models.QuerySet`, None
+    """
+    return Transaction.objects.get_activity_last_two_weeks(
+        self.id, zone=self.user.timezone.zone
+    )
+
   @PersistentCachedProperty(ttl_field="next_expiry_datetime")
   def expired(self):
     """Return the sum quantity of all inventory that is expired.
@@ -137,6 +161,65 @@ class Item(
     :rtype: float
     """
     return Inventory.objects.get_next_expiry_quantity(self)
+
+  @property
+  def usage_avg_week(self):
+    """Retrieve an item's average weekly usage, since it's first activity.
+
+    :returns: The average usage
+    :rtype: float
+    """
+    since_first_transaction = (
+        pendulum.now() - pendulum.instance(self.activity_first)
+    )
+    average = self.usage_total / (since_first_transaction.in_weeks() + 1)
+    return float("{:.2f}".format(average))
+
+  @property
+  def usage_avg_month(self):
+    """Retrieve an item's average monthly usage, since it's first activity.
+
+    :returns: The average usage
+    :rtype: float
+    """
+    since_first_transaction = (
+        pendulum.now() - pendulum.instance(self.activity_first)
+    )
+    average = self.usage_total / (since_first_transaction.in_months() + 1)
+    return float("{:.2f}".format(average))
+
+  @property
+  def usage_current_week(self):
+    """Retrieve the sum of the current week of transaction activity.
+    Week bounds are determined by the specified timezone.
+
+    :returns: The total count of cumulative consumption
+    :rtype: float
+    """
+    return Transaction.objects.get_usage_current_week(
+        self.id, zone=self.user.timezone.zone
+    )
+
+  @property
+  def usage_current_month(self):
+    """Retrieve the sum of the current month of transaction activity.
+    Month bounds are determined by the specified timezone.
+
+    :returns: The total count of cumulative consumption
+    :rtype: float
+    """
+    return Transaction.objects.get_usage_current_month(
+        self.id, zone=self.user.timezone.zone
+    )
+
+  @cached_property
+  def usage_total(self):
+    """Calculate the total sum consumption of an item.
+
+    :returns: The total count of cumulative consumption
+    :rtype: float
+    """
+    return Transaction.objects.get_usage_total(self.id)
 
   def __str__(self):
     return str(self.name)

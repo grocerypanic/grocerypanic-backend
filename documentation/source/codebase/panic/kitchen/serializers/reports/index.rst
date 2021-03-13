@@ -6,4 +6,5 @@ reports
 .. toctree::
    :glob:
 
+   item_activity/index.rst
    *

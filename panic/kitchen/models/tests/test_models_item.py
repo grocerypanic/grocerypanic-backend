@@ -4,6 +4,7 @@
 import datetime
 from unittest.mock import MagicMock, patch
 
+import pendulum
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 from django.utils.functional import cached_property
@@ -15,6 +16,8 @@ from ...tests.fixtures.fixtures_item import ItemTestHarness
 from .. import constants
 from .. import item as item_module
 from ..item import Item
+
+ITEM_MODULE = item_module.__name__
 
 
 class TestItem(ModelTestMixin, ItemTestHarness):
@@ -152,13 +155,12 @@ class TestItem(ModelTestMixin, ItemTestHarness):
 
 
 @freeze_time("2020-01-14")
-class TestItemCalculatedProperties(ItemTestHarness):
-  """Test the Item model's calculated properties."""
+class TestItemCalculatedPropertiesInventory(ItemTestHarness):
+  """Test the Item model's calculated properties that use Inventory."""
 
   @classmethod
   def create_data_hook(cls):
     cls.today = timezone.now()
-    cls.fields = {"name": 255}
     cls.data = {
         'user': cls.user1,
         'name': "Canned Beans",
@@ -168,21 +170,23 @@ class TestItemCalculatedProperties(ItemTestHarness):
         'price': 2.00,
     }
 
+    cls.item1 = cls.create_instance(**cls.data)
+
   def setUp(self):
     super().setUp()
     self.user1.timezone = "UTC"
     self.user1.save()
+    self.item1.invalidate_caches()
 
   def test_refresh_from_db_clears_cache(self):
-    item = self.create_test_instance(**self.data)
     persistent_cached_props = []
     django_cached_props = []
 
-    for key, value in item.__class__.__dict__.items():
+    for key, value in self.item1.__class__.__dict__.items():
       if isinstance(value, cached_property):
         django_cached_props.append(key)
 
-    for key, value in item.__class__.__dict__.items():
+    for key, value in self.item1.__class__.__dict__.items():
       if isinstance(value, PersistentModelFieldCache):
         persistent_cached_props.append(key)
 
@@ -191,20 +195,35 @@ class TestItemCalculatedProperties(ItemTestHarness):
 
     cached_props = django_cached_props + persistent_cached_props
 
-    with patch(item_module.__name__ + ".delattr", MagicMock()) as m_del:
-      item.invalidate_caches()
+    with patch(ITEM_MODULE + ".delattr", MagicMock()) as m_del:
+      self.item1.invalidate_caches()
       self.assertEqual(m_del.call_count, len(cached_props))
       for cached_prop in cached_props:
-        m_del.assert_any_call(item, cached_prop)
+        m_del.assert_any_call(self.item1, cached_prop)
 
-  @patch(item_module.__name__ + ".Inventory.objects.get_expired")
+  @patch(ITEM_MODULE + ".Inventory.objects.get_expired")
   def test_expired(self, m_func):
     m_func.return_value = 1.1
-    item = self.create_test_instance(**self.data)
-    self.assertEqual(item.expired, m_func.return_value)
-    m_func.assert_called_with(item)
+    self.assertEqual(self.item1.expired, m_func.return_value)
+    m_func.assert_called_with(self.item1)
 
-  @patch(item_module.__name__ + ".Inventory.objects.get_next_expiry_datetime")
+  @patch(ITEM_MODULE + ".Inventory.objects.get_expired")
+  @patch(ITEM_MODULE + ".Inventory.objects.get_next_expiry_datetime")
+  def test_expired_is_cached(self, m_datetime, m_func):
+    original_value = 1.1
+
+    m_datetime.return_value = self.today - datetime.timedelta(days=3)
+    m_func.return_value = original_value
+    self.assertEqual(self.item1.expired, original_value)
+
+    m_func.return_value = original_value + 1
+    m_datetime.return_value = self.today + datetime.timedelta(days=3)
+    del self.item1.next_expiry_datetime
+
+    self.assertEqual(self.item1.expired, original_value)
+    m_func.assert_called_once_with(self.item1)
+
+  @patch(ITEM_MODULE + ".Inventory.objects.get_next_expiry_datetime")
   def test_next_expiry_date_utc(self, m_func):
     self.user1.timezone = "UTC"
     self.user1.save()
@@ -212,14 +231,13 @@ class TestItemCalculatedProperties(ItemTestHarness):
     m_func.return_value = timezone.now()
     user_adjusted_date = timezone.now().astimezone(self.user1.timezone).date()
 
-    item = self.create_test_instance(**self.data)
-    received_date = item.next_expiry_date
+    received_date = self.item1.next_expiry_date
 
     self.assertEqual(received_date, user_adjusted_date)
     self.assertIsInstance(received_date, datetime.date)
-    m_func.assert_called_with(item)
+    m_func.assert_called_with(self.item1)
 
-  @patch(item_module.__name__ + ".Inventory.objects.get_next_expiry_datetime")
+  @patch(ITEM_MODULE + ".Inventory.objects.get_next_expiry_datetime")
   def test_next_expiry_date_honolulu(self, m_func):
     self.user1.timezone = "Pacific/Honolulu"
     self.user1.save()
@@ -227,54 +245,226 @@ class TestItemCalculatedProperties(ItemTestHarness):
     m_func.return_value = timezone.now()
     user_adjusted_date = timezone.now().astimezone(self.user1.timezone).date()
 
-    item = self.create_test_instance(**self.data)
-    received_date = item.next_expiry_date
+    received_date = self.item1.next_expiry_date
 
     self.assertEqual(received_date, user_adjusted_date)
     self.assertIsInstance(received_date, datetime.date)
-    m_func.assert_called_with(item)
+    m_func.assert_called_with(self.item1)
 
-  @patch(item_module.__name__ + ".Inventory.objects.get_next_expiry_datetime")
+  @patch(ITEM_MODULE + ".Inventory.objects.get_next_expiry_datetime")
   def test_next_expiry_date_utc_w_no_expiry_objects(self, m_func):
     self.user1.timezone = "UTC"
     self.user1.save()
 
     m_func.return_value = None
 
-    item = self.create_test_instance(**self.data)
-    received_date = item.next_expiry_date
+    received_date = self.item1.next_expiry_date
 
     self.assertEqual(received_date, None)
-    m_func.assert_called_with(item)
+    m_func.assert_called_with(self.item1)
 
-  @patch(item_module.__name__ + ".Inventory.objects.get_next_expiry_datetime")
+  @patch(ITEM_MODULE + ".Inventory.objects.get_next_expiry_datetime")
   def test_next_expiry_date_tz_diff(self, m_func):
     m_func.return_value = timezone.now()
-    item = self.create_test_instance(**self.data)
 
     self.user1.timezone = "Pacific/Honolulu"
     self.user1.save()
-    tz1_date = item.next_expiry_date
+    tz1_date = self.item1.next_expiry_date
 
     self.user1.timezone = "UTC"
     self.user1.save()
-    tz2_date = item.next_expiry_date
+    tz2_date = self.item1.next_expiry_date
 
     self.assertNotEqual(tz1_date, tz2_date)
 
-  @patch(item_module.__name__ + ".Inventory.objects.get_next_expiry_datetime")
+  @patch(ITEM_MODULE + ".Inventory.objects.get_next_expiry_datetime")
   def test_next_expiry_datetime(self, m_func):
     m_func.return_value = timezone.now()
-    item = self.create_test_instance(**self.data)
-    self.assertEqual(item.next_expiry_datetime, m_func.return_value)
-    m_func.assert_called_with(item)
+    self.assertEqual(self.item1.next_expiry_datetime, m_func.return_value)
+    m_func.assert_called_with(self.item1)
 
-  @patch(item_module.__name__ + ".Inventory.objects.get_next_expiry_quantity")
+  @patch(ITEM_MODULE + ".Inventory.objects.get_next_expiry_datetime")
+  def test_next_expiry_datetime_is_cached(self, m_func):
+    original_value = timezone.now()
+
+    m_func.return_value = original_value
+    self.assertEqual(self.item1.next_expiry_datetime, original_value)
+
+    m_func.return_value = None
+    self.assertEqual(self.item1.next_expiry_datetime, original_value)
+    m_func.assert_called_once_with(self.item1)
+
+  @patch(ITEM_MODULE + ".Inventory.objects.get_next_expiry_quantity")
   def test_next_expiry_quantity(self, m_func):
     m_func.return_value = 85.1
-    item = self.create_test_instance(**self.data)
-    self.assertEqual(item.next_expiry_quantity, m_func.return_value)
-    m_func.assert_called_with(item)
+    self.assertEqual(self.item1.next_expiry_quantity, m_func.return_value)
+    m_func.assert_called_with(self.item1)
+
+  @patch(ITEM_MODULE + ".Inventory.objects.get_next_expiry_quantity")
+  @patch(ITEM_MODULE + ".Inventory.objects.get_next_expiry_datetime")
+  def test_next_expiry_quantity_is_cached(self, m_datetime, m_func):
+    original_value = 85.1
+
+    m_datetime.return_value = self.today - datetime.timedelta(days=3)
+    m_func.return_value = original_value
+    self.assertEqual(self.item1.next_expiry_quantity, original_value)
+
+    m_datetime.return_value = self.today + datetime.timedelta(days=3)
+    m_func.return_value = original_value + 1
+    del self.item1.next_expiry_datetime
+
+    self.assertEqual(self.item1.next_expiry_quantity, original_value)
+    m_func.assert_called_once_with(self.item1)
+
+  @patch(ITEM_MODULE + '.Transaction.objects.get_activity_first')
+  def test_activity_first(self, m_activity):
+    m_activity.return_value = self.today - datetime.timedelta(days=900)
+    self.assertEqual(
+        self.item1.activity_first,
+        m_activity.return_value,
+    )
+    m_activity.assert_called_with(self.item1.id)
+
+  @patch(ITEM_MODULE + '.Transaction.objects.get_activity_first')
+  def test_activity_first_is_cached(self, m_activity):
+    original_value = self.today - datetime.timedelta(days=900)
+    m_activity.return_value = original_value
+    self.assertEqual(
+        self.item1.activity_first,
+        original_value,
+    )
+
+    m_activity.return_value = self.today
+    self.assertEqual(
+        self.item1.activity_first,
+        original_value,
+    )
+    m_activity.assert_called_once_with(self.item1.id)
+
+  @patch(ITEM_MODULE + '.Transaction.objects.get_activity_last_two_weeks')
+  def test_activity_last_two_weeks(self, m_activity):
+    m_activity.return_value = "MockQuerySet"
+    self.assertEqual(
+        self.item1.activity_last_two_weeks,
+        m_activity.return_value,
+    )
+    m_activity.assert_called_with(self.item1.id, zone=self.user1.timezone.zone)
+
+  @patch(ITEM_MODULE + '.Transaction.objects.get_activity_first')
+  @patch(ITEM_MODULE + '.Transaction.objects.get_usage_total')
+  def test_usage_avg_week(self, m_usage, m_activity):
+    m_usage.return_value = 999
+
+    m_activity.return_value = self.today - datetime.timedelta(days=900)
+    weeks = (
+        pendulum.instance(self.today) -
+        pendulum.instance(m_activity.return_value)
+    ).in_weeks() + 1
+
+    expected = (float("{:.2f}".format(m_usage.return_value / weeks)))
+
+    self.assertEqual(
+        self.item1.usage_avg_week,
+        expected,
+    )
+    m_usage.assert_called_with(self.item1.id)
+    m_activity.assert_called_with(self.item1.id)
+
+  @patch(ITEM_MODULE + '.Transaction.objects.get_activity_first')
+  @patch(ITEM_MODULE + '.Transaction.objects.get_usage_total')
+  def test_usage_avg_week_zero_edge(self, m_usage, m_activity):
+    m_usage.return_value = 999
+    m_activity.return_value = self.today
+
+    expected = (float("{:.2f}".format(m_usage.return_value / 1)))
+
+    self.assertEqual(
+        self.item1.usage_avg_week,
+        expected,
+    )
+    m_usage.assert_called_with(self.item1.id)
+    m_activity.assert_called_with(self.item1.id)
+
+  @patch(ITEM_MODULE + '.Transaction.objects.get_activity_first')
+  @patch(ITEM_MODULE + '.Transaction.objects.get_usage_total')
+  def test_usage_avg_month(self, m_usage, m_activity):
+    m_usage.return_value = 999
+    m_activity.return_value = self.today - datetime.timedelta(days=900)
+
+    weeks = (
+        pendulum.instance(self.today) -
+        pendulum.instance(m_activity.return_value)
+    ).in_months() + 1
+
+    expected = (float("{:.2f}".format(m_usage.return_value / weeks)))
+
+    self.assertEqual(
+        self.item1.usage_avg_month,
+        expected,
+    )
+    m_usage.assert_called_with(self.item1.id)
+    m_activity.assert_called_with(self.item1.id)
+
+  @patch(ITEM_MODULE + '.Transaction.objects.get_activity_first')
+  @patch(ITEM_MODULE + '.Transaction.objects.get_usage_total')
+  def test_usage_avg_month_zero_edge(self, m_usage, m_activity):
+    m_usage.return_value = 999
+    m_activity.return_value = self.today
+
+    expected = (float("{:.2f}".format(m_usage.return_value / 1)))
+
+    self.assertEqual(
+        self.item1.usage_avg_month,
+        expected,
+    )
+    m_usage.assert_called_with(self.item1.id)
+    m_activity.assert_called_with(self.item1.id)
+
+  @patch(ITEM_MODULE + '.Transaction.objects.get_usage_current_week')
+  def test_usage_current_week(self, m_usage):
+    m_usage.return_value = 999
+
+    self.assertEqual(
+        self.item1.usage_current_week,
+        m_usage.return_value,
+    )
+    m_usage.assert_called_with(self.item1.id, zone=self.user1.timezone.zone)
+
+  @patch(ITEM_MODULE + '.Transaction.objects.get_usage_current_month')
+  def test_usage_current_month(self, m_usage):
+    m_usage.return_value = 999
+
+    self.assertEqual(
+        self.item1.usage_current_month,
+        m_usage.return_value,
+    )
+    m_usage.assert_called_with(self.item1.id, zone=self.user1.timezone.zone)
+
+  @patch(ITEM_MODULE + '.Transaction.objects.get_usage_total')
+  def test_usage_total(self, m_usage):
+    m_usage.return_value = 999
+    self.assertEqual(
+        self.item1.usage_total,
+        m_usage.return_value,
+    )
+    m_usage.assert_called_with(self.item1.id)
+
+  @patch(ITEM_MODULE + '.Transaction.objects.get_usage_total')
+  def test_usage_total_is_cached(self, m_usage):
+    original_value = 999
+
+    m_usage.return_value = original_value
+    self.assertEqual(
+        self.item1.usage_total,
+        original_value,
+    )
+
+    m_usage.return_value = original_value + 1
+    self.assertEqual(
+        self.item1.usage_total,
+        original_value,
+    )
+    m_usage.assert_called_once_with(self.item1.id)
 
 
 class TestItemRelatedFields(ItemTestHarness):

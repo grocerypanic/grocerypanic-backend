@@ -1,11 +1,11 @@
 """Root Transaction model manager."""
 
-from .consumption import ConsumptionHistoryManager
+from .activity import ActivityManager
 from .maintenance import MaintenanceManager
 
 
 class TransactionManager(
-    ConsumptionHistoryManager,
+    ActivityManager,
     MaintenanceManager,
 ):
   """Aggregate sub-managers into a root Transaction model manager."""

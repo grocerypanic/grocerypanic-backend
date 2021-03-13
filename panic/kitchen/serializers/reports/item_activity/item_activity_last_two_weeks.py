@@ -1,10 +1,10 @@
-"""Serializer for the item history report."""
+"""Serializer for an Item's last two weeks of usage activity."""
 
 from rest_framework import serializers
 
 
-class ItemHistorySerializer(serializers.Serializer):
-  """Serializer for Item History."""
+class LastTwoWeeksActivitySerializer(serializers.Serializer):
+  """Serializer for an Item's last two weeks of usage activity."""
 
   date = serializers.DateField(read_only=True)
   quantity = serializers.IntegerField(read_only=True)

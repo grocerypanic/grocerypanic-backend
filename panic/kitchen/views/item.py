@@ -7,9 +7,7 @@ from ..filters import ItemFilter
 from ..models.item import Item
 from ..pagination import BasePagePagination
 from ..serializers.item import ItemSerializer
-from ..serializers.reports.item_consumption_report import (
-    ItemConsumptionHistoryReportSerializer,
-)
+from ..serializers.reports.item_activity import ItemActivityReportSerializer
 from ..swagger import openapi_ready
 from .bases import KitchenBaseView
 
@@ -62,11 +60,11 @@ class ItemListCreateViewSet(
     serializer.save(user=self.request.user)
 
 
-class ItemConsumptionHistoryViewSet(
+class ItemActivityReportViewSet(
     ItemBaseViewSet,
     mixins.RetrieveModelMixin,
     viewsets.GenericViewSet,
 ):
-  """Item consumption history API view."""
+  """Item activity API view."""
 
-  serializer_class = ItemConsumptionHistoryReportSerializer
+  serializer_class = ItemActivityReportSerializer

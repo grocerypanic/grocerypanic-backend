@@ -18,9 +18,9 @@ v1_router.register(
 )
 
 v1_router.register(
-    "items/consumption",
-    item.ItemConsumptionHistoryViewSet,
-    basename="item-consumption",
+    "items/activity",
+    item.ItemActivityReportViewSet,
+    basename="item-activity",
 )
 v1_router.register(
     "shelves",

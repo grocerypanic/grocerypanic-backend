@@ -1,4 +1,4 @@
-"""Test the V1 kitchen Transaction API."""
+"""Test the V1 kitchen ItemActivity API."""
 
 from datetime import timedelta
 
@@ -13,9 +13,9 @@ from .bases import APICrudTestHarness, APICrudTestHarnessUnauthorized
 
 @freeze_time("2020-01-14")
 class ItemConsumptionAPICrudTest(APICrudTestHarness):
-  """Test the V1 Kitchen Transaction API Authorized endpoints."""
+  """Test the V1 Kitchen ItemActivity API Authorized endpoints."""
 
-  test_view = 'v1:item-consumption-detail-pk'
+  test_view = 'v1:item-activity-detail-pk'
   transaction_view = 'v1:transactions-list'
   item_view = 'v1:items-list'
   store_view = 'v1:stores-list'
@@ -101,40 +101,58 @@ class ItemConsumptionAPICrudTest(APICrudTestHarness):
     self.assertDictEqual(
         list_response.json(),
         {
-            'first_consumption':
-                (transactions_data[1]['datetime'].isoformat()[:-6] + 'Z'),
-            'recent_consumption': {
-                'daily_past_two_weeks': [
+            'activity_first':
+                (transactions_data[0]['datetime'].isoformat()[:-6] + 'Z'),
+            'recent_activity': {
+                'activity_last_two_weeks': [
                     {
                         'date': as_user_date(transactions_data[5]['datetime']),
-                        'quantity': abs(transactions_data[5]['quantity']),
+                        'quantity': transactions_data[5]['quantity'],
+                    },
+                    {
+                        'date': as_user_date(transactions_data[4]['datetime']),
+                        'quantity': transactions_data[4]['quantity'],
                     },
                     {
                         'date': as_user_date(transactions_data[3]['datetime']),
-                        'quantity': abs(transactions_data[3]['quantity']),
+                        'quantity': transactions_data[3]['quantity'],
                     },
                     {
                         'date':
                             as_user_date(transactions_data[2]['datetime']),
                         'quantity': (
-                            abs(transactions_data[2]['quantity']) +
-                            abs(transactions_data[1]['quantity'])
+                            transactions_data[2]['quantity'] +
+                            transactions_data[1]['quantity']
                         ),
                     },
                 ],
-                'past_month':
+                'usage_current_month':
                     float(
                         abs(transactions_data[5]['quantity']) +
                         abs(transactions_data[3]['quantity']) +
                         abs(transactions_data[2]['quantity']) +
                         abs(transactions_data[1]['quantity'])
                     ),
-                'past_week':
+                'usage_current_week':
                     float(abs(transactions_data[5]['quantity'])),
                 'user_timezone':
                     str(self.user.timezone),
             },
-            'total_consumption':
+            'usage_total':
+                float(
+                    abs(transactions_data[5]['quantity']) +
+                    abs(transactions_data[3]['quantity']) +
+                    abs(transactions_data[2]['quantity']) +
+                    abs(transactions_data[1]['quantity'])
+                ),
+            'usage_avg_week':
+                float(
+                    abs(transactions_data[5]['quantity']) +
+                    abs(transactions_data[3]['quantity']) +
+                    abs(transactions_data[2]['quantity']) +
+                    abs(transactions_data[1]['quantity'])
+                ) / 3,
+            'usage_avg_month':
                 float(
                     abs(transactions_data[5]['quantity']) +
                     abs(transactions_data[3]['quantity']) +
@@ -146,9 +164,9 @@ class ItemConsumptionAPICrudTest(APICrudTestHarness):
 
 
 class ItemConsumption(APICrudTestHarnessUnauthorized):
-  """Test the V1 Kitchen Transaction API Authorized endpoints anonymously."""
+  """Test the V1 Kitchen ItemActivity API Authorized endpoints anonymously."""
 
-  test_view = 'v1:item-consumption-detail-pk'
+  test_view = 'v1:item-activity-detail-pk'
   __test__ = True
   __non_pk_checks__ = False
   __pk_checks__ = True

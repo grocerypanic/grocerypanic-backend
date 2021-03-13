@@ -6,7 +6,7 @@ from ....exceptions import ProcessingError
 
 
 class AdjustmentManager(models.Manager):
-  """Update the inventory based on transaction events."""
+  """Update the Inventory based on Transaction events."""
 
   def adjust(self, transaction):
     """Adjust the related item's inventory based on the transaction's quantity.
