@@ -14,7 +14,7 @@ from ....inventory import Inventory
 
 @freeze_time("2020-01-14")
 class TestAdjustmentManager(InventoryTestHarness):
-  """Test the InventoryTransactionManager model manager class."""
+  """Test the AdjustmentManager model manager class."""
 
   @classmethod
   def create_data_hook(cls):

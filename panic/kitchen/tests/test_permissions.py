@@ -1,22 +1,15 @@
-"""Test custom permissions."""
+"""Test rest_framework permissions for the kitchen app."""
 
 from django.test import TestCase
 
 from ..permissions import IsOwner
+from ..tests.fixtures.fixtures_django import MockRequest
 
 
 class IsOwnerTest(TestCase):
   """Test the IsOwner permission."""
 
   def setUp(self):
-
-    class MockRequest:
-
-      def __init__(self, user):
-        self.user = user
-
-    class MockObject:
-      pass
 
     self.user = "username"
 
@@ -63,3 +56,7 @@ class IsOwnerTest(TestCase):
     )
 
     self.assertFalse(result)
+
+
+class MockObject:
+  """Simple object mock."""

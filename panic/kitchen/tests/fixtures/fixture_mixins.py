@@ -1,4 +1,4 @@
-"""Mixin classes for kitchen model test fixtures."""
+"""Mixin classes for kitchen test fixtures."""
 
 from typing import Type
 

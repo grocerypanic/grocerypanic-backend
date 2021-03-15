@@ -7,7 +7,7 @@ from ...models.item import Item
 from ...tests.fixtures.fixture_mixins import SerializerTestMixin
 from ...tests.fixtures.fixtures_django import MockRequest
 from ...tests.fixtures.fixtures_item import ItemTestHarness
-from .. import UNIQUE_CONSTRAINT_MSG
+from ..constants import UNIQUE_CONSTRAINT_MSG
 from ..item import ItemSerializer
 
 

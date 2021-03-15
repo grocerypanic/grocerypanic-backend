@@ -16,7 +16,7 @@ from .fixtures.fixtures_activity import ActivityManagerTestHarness
 
 @freeze_time("2020-01-14")
 class TestActivityManagerWithoutData(ActivityManagerTestHarness):
-  """Test the Transaction Activity model manager without item history."""
+  """Test the ActivityManager model manager without item history."""
 
   mute_signals = False
   randomize_datetimes = False
@@ -53,7 +53,7 @@ class TestActivityManagerWithoutData(ActivityManagerTestHarness):
 
 @freeze_time("2020-01-14")
 class TestActivityManagerTwoWeeks(ActivityManagerTestHarness):
-  """Test the AHM 'get_last_two_weeks' method with item history created."""
+  """Test the AM 'get_last_two_weeks' method with item history created."""
 
   mute_signals = False
   randomize_datetimes = True
@@ -171,7 +171,7 @@ class TestActivityManagerTwoWeeks(ActivityManagerTestHarness):
 
 @freeze_time("2020-01-14")
 class TestActivityManagerStats(ActivityManagerTestHarness):
-  """Test the AHM 'get_STATISTIC' methods with item history created."""
+  """Test the AM 'get_STATISTIC' methods with item history created."""
 
   mute_signals = False
   randomize_datetimes = False

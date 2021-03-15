@@ -1,4 +1,4 @@
-"""Kitchen custom exception classes."""
+"""Exception classes for the kitchen app."""
 
 from rest_framework import exceptions, serializers, status
 

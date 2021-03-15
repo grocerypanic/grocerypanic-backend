@@ -1,4 +1,4 @@
-"""Kitchen item views."""
+"""Views for the Item model."""
 
 from django_filters import rest_framework as filters
 from rest_framework import mixins, viewsets

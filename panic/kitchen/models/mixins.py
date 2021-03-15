@@ -1,4 +1,4 @@
-"""Mixins for Kitchen models."""
+"""Mixins for models in the kitchen app."""
 
 from django import forms
 from django.core.exceptions import ValidationError

@@ -10,17 +10,9 @@ from rest_framework.test import APIClient
 from ...models.shelf import Shelf
 from ...serializers.shelf import ShelfSerializer
 from ...tests.fixtures.fixtures_shelf import ShelfTestHarness
+from .fixtures.fixtures_shelf import AnotherUserTestHarness
 
 SHELF_URL = reverse("v1:shelves-list")
-
-
-class AnotherUserTestHarness(ShelfTestHarness):
-  """Extend the test harness by adding an additional user."""
-
-  @classmethod
-  def create_data_hook(cls):
-    test_data2 = cls.create_dependencies(2)
-    cls.user2 = test_data2['user']
 
 
 def shelf_url_with_params(query_kwargs):
@@ -46,7 +38,7 @@ class PublicShelfTest(TestCase):
 
 
 class PrivateShelfTest(ShelfTestHarness):
-  """Test the private Shelf API."""
+  """Test the authorized Shelf API."""
 
   def setUp(self):
     super().setUp()

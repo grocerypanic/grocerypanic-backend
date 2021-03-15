@@ -1,4 +1,4 @@
-"""Filters for the kitchen application views."""
+"""Filters for the kitchen app."""
 
 from django_filters import CharFilter
 from django_filters import rest_framework as simple_filters

@@ -1,4 +1,4 @@
-"""Kitchen store views."""
+"""Views for the Store model."""
 
 from rest_framework import mixins, viewsets
 

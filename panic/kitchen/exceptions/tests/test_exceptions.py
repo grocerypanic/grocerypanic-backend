@@ -1,4 +1,4 @@
-"""Test the custom exception handler."""
+"""Test the exceptions for the kitchen app."""
 
 from django.test import TestCase
 from rest_framework import serializers, status
@@ -7,7 +7,7 @@ from .. import ConfirmationRequired, ProcessingError, ValidationPermissionError
 
 
 class TestCustomExceptions(TestCase):
-  """Test the custom exceptions."""
+  """Test the exceptions for the kitchen app."""
 
   def test_validation_permission_error(self):
     with self.assertRaises(ValidationPermissionError) as raised:

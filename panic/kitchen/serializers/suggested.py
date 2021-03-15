@@ -4,7 +4,7 @@ from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 
 from ..models.suggested import SuggestedItem
-from . import DUPLICATE_OBJECT_MSG
+from .constants import DUPLICATE_OBJECT_MSG
 
 
 class SuggestedItemSerializer(serializers.ModelSerializer):

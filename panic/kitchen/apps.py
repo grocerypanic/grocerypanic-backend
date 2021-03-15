@@ -1,10 +1,10 @@
-"""Kitchen app AppConfig."""
+"""AppConfig for the kitchen app."""
 
 from django.apps import AppConfig
 
 
 class KitchenConfig(AppConfig):
-  """Kitchen app AppConfig."""
+  """AppConfig for the kitchen app."""
 
   name = 'kitchen'
 

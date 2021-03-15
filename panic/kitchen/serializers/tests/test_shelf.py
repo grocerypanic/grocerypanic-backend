@@ -6,7 +6,7 @@ from ...models.shelf import Shelf
 from ...tests.fixtures.fixture_mixins import SerializerTestMixin
 from ...tests.fixtures.fixtures_django import MockRequest
 from ...tests.fixtures.fixtures_shelf import ShelfTestHarness
-from .. import UNIQUE_CONSTRAINT_MSG
+from ..constants import UNIQUE_CONSTRAINT_MSG
 from ..shelf import ShelfSerializer
 
 

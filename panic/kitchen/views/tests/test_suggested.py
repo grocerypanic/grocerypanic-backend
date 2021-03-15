@@ -1,4 +1,4 @@
-"""Test the list items API."""
+"""Test the SuggestedItems API."""
 
 from django.contrib.auth import get_user_model
 from django.test import TestCase
@@ -19,7 +19,7 @@ def item_url_with_params(query_kwargs):
 
 
 class PublicListItemsTest(TestCase):
-  """Test the public Suggested Items API."""
+  """Test the public SuggestedItems API."""
 
   def setUp(self):
     self.client = APIClient()
@@ -37,7 +37,7 @@ class PublicListItemsTest(TestCase):
 
 
 class PrivateListItemsTest(SuggestedItemTestHarness):
-  """Test the authorized Suggested Items API."""
+  """Test the authorized SuggestedItems API."""
 
   @classmethod
   def create_data_hook(cls):

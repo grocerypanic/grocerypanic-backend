@@ -1,4 +1,4 @@
-"""Kitchen custom rest_framework permissions."""
+"""Permissions for the kitchen app.."""
 
 from rest_framework import permissions
 

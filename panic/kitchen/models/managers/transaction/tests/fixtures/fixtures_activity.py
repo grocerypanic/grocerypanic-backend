@@ -10,7 +10,7 @@ from ......tests.fixtures.fixtures_transaction import TransactionTestHarness
 
 
 class ActivityManagerTestHarness(TransactionTestHarness):
-  """Test harness for the Transaction Activity model manager."""
+  """Test harness for the ActivityManager model manager class."""
 
   randomize_datetimes = False
   user2_initial_transaction = True

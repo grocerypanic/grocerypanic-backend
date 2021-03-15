@@ -1,4 +1,4 @@
-"""Kitchen base view classes."""
+"""Base view classes."""
 
 from spa_security.mixins.csrf import CSRFMixin
 

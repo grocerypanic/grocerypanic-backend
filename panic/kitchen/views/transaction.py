@@ -1,4 +1,4 @@
-"""Kitchen transaction views."""
+"""Views for the Transaction model."""
 
 import datetime
 
@@ -22,7 +22,7 @@ TRANSACTION_LIST_SUNSET = datetime.date(year=2021, month=3, day=21)
 class BaseTransactionView(
     KitchenBaseView,
 ):
-  """Base transaction view."""
+  """Base Transaction view."""
 
   queryset = Transaction.objects.all()
   serializer_class = TransactionSerializer

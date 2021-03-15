@@ -1,4 +1,4 @@
-"""Test the custom exception handler."""
+"""Test the validation exception handler."""
 
 from rest_framework import serializers
 
@@ -8,7 +8,7 @@ from ..validation_exception_handler import ValidationExceptionHandler
 
 
 class TestCustomValidationExceptionHandler(HandlerTestHarness):
-  """Test the custom validation exception handler."""
+  """Test the validation exception handler."""
 
   def test_base_exception_not_formatted(self):
     custom_exception_handler = ValidationExceptionHandler(

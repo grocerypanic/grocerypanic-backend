@@ -1,4 +1,4 @@
-"""Kitchen suggestion views."""
+"""Views for the SuggestedItem model."""
 
 from rest_framework import mixins, viewsets
 
@@ -12,7 +12,7 @@ from .bases import KitchenBaseView
 class SuggestedBaseView(
     KitchenBaseView,
 ):
-  """Suggestion base view."""
+  """SuggestedItem base view."""
 
   queryset = SuggestedItem.objects.all().order_by("name")
   serializer_class = SuggestedItemSerializer
@@ -23,7 +23,7 @@ class SuggestedItemListViewSet(
     mixins.ListModelMixin,
     viewsets.GenericViewSet,
 ):
-  """Suggested items list view."""
+  """SuggestedItem list view."""
 
   pagination_class = BasePagePagination
 

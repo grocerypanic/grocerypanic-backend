@@ -10,7 +10,7 @@ from .fixture_mixins import MutableSignalsMixin
 
 
 class KitchenModelTestFixture(ABC):
-  """Define the Abstract Base Class for the kitchen model fixtures."""
+  """Define the ABC for the kitchen model fixtures."""
 
   create_data: dict
   calculated_properties: set

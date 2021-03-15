@@ -6,7 +6,7 @@ from ...models.store import Store
 from ...tests.fixtures.fixture_mixins import SerializerTestMixin
 from ...tests.fixtures.fixtures_django import MockRequest
 from ...tests.fixtures.fixtures_store import StoreTestHarness
-from .. import UNIQUE_CONSTRAINT_MSG
+from ..constants import UNIQUE_CONSTRAINT_MSG
 from ..store import StoreSerializer
 
 

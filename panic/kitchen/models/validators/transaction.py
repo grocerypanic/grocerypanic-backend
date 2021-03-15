@@ -1,4 +1,4 @@
-"""Custom transaction validators."""
+"""Validators for the Transaction model."""
 
 from django.core.exceptions import ValidationError
 from django.core.validators import BaseValidator

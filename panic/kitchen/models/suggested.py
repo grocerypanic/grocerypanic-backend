@@ -1,4 +1,4 @@
-"""Suggested Item model."""
+"""SuggestedItem model."""
 
 from django.db import models
 
@@ -10,7 +10,7 @@ class SuggestedItem(
     FullCleanMixin,
     models.Model,
 ):
-  """Suggest Item model."""
+  """SuggestItem model."""
 
   MAXIMUM_NAME_LENGTH = 255
 

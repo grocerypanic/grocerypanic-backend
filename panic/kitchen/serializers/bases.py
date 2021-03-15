@@ -4,7 +4,7 @@ from django.db.models import Model
 from rest_framework import serializers
 
 from ..exceptions import ValidationPermissionError
-from . import UNIQUE_CONSTRAINT_MSG
+from .constants import UNIQUE_CONSTRAINT_MSG
 
 
 class KitchenBaseModelSerializer(serializers.ModelSerializer):

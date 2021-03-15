@@ -1,4 +1,4 @@
-"""Pagination for kitchen views."""
+"""Pagination for the kitchen app."""
 
 from django.conf import settings
 from rest_framework.pagination import PageNumberPagination

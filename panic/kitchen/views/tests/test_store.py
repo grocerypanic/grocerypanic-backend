@@ -10,17 +10,9 @@ from rest_framework.test import APIClient
 from ...models.store import Store
 from ...serializers.store import StoreSerializer
 from ...tests.fixtures.fixtures_store import StoreTestHarness
+from .fixtures.fixtures_store import AnotherUserTestHarness
 
 STORE_URL = reverse("v1:stores-list")
-
-
-class AnotherUserTestHarness(StoreTestHarness):
-  """Extend the test harness by adding an additional user."""
-
-  @classmethod
-  def create_data_hook(cls):
-    test_data2 = cls.create_dependencies(2)
-    cls.user2 = test_data2['user']
 
 
 def store_url_with_params(query_kwargs):
