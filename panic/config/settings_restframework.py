@@ -1,6 +1,6 @@
 """Panic DRF settings.
 
-Please see the related libraries:
+Please see the related libraries::
     - https://www.django-rest-framework.org/api-guide/settings/
 """
 

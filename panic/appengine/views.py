@@ -12,9 +12,9 @@ from utilities.database.connection import wait_for_database_connection
 class WarmUp(View):
   """Handle App Engine `warm up` requests.
 
-  `App Engine `warm up` documentation
-  <https://cloud.google.com/appengine/docs/standard/python3/
-  configuring-warmup-requests>`__
+  App Engine `warm up` documentation::
+    - https://cloud.google.com/appengine/docs/standard/python3/\
+configuring-warmup-requests
   """
 
   def get(self, request, *args, **kwargs):  # pylint: disable=unused-argument

@@ -1,6 +1,6 @@
 """Panic JWT configuration.
 
-Please see the related libraries:
+Please see the related libraries::
     - https://github.com/iMerica/dj-rest-auth
 """
 

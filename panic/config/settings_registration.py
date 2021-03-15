@@ -1,6 +1,6 @@
 """Panic user registration configuration.
 
-Please see the related libraries:
+Please see the related libraries::
     - https://github.com/pennersr/django-allauth
     - https://github.com/iMerica/dj-rest-auth
 """
