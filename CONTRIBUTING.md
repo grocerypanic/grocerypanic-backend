@@ -38,6 +38,6 @@ https://app.swaggerhub.com/apis/niall-byrne/panic/v1
 
 - Please follow the various linter's configured suggestions for docstrings, indent size (2 spaces), import sorting, and general style
 - Compartmentalize models, views, signals, and serializers as soon as there is more than a single class in their own sub-folders
-- Try to centralize [test fixtures](./kitchen/tests/fixtures) in each app's top level tests folder, keep the same naming convention 
+- Try to centralize [test fixtures](./kitchen/tests/fixtures) in each app's top level tests folder, keep the same naming convention, more specific or subclassed harnesses should be kept with the relevant tests 
 - Keep [integration tests](./root/tests) in the root app
 - Update the [Toc Tree](./documentation/source) to keep Sphinx documentation up to date
