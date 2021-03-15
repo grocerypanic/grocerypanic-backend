@@ -143,8 +143,10 @@ source_environment() {
 
   pushd "${PROJECT_HOME}" >/dev/null
   set +e
-  cd .git/hooks
-  ln -sf ../../scripts/hooks/pre-commit pre-commit
+    if [[ ! -f /etc/container_release ]]; then
+      cd .git/hooks
+      ln -sf ../../scripts/hooks/pre-commit pre-commit
+    fi
   set -e
   popd >/dev/null
 

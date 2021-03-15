@@ -84,4 +84,5 @@ git_status() {
   find_git_branch
 }
 
+source /usr/share/bash-completion/completions/git
 PROMPT_COMMAND="git_status; $PROMPT_COMMAND"
