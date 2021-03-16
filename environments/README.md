@@ -95,3 +95,13 @@ GOOGLE_APPLICATION_CREDENTIALS=<path to a gcp key with access to the cloud sql i
 
 This is in addition to the `prod.env` file which is also read, when you active the environment:
 - `ADMIN_ENVIRONMENT=prod docker-compose-up -f admin.yml`
+
+## Debugging
+
+To use the Visual Studio Code remote debugger, set the `DJANGO_REMOTE_DEBUGGING` value to `1` in your [local.env](./local.env) file.  If you need to customize the debugger's port, set `DJANGO_DEBUGGER_PORT` to the appropriate value.
+
+```python
+DJANGO_REMOTE_DEBUGGING=1 
+DJANGO_DEBUGGER_PORT=5678
+```
+You may then import [debugpy](https://github.com/microsoft/debugpy), and set breakpoints as needed.

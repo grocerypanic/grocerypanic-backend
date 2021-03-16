@@ -1,0 +1,19 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Run Django Debugger",
+      "type": "python",
+      "request": "attach",
+      "subProcess": true,
+      "pathMappings": [
+        {
+          "localRoot": "${workspaceFolder}/panic",
+          "remoteRoot": "/app/panic"
+        }
+      ],
+      "port": 5678,
+      "host": "127.0.0.1",
+    }
+  ]
+}

@@ -8,6 +8,7 @@ utilities
 
    config/index.rst
    database/index.rst
+   debugger/index.rst
    filesystem/index.rst
    management/index.rst
    models/index.rst

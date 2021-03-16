@@ -69,6 +69,9 @@ class ActivityManager(models.Manager):
         order_by('-date').\
         annotate(quantity=Sum('quantity'))
 
+    # TODO: Backfill days with no activity, change quantity to to something like
+    # quantity_change... yeah it sucks
+
     return query
 
   def get_usage_current_week(self, item_id, zone=pytz.utc.zone):

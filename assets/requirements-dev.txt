@@ -1,6 +1,7 @@
 # Development Requirements
 bandit>=1.6.2,<1.6.3
 commitizen>=1.16.0,<1.17.0
+debugpy>=1.2.1
 isort>=4.3.21,<4.4.0
 faker>=6.4.1,<6.5.0
 freezegun>=0.3.15,<0.4.0

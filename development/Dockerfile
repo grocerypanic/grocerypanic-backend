@@ -15,10 +15,12 @@ RUN apt-get update      && \
     bash                   \
     build-essential        \
     curl                   \
+    gdb                    \
     jq                     \
     libpq-dev              \
     openssh-client         \
     postgresql-client      \
+    procps                 \
     shellcheck             \
     sudo                   \
     tig                    \

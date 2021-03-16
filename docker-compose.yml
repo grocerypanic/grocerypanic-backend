@@ -5,8 +5,13 @@ services:
     build:
       context: .
       dockerfile: development/Dockerfile
+    security_opt:
+      - seccomp:unconfined
+    cap_add:
+      - SYS_PTRACE
     ports:
       - "127.0.0.1:8080:8080"
+      - "127.0.0.1:5678:5678"
     volumes:
       - ${HOME}/.ssh:/home/user/.ssh
       - ${HOME}/.gitconfig:/home/user/.gitconfig
