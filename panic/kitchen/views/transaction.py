@@ -16,7 +16,7 @@ from ..serializers.transaction import TransactionSerializer
 from ..swagger import custom_transaction_view_parm, openapi_ready
 from .bases import KitchenBaseView
 
-TRANSACTION_LIST_SUNSET = datetime.date(year=2021, month=3, day=21)
+TRANSACTION_LIST_SUNSET = datetime.date(year=2021, month=5, day=1)
 
 
 class BaseTransactionView(
