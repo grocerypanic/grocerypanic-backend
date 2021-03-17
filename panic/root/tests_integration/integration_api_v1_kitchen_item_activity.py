@@ -106,24 +106,64 @@ class ItemConsumptionAPICrudTest(APICrudTestHarness):
             'recent_activity': {
                 'activity_last_two_weeks': [
                     {
+                        'date': as_user_date(now()),
+                        'change': 0,
+                    },
+                    {
                         'date': as_user_date(transactions_data[5]['datetime']),
-                        'quantity': transactions_data[5]['quantity'],
+                        'change': transactions_data[5]['quantity'],
                     },
                     {
                         'date': as_user_date(transactions_data[4]['datetime']),
-                        'quantity': transactions_data[4]['quantity'],
+                        'change': transactions_data[4]['quantity'],
                     },
                     {
                         'date': as_user_date(transactions_data[3]['datetime']),
-                        'quantity': transactions_data[3]['quantity'],
+                        'change': transactions_data[3]['quantity'],
+                    },
+                    {
+                        'date': as_user_date(now() - timedelta(days=4)),
+                        'change': 0,
                     },
                     {
                         'date':
                             as_user_date(transactions_data[2]['datetime']),
-                        'quantity': (
+                        'change': (
                             transactions_data[2]['quantity'] +
                             transactions_data[1]['quantity']
                         ),
+                    },
+                    {
+                        'date': as_user_date(now() - timedelta(days=6)),
+                        'change': 0,
+                    },
+                    {
+                        'date': as_user_date(now() - timedelta(days=7)),
+                        'change': 0,
+                    },
+                    {
+                        'date': as_user_date(now() - timedelta(days=8)),
+                        'change': 0,
+                    },
+                    {
+                        'date': as_user_date(now() - timedelta(days=9)),
+                        'change': 0,
+                    },
+                    {
+                        'date': as_user_date(now() - timedelta(days=10)),
+                        'change': 0,
+                    },
+                    {
+                        'date': as_user_date(now() - timedelta(days=11)),
+                        'change': 0,
+                    },
+                    {
+                        'date': as_user_date(now() - timedelta(days=12)),
+                        'change': 0,
+                    },
+                    {
+                        'date': as_user_date(now() - timedelta(days=13)),
+                        'change': 0,
                     },
                 ],
                 'usage_current_month':

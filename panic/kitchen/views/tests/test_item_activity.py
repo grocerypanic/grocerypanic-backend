@@ -122,14 +122,14 @@ class PrivateItemActivityViewSetTest(ItemActivityViewSetHarness):
         res.data['recent_activity']['activity_last_two_weeks']
     )
 
-    assert len(consumption_past_two_weeks) == 2
+    assert len(consumption_past_two_weeks) == 14
 
     self.assertEqual(
         self.deserialize_date(consumption_past_two_weeks[0]['date']),
         self._user_date(self.today)
     )
     self.assertEqual(
-        self.deserialize_date(consumption_past_two_weeks[1]['date']),
+        self.deserialize_date(consumption_past_two_weeks[5]['date']),
         self._user_date(self.five_days_ago)
     )
 

@@ -51,9 +51,16 @@ class ActivityManager(models.Manager):
     :returns: A queryset representing the activity
     :rtype: :class:`django.db.models.QuerySet`, None
     """
-    zone = pytz.timezone(zone)
+    timezone_object = pytz.timezone(zone)
+    query = self._query_activity_last_two_weeks(item_id, timezone_object)
+    results = self._zfill_activity_last_two_weeks(query, timezone_object)
+    return results
 
-    start_of_window = pendulum.now(tz=zone)
+  def _query_activity_last_two_weeks(self, item_id, timezone_object):
+    """Retrieve transaction activity for the past two weeks."""
+    results = []
+
+    start_of_window = pendulum.now(tz=timezone_object)
     end_of_window = (
         start_of_window - timedelta(days=int(settings.TRANSACTION_HISTORY_MAX))
     ).start_of("day").astimezone(pytz.utc)
@@ -64,15 +71,35 @@ class ActivityManager(models.Manager):
           datetime__date__gte=end_of_window,
         ).\
         order_by('-datetime').\
-        annotate(date=TruncDate(TruncDay('datetime', tzinfo=zone))).\
+        annotate(date=TruncDate(TruncDay('datetime', tzinfo=timezone_object))).\
         values('date').\
         order_by('-date').\
-        annotate(quantity=Sum('quantity'))
+        annotate(change=Sum('quantity'))
 
-    # TODO: Backfill days with no activity, change quantity to to something like
-    # quantity_change... yeah it sucks
+    if query:
+      results = query
 
-    return query
+    return results
+
+  def _zfill_activity_last_two_weeks(self, query_results, timezone_object):
+    """Add zero `change` entries to the query for days without activity."""
+    zero_padded_results = []
+    query_hash = {}
+    current_datetime = pendulum.now(timezone_object)
+
+    for row in query_results:
+      query_hash[row['date']] = row['change']
+
+    for day in range(0, int(settings.TRANSACTION_HISTORY_MAX)):
+      history_date = (current_datetime - timedelta(days=day))\
+          .start_of('day')\
+          .date()
+      zero_padded_results.append({
+          'date': history_date,
+          'change': query_hash.setdefault(history_date, 0),
+      })
+
+    return zero_padded_results
 
   def get_usage_current_week(self, item_id, zone=pytz.utc.zone):
     """Retrieve the sum of the current week of transaction activity.

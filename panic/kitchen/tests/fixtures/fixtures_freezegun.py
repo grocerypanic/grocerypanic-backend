@@ -17,7 +17,7 @@ def to_realdate(queryset, field, offset=0):
   :type offset: int
 
   :returns: The queryset with modified values
-  :rtype: :class:`django.db.models.QuerySet`
+  :rtype: :class:`django.db.models.QuerySet`, list
   """
   for record in queryset:
     date_object = record[field]

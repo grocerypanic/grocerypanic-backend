@@ -22,9 +22,15 @@ class TestActivityManagerWithoutData(ActivityManagerTestHarness):
   randomize_datetimes = False
 
   def test_activity_last_two_weeks_no_history(self):
-
+    expected_results = []
+    for day in range(0, 14):
+      expected_results.append({
+          'date': timezone.now() - timedelta(days=day),
+          'change': 0,
+      })
+    expected_results = to_realdate(expected_results, 'date')
     received = Transaction.objects.get_activity_last_two_weeks(self.item1)
-    self.assertQuerysetEqual(received, map(repr, []))
+    self.assertListEqual(received, expected_results)
 
   def test_get_activity_first_no_history(self):
     assert Transaction.objects.all().count() == 0
@@ -71,9 +77,9 @@ class TestActivityManagerTwoWeeks(ActivityManagerTestHarness):
     }
 
     cls.dates = OrderedDict()
-    cls.dates['last_year'] = timezone.now() + timedelta(days=-365)
-    cls.dates['last_week'] = timezone.now() + timedelta(days=-8)
-    cls.dates['yesterday'] = timezone.now() + timedelta(days=-1)
+    cls.dates['last_year'] = cls.today + timedelta(days=-365)
+    cls.dates['last_week'] = cls.today + timedelta(days=-8)
+    cls.dates['yesterday'] = cls.today + timedelta(days=-1)
     cls.dates['today'] = cls.today
 
     purchase = cls.transaction_quantity
@@ -83,7 +89,7 @@ class TestActivityManagerTwoWeeks(ActivityManagerTestHarness):
     cls.create_transaction_history(create_pattern)
     cls._create_another_user_transaction()
     cls._create_lower_bounds_edge_case_transaction(
-        settings.TRANSACTION_HISTORY_MAX
+        settings.TRANSACTION_HISTORY_MAX - 1
     )
 
   def test_activity_last_two_weeks_utc(self):
@@ -91,23 +97,67 @@ class TestActivityManagerTwoWeeks(ActivityManagerTestHarness):
     expected_results = [
         {
             'date': self.dates['today'],
-            'quantity': -2 * consumption_amount
+            'change': -2 * consumption_amount
         },
         {
             'date': self.dates['yesterday'],
-            'quantity': -2 * consumption_amount
+            'change': -2 * consumption_amount
+        },
+        {
+            'date': self.dates['today'] - timedelta(days=2),
+            'change': 0
+        },
+        {
+            'date': self.dates['today'] - timedelta(days=3),
+            'change': 0
+        },
+        {
+            'date': self.dates['today'] - timedelta(days=4),
+            'change': 0
+        },
+        {
+            'date': self.dates['today'] - timedelta(days=5),
+            'change': 0
+        },
+        {
+            'date': self.dates['today'] - timedelta(days=6),
+            'change': 0
+        },
+        {
+            'date': self.dates['today'] - timedelta(days=7),
+            'change': 0
         },
         {
             'date': self.dates['last_week'],
-            'quantity': -2 * consumption_amount
+            'change': -2 * consumption_amount
+        },
+        {
+            'date': self.dates['today'] - timedelta(days=9),
+            'change': 0
+        },
+        {
+            'date': self.dates['today'] - timedelta(days=10),
+            'change': 0
+        },
+        {
+            'date': self.dates['today'] - timedelta(days=11),
+            'change': 0
+        },
+        {
+            'date': self.dates['today'] - timedelta(days=12),
+            'change': 0
+        },
+        {
+            'date': self.dates['today'] - timedelta(days=13),
+            'change': 0
         },
     ]
 
     received = Transaction.objects.get_activity_last_two_weeks(self.item1)
 
-    self.assertQuerysetEqual(
+    self.assertListEqual(
         to_realdate(expected_results, 'date'),
-        map(repr, received),
+        received,
     )
 
   def test_activity_last_two_weeks_honolulu(self):
@@ -119,30 +169,71 @@ class TestActivityManagerTwoWeeks(ActivityManagerTestHarness):
     expected_results = [
         {
             'date': self.dates['today'],
-            'quantity': -2 * consumption_amount
+            'change': -2 * consumption_amount
         },
         {
             'date': self.dates['yesterday'],
-            'quantity': -2 * consumption_amount
+            'change': -2 * consumption_amount
+        },
+        {
+            'date': self.dates['today'] - timedelta(days=2),
+            'change': 0
+        },
+        {
+            'date': self.dates['today'] - timedelta(days=3),
+            'change': 0
+        },
+        {
+            'date': self.dates['today'] - timedelta(days=4),
+            'change': 0
+        },
+        {
+            'date': self.dates['today'] - timedelta(days=5),
+            'change': 0
+        },
+        {
+            'date': self.dates['today'] - timedelta(days=6),
+            'change': 0
+        },
+        {
+            'date': self.dates['today'] - timedelta(days=7),
+            'change': 0
         },
         {
             'date': self.dates['last_week'],
-            'quantity': -2 * consumption_amount
+            'change': -2 * consumption_amount
+        },
+        {
+            'date': self.dates['today'] - timedelta(days=9),
+            'change': 0
+        },
+        {
+            'date': self.dates['today'] - timedelta(days=10),
+            'change': 0
+        },
+        {
+            'date': self.dates['today'] - timedelta(days=11),
+            'change': 0
+        },
+        {
+            'date': self.dates['today'] - timedelta(days=12),
+            'change': 0
         },
         {
             'date': honolulu_edge_case,
-            'quantity': -2 * consumption_amount
+            'change': -2 * consumption_amount
         },
     ]
+    expected_results = to_realdate(expected_results, 'date', offset=1)
 
     received = Transaction.objects.get_activity_last_two_weeks(
         self.item1,
         zone=test_tz,
     )
 
-    self.assertQuerysetEqual(
-        to_realdate(expected_results, 'date', offset=1),
-        map(repr, received),
+    self.assertListEqual(
+        expected_results,
+        received,
     )
 
   def test_activity_last_two_weeks_tz_diff(self):
@@ -166,7 +257,7 @@ class TestActivityManagerTwoWeeks(ActivityManagerTestHarness):
 
     for index, transaction in enumerate(received1):
       assert received2[index]['date'] != transaction['date']
-      assert received2[index]['quantity'] == transaction['quantity']
+      assert received2[index]['change'] == transaction['change']
 
 
 @freeze_time("2020-01-14")

@@ -7,7 +7,7 @@ class LastTwoWeeksActivitySerializer(serializers.Serializer):
   """Serializer for an Item's last two weeks of usage activity."""
 
   date = serializers.DateField(read_only=True)
-  quantity = serializers.IntegerField(read_only=True)
+  change = serializers.IntegerField(read_only=True)
 
   # pylint: disable=useless-super-delegation
   def create(self, validated_data):

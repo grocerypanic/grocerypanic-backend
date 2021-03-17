@@ -57,7 +57,7 @@ class TestItemHistorySerializer(TransactionTestHarness):
     )
 
     self.assertEqual(
-        deserialized[0]['quantity'],
+        deserialized[0]['change'],
         transaction.quantity,
     )
 
@@ -81,7 +81,7 @@ class TestItemHistorySerializer(TransactionTestHarness):
     )
 
     self.assertEqual(
-        deserialized[0]['quantity'],
+        deserialized[0]['change'],
         transaction.quantity,
     )
 
