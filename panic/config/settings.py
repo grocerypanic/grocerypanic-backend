@@ -68,6 +68,7 @@ INSTALLED_APPS = [
     'django_bleach',
     'utilities',
     'watchman',
+    'legal',
 ]
 
 MIDDLEWARE = [

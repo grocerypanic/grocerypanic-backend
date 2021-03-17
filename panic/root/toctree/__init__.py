@@ -8,3 +8,4 @@ settings.files_filter_list = [
     f"{PROJECT_ROOT_DIRECTORY}/manage.py",
 ]
 settings.folders_filter_list.append('tests_integration')
+settings.folders_filter_list.append('templates')

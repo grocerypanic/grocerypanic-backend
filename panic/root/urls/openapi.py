@@ -1,6 +1,7 @@
 """URL configuration for the OpenAPI documentation endpoints."""
 
 from django.conf.urls import url
+from django.urls import reverse_lazy
 from drf_yasg import openapi
 from drf_yasg.views import get_schema_view
 from rest_framework import permissions
@@ -10,7 +11,7 @@ SchemaView = get_schema_view(
         title="Don't Panic API!",
         default_version='v1',
         description="A Pandemic Kitchen Inventory Manager",
-        terms_of_service="https://www.google.com/policies/terms/",
+        terms_of_service=reverse_lazy('legal_tos'),
         contact=openapi.Contact(email="niall@niallbyrne.ca"),
         license=openapi.License(name="MPL 2.0 License"),
     ),

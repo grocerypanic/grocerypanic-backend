@@ -6,6 +6,7 @@ from django.urls import include, path
 
 urlpatterns = [
     path('', include('appengine.urls')),
+    path('', include('legal.urls')),
     path('', include('root.urls.api.v1')),
     path('watchman/', include('watchman.urls')),
 ]
