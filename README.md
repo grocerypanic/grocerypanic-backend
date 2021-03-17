@@ -105,11 +105,9 @@ To start the admin environment:
 The admin environment is the only way to access the production environment's admin console.
 
 ## Git Hooks
-Git hooks are installed that will enforce linting and unit-testing on the specified branches.
-The following environment variables can be used to customize this behavior:
+Git hooks are installed that will enforce linting, unit-testing and other basic checks on the `production` and `master` branches.
 
-- `GIT_HOOKS` (Set this value to 1 to enable the pre-commit hook)
-- `GIT_HOOKS_PROTECTED_BRANCHES` (Customize this regex to specify the branches that should enforce the Git Hook on commit.)
+The default configuration is to use the `pre-push` hook, with the goal being to prevent any unnecessary rebasing of the master branch, regardless of the circumstances around the commit.
 
 ## CLI Reference
 The CLI is enabled by default inside the container, and is also available on the host machine.

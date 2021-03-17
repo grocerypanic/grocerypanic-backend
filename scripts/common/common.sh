@@ -65,7 +65,9 @@ lint_diff() {
   pushd "${PROJECT_HOME}" >/dev/null
     FILES=()
     IFS=" " read -r -a FILES <<< "$(git diff --name-only --diff-filter=d | grep -E '\.py$' | tr '\n' ' ')"
-    pytest --pylint -m pylint --pylint-rcfile=.pylint.rc --pylint-jobs=3 "${FILES[@]}"
+    if [[ ${#FILES[@]} -gt 0 ]]; then
+      pytest --pylint -m pylint --pylint-rcfile=.pylint.rc --pylint-jobs=3 "${FILES[@]}"
+    fi
   popd >/dev/null
 }
 
@@ -143,10 +145,9 @@ source_environment() {
 
   pushd "${PROJECT_HOME}" >/dev/null
   set +e
-    if [[ ! -f /etc/container_release ]]; then
-      cd .git/hooks
-      ln -sf ../../scripts/hooks/pre-commit pre-commit
-    fi
+    cd .git/hooks
+    ln -sf ../../scripts/hooks/pre-commit pre-commit
+    ln -sf ../../scripts/hooks/pre-push pre-push
   set -e
   popd >/dev/null
 
