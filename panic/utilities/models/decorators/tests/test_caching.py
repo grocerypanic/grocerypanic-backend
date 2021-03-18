@@ -1,4 +1,4 @@
-"""Test the Custom Caching Decorators."""
+"""Test the PersistentCachedProperty decorator class."""
 
 from datetime import datetime
 
@@ -7,11 +7,7 @@ from django.test import SimpleTestCase
 from django.utils.timezone import now
 from freezegun import freeze_time
 
-from ..caching import (
-    SETTER_ERROR,
-    PersistentCachedProperty,
-    PersistentModelFieldCache,
-)
+from ..caching import SETTER_ERROR, PersistentCachedProperty
 
 
 class TestCachingDecoratorNonTTLRelated(SimpleTestCase):
@@ -24,7 +20,7 @@ class TestCachingDecoratorNonTTLRelated(SimpleTestCase):
   def test_cached_calculation_base(self):
     self.assertIsInstance(
         self.instance1.__class__.__dict__['cached_calculated'],
-        PersistentModelFieldCache,
+        PersistentCachedProperty,
     )
 
   def test_calculation(self):

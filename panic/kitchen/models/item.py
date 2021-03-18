@@ -8,10 +8,7 @@ from django.utils.functional import cached_property
 from naturalsortfield import NaturalSortField
 
 from spa_security.fields import BlondeCharField
-from utilities.models.decorators.caching import (
-    PersistentCachedProperty,
-    PersistentModelFieldCache,
-)
+from utilities.models.decorators.caching import PersistentCachedProperty
 from . import constants
 from .inventory import Inventory
 from .managers.item import ItemManager
@@ -228,7 +225,7 @@ class Item(
     """Clear all types of cached properties."""
     for key, value in self.__class__.__dict__.items():
       if isinstance(value, (
-          PersistentModelFieldCache,
+          PersistentCachedProperty,
           cached_property,
       )):
         try:

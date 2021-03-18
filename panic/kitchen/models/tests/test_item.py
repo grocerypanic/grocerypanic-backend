@@ -10,7 +10,7 @@ from django.utils import timezone
 from django.utils.functional import cached_property
 from freezegun import freeze_time
 
-from utilities.models.decorators.caching import PersistentModelFieldCache
+from utilities.models.decorators.caching import PersistentCachedProperty
 from ...tests.fixtures.fixture_mixins import ModelTestMixin
 from ...tests.fixtures.fixtures_item import ItemTestHarness
 from .. import constants
@@ -187,7 +187,7 @@ class TestItemCalculatedPropertiesInventory(ItemTestHarness):
         django_cached_props.append(key)
 
     for key, value in self.item1.__class__.__dict__.items():
-      if isinstance(value, PersistentModelFieldCache):
+      if isinstance(value, PersistentCachedProperty):
         persistent_cached_props.append(key)
 
     self.assertNotEqual(0, len(django_cached_props))

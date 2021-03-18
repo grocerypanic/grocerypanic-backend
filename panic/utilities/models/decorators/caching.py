@@ -6,10 +6,9 @@ SETTER_ERROR = "This attribute can not be assigned directly."
 
 
 class PersistentCachedProperty:
-  """Persisting version of the cached_property decorator.
+  """Persistent implementation of the cached_property decorator.
 
-  Generates a decorator for a model method with the PersistentCachedProperty
-  class.  Specify another model field (storing a datetime) that can be used to
+  Specify another model field (storing a datetime) that can be used to
   act as a cache ttl, and an internal nullable field to hold the value
   persistently.
 
@@ -23,26 +22,26 @@ class PersistentCachedProperty:
   """
 
   def __init__(self, ttl_field, cached_field=None):
+    self.func = None
     self.ttl_field = ttl_field
     self.cached_field = cached_field
 
   def __call__(self, func):
-    """Return the PersistentModelFieldCache."""
-    return PersistentModelFieldCache(func, self.ttl_field, self.cached_field)
+    """Configure the function, and return the configured decorator.
 
+    :param func: The function to decorate with the persisting cache
+    :type func: func
 
-class PersistentModelFieldCache:
-  """Persistent implementation of the cached_property decorator."""
-
-  def __init__(self, func, ttl_field, cached_field=None):
+    :returns: A configured instance of the decorator
+    :rtype: :class:`PersistentCachedProperty`
+    """
     self.func = func
-    self.ttl_field = ttl_field
-    self.cached_field = self._get_cached_field(cached_field)
+    self._set_default_cached_field()
+    return self
 
-  def _get_cached_field(self, cached_field):
-    if cached_field is None:
-      return "_" + self.func.__name__
-    return cached_field
+  def _set_default_cached_field(self):
+    if self.cached_field is None:
+      self.cached_field = "_" + self.func.__name__
 
   def __get__(self, instance, cls=None):
     cache_value = getattr(instance, self.cached_field)
@@ -59,8 +58,7 @@ class PersistentModelFieldCache:
   def __delete__(self, instance):
     self._write_cache(instance)
 
-  # pylint: disable=unused-argument
-  def __set__(self, instance, value):
+  def __set__(self, _instance, _value):
     raise AttributeError(SETTER_ERROR)
 
   def _cache_is_valid(self, cache_value, ttl_value):
