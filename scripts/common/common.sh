@@ -47,14 +47,12 @@ lint_check() {
 
   pushd "${PROJECT_HOME}" >/dev/null
 
-  lint_extras
+    lint_extras
 
-  echo "Running pylint ..."
-  pytest --pylint -m pylint --pylint-rcfile=.pylint.rc --pylint-jobs=3 "${ARGS[@]}"
+    echo "Running pylint ..."
+    pytest --pylint -m pylint --pylint-rcfile=.pylint.rc --pylint-jobs=3 "${ARGS[@]}"
 
-  echo "Running shellcheck ..."
-  shellcheck -x scripts/*.sh
-  shellcheck -x scripts/common/*.sh
+    shellcheck_scripts
 
   popd >/dev/null
 
@@ -72,13 +70,15 @@ lint_diff() {
 }
 
 lint_extras() {
-  echo "Checking docstrings ..."
   pushd "${PROJECT_HOME}" >/dev/null
+    echo "Checking docstrings ..."
     pydocstyle "${PROJECT_NAME}"
     pydocstyle --config=.pydocstyle.tests "${PROJECT_NAME}"
     echo "Checking imports ..."
     isort -c
+    shellcheck_scripts
   popd >/dev/null
+
 }
 
 reinstall_requirements() {
@@ -86,8 +86,8 @@ reinstall_requirements() {
   set -e
 
   pushd "${PROJECT_HOME}" >/dev/null
-  pip install -r assets/requirements.txt --no-warn-script-location
-  pip install -r assets/requirements-dev.txt --no-warn-script-location
+    pip install -r assets/requirements.txt --no-warn-script-location
+    pip install -r assets/requirements-dev.txt --no-warn-script-location
   popd >/dev/null
 
 }
@@ -97,8 +97,8 @@ security() {
   set -e
 
   pushd "${PROJECT_HOME}" >/dev/null
-  bandit -r "${PROJECT_NAME}" -c .bandit.rc --ini .bandit
-  safety check
+    bandit -r "${PROJECT_NAME}" -c .bandit.rc --ini .bandit
+    safety check
   popd >/dev/null
 
 }
@@ -119,17 +119,26 @@ setup_python() {
   unvirtualize
 
   pushd "${PROJECT_HOME}" >/dev/null
-  if [[ ! -f /etc/container_release ]]; then
-    set +e
-    pipenv --rm
-    set -e
-    pipenv --python 3.7
-  fi
-  source_environment
-  reinstall_requirements
-  unvirtualize
+    if [[ ! -f /etc/container_release ]]; then
+      set +e
+      pipenv --rm
+      set -e
+      pipenv --python 3.7
+    fi
+    source_environment
+    reinstall_requirements
+    unvirtualize
   popd >/dev/null
 
+}
+
+shellcheck_scripts() {
+  pushd "${PROJECT_HOME}" >/dev/null
+    echo "Running shellcheck ..."
+    shellcheck -x scripts/*.sh
+    shellcheck -x scripts/hooks/*
+    shellcheck -x scripts/common/*.sh
+  popd >/dev/null
 }
 
 source_environment() {
@@ -144,11 +153,11 @@ source_environment() {
   fi
 
   pushd "${PROJECT_HOME}" >/dev/null
-  set +e
-    cd .git/hooks
-    ln -sf ../../scripts/hooks/pre-commit pre-commit
-    ln -sf ../../scripts/hooks/pre-push pre-push
-  set -e
+    set +e
+      cd .git/hooks
+      ln -sf ../../scripts/hooks/pre-commit pre-commit
+      ln -sf ../../scripts/hooks/pre-push pre-push
+    set -e
   popd >/dev/null
 
 }
@@ -170,7 +179,7 @@ type_check() {
   set -e
 
   pushd "${PROJECT_HOME}" >/dev/null
-  mypy "${PROJECT_NAME}"
+    mypy "${PROJECT_NAME}"
   popd >/dev/null
 
 }
@@ -186,17 +195,17 @@ unittests() {
   else
 
     pushd "${PROJECT_HOME}" >/dev/null
-    if [[ $1 == "coverage" ]]; then
-      shift
-      set +e
-      pytest --cov-config=.coveragerc --cov-report term-missing --cov-fail-under=100 --cov="${PROJECT_NAME}" "$@"
-      exit_code="$?"
-      coverage html
-      set -e
-      exit "${exit_code}"
-    else
-      pytest "$@"
-    fi
+      if [[ $1 == "coverage" ]]; then
+        shift
+        set +e
+        pytest --cov-config=.coveragerc --cov-report term-missing --cov-fail-under=100 --cov="${PROJECT_NAME}" "$@"
+        exit_code="$?"
+        coverage html
+        set -e
+        exit "${exit_code}"
+      else
+        pytest "$@"
+      fi
     popd >/dev/null
 
   fi
@@ -249,15 +258,15 @@ update_cli() {
   updates=("/scripts/common/documentation.sh" "/scripts/common/wheel.sh" "/scripts/common/upload.sh" "/scripts/common/common.sh" "/development/bash/.bash_git" "/development/bash/.bash_profile" "/development/bash/.bashrc")
 
   pushd "${PROJECT_HOME}" >/dev/null
-  mkdir -p scripts/common/.archive
-  mkdir -p development/bash/.archive
-  cp scripts/common/*.sh scripts/common/.archive
-  cp development/bash/.bash* development/bash/.archive
-  for filename in "${updates[@]}"; do
-    echo "Downloading: .${filename}"
-    echo "Source: https://raw.githubusercontent.com/niall-byrne/python-in-a-box/master/%7B%7Bcookiecutter.project_slug%7D%7D${filename}"
-    curl -s -L "https://raw.githubusercontent.com/niall-byrne/python-in-a-box/master/%7B%7Bcookiecutter.project_slug%7D%7D${filename}" >".${filename}"
-  done
+    mkdir -p scripts/common/.archive
+    mkdir -p development/bash/.archive
+    cp scripts/common/*.sh scripts/common/.archive
+    cp development/bash/.bash* development/bash/.archive
+    for filename in "${updates[@]}"; do
+      echo "Downloading: .${filename}"
+      echo "Source: https://raw.githubusercontent.com/niall-byrne/python-in-a-box/master/%7B%7Bcookiecutter.project_slug%7D%7D${filename}"
+      curl -s -L "https://raw.githubusercontent.com/niall-byrne/python-in-a-box/master/%7B%7Bcookiecutter.project_slug%7D%7D${filename}" >".${filename}"
+    done
   popd >/dev/null
 
   setup_bash

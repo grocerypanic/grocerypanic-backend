@@ -18,9 +18,9 @@ bypass() {
 
 main() {
 
-  bypass
+  [[ ! -f /etc/container_release ]] && echo "Please make this commit inside the containerized environment." && exit 127
 
-  [[ ! -f /etc/container_release ]] && source environments/local.env
+  bypass
 
   bash scripts/commander.sh check-toctree
   bash scripts/commander.sh lint-diff
@@ -28,15 +28,13 @@ main() {
   bash scripts/commander.sh sectest
   bash scripts/commander.sh test-coverage
   bash scripts/commander.sh test-integration
-  shellcheck -x scripts/*.sh
-  shellcheck -x scripts/common/*.sh
 
   if [[ -n "$(git diff)" ]]; then
 
     git status
 
     exec < /dev/tty
-    echo -e "\nWARNING: You have uncommitted changes!"
+    echo -e "\\nWARNING: You have uncommitted changes!"
     read -r -p "Type 'yes' to confirm you wish to proceed with this commit: " confirm
     [[ ${confirm} != "yes" ]] && echo 'ABORTED' && exit 127
 

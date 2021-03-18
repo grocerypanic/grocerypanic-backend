@@ -19,20 +19,18 @@ bypass() {
 main() {
 
   IFS=' '
-  while read local_ref local_sha remote_ref remote_sha; do
+  # shellcheck disable=SC2034
+  while read -r local_ref local_sha remote_ref remote_sha; do
 
-    bypass ${remote_ref}
+    [[ ! -f /etc/container_release ]] && echo "Please push this commit inside the containerized environment." && exit 127
 
-    [[ ! -f /etc/container_release ]] && source environments/local.env
+    bypass "${remote_ref}"
 
     bash scripts/commander.sh check-toctree
-    bash scripts/commander.sh lint-diff
-    bash scripts/commander.sh lint-extras
+    bash scripts/commander.sh lint
     bash scripts/commander.sh sectest
     bash scripts/commander.sh test-coverage
     bash scripts/commander.sh test-integration
-    shellcheck -x scripts/*.sh
-    shellcheck -x scripts/common/*.sh
 
   done
 
