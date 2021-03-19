@@ -40,9 +40,8 @@ jobs:
         env:
           WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
       - name: Production -- Report Failure
-        if: ${{ failure() }}
+        if: failure()
         run: |
-          [[ -z ${GIT_DIFF} ]] && curl -X POST -H 'Content-type: application/json' --data '{"text":"panic backend: automated production deployment has failed!"}' "${WEBHOOK_URL}"
+          curl -X POST -H 'Content-type: application/json' --data '{"text":"panic backend: automated production deployment has failed!"}' "${WEBHOOK_URL}"
         env:
           WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
-          GIT_DIFF: ${{ env.GIT_DIFF }}

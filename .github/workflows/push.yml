@@ -56,14 +56,14 @@ jobs:
       env:
         WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
     - name: Report Job Status
-      if: failure() == true
+      if: failure()
       run: |
         curl -X POST -H 'Content-type: application/json' --data '{"text":"panic backend build has failed!"}' "${WEBHOOK_URL}"
       env:
         WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
 
     - name: Stage -- Deploy
-      if: ${{ github.ref == 'refs/heads/master' && github.event_name == 'push' }}
+      if: github.ref == 'refs/heads/master'
       run: |
         # Deploy to Stage
         echo -n "${ADMIN_ENV}" | base64 --decode > ./environments/admin.env
@@ -75,45 +75,34 @@ jobs:
         STAGE_ENV: ${{ secrets.STAGE_ENV }}
         STAGE_SERVICE_ACCOUNT: ${{ secrets.STAGE_SERVICE_ACCOUNT }}
     - name: Stage -- Report Success
-      if: ${{ github.ref == 'refs/heads/master' && github.event_name == 'push' }}
+      if: github.ref == 'refs/heads/master'
       run: |
         curl -X POST -H 'Content-type: application/json' --data '{"text":"panic backend: automated deploy to stage!"}' "${WEBHOOK_URL}"
       env:
         WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
     - name: Stage -- Report Failure
-      if: failure() == true
+      if: failure() && github.ref == 'refs/heads/master'
       run: |
-        [[ ${REF} == 'refs/heads/master' ]] && [[ ${EVENT} == 'push' ]] && curl -X POST -H 'Content-type: application/json' --data '{"text":"panic backend: stage deploy has failed!"}' "${WEBHOOK_URL}"
+        curl -X POST -H 'Content-type: application/json' --data '{"text":"panic backend: stage deploy has failed!"}' "${WEBHOOK_URL}"
       env:
         WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
         REF: ${{ github.ref }}
         EVENT: ${{ github.event_name }}
 
-    - name: Production -- Detect A Release Tag
-      if: contains(github.ref, '/tags/v') == true
-      run: |
-        GIT_DIFF=$(git diff origin/master)
-        echo "GIT_DIFF=${GIT_DIFF}" >> $GITHUB_ENV
-    - name: Production -- Ignore Non-Release Tags and Branches
-      if: contains(github.ref, '/tags/v') != true
-      run: |
-        GIT_DIFF="not a release"
-        echo "GIT_DIFF=${GIT_DIFF}" >> $GITHUB_ENV
-
     - name: Production -- Prepare Release Content
-      if: env.GIT_DIFF == ''
+      if: contains(github.ref, '/tags/v')
       run: |
         NEWTAG=${GITHUB_REF#refs/tags/}
         echo "NEWTAG=${NEWTAG}" >> $GITHUB_ENV
         echo "{}" > package.json
     - name: Production -- Generate Changelog
-      if: env.GIT_DIFF == ''
+      if: contains(github.ref, '/tags/v')
       uses: scottbrenner/generate-changelog-action@1.0.3
       id: Changelog
       env:
         REPO: ${{ github.repository }}
     - name: Production -- Create Release
-      if: env.GIT_DIFF == ''
+      if: contains(github.ref, '/tags/v')
       uses: actions/create-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -132,16 +121,15 @@ jobs:
         draft: true
         prerelease: false
     - name: Production -- Report Success
-      if: env.GIT_DIFF == ''
+      if: contains(github.ref, '/tags/v')
       run: |
         curl -X POST -H 'Content-type: application/json' --data "{\"text\":\"panic backend: automated release has been created for ${TAG}: https://github.com/niall-byrne/panic/releases\"}" "${WEBHOOK_URL}"
       env:
         WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
         TAG: ${{ env.NEWTAG }}
     - name: Production -- Report Failure
-      if: failure() == true && contains(github.ref, '/tags/v') == true
+      if: failure() && contains(github.ref, '/tags/v')
       run: |
-        [[ -z ${GIT_DIFF} ]] && curl -X POST -H 'Content-type: application/json' --data '{"text":"panic backend: automated production release has failed!"}' "${WEBHOOK_URL}"
+        curl -X POST -H 'Content-type: application/json' --data '{"text":"panic backend: automated production release has failed!"}' "${WEBHOOK_URL}"
       env:
         WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
-        GIT_DIFF: ${{ env.GIT_DIFF }}
