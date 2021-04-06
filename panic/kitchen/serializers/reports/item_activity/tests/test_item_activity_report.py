@@ -48,6 +48,19 @@ class TestItemActivitySerializer(TransactionTestHarness):
     self.user1.timezone = pytz.utc.zone
     self.user1.save()
 
+  def test_deserialize_item_id(self):
+    serialized = self.serializer(
+        self.item1,
+        context={'request': self.request},
+    )
+
+    deserialized = serialized.data
+
+    self.assertEqual(
+        deserialized['id'],
+        self.item1.id,
+    )
+
   def test_deserialize_activity_first(self):
     serialized = self.serializer(
         self.item1,

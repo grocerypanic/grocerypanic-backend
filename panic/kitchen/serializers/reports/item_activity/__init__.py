@@ -22,6 +22,7 @@ class ItemActivityReportSerializer(serializers.ModelSerializer):
   class Meta:
     model = Item
     fields = (
+        "id",
         "activity_first",
         "usage_total",
         "usage_avg_week",

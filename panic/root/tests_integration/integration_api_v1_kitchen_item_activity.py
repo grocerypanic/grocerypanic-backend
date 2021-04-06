@@ -101,6 +101,8 @@ class ItemConsumptionAPICrudTest(APICrudTestHarness):
     self.assertDictEqual(
         list_response.json(),
         {
+            'id':
+                item_id,
             'activity_first':
                 (transactions_data[0]['datetime'].isoformat()[:-6] + 'Z'),
             'recent_activity': {
