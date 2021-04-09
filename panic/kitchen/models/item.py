@@ -166,10 +166,13 @@ class Item(
     :returns: The average usage
     :rtype: float
     """
-    since_first_transaction = (
-        pendulum.now() - pendulum.instance(self.activity_first)
-    )
-    average = self.usage_total / (since_first_transaction.in_weeks() + 1)
+    activity_first = self.activity_first
+    average = 0
+    if activity_first is not None:
+      since_first_transaction = (
+          pendulum.now() - pendulum.instance(activity_first)
+      )
+      average = self.usage_total / (since_first_transaction.in_weeks() + 1)
     return float("{:.2f}".format(average))
 
   @property
@@ -179,10 +182,13 @@ class Item(
     :returns: The average usage
     :rtype: float
     """
-    since_first_transaction = (
-        pendulum.now() - pendulum.instance(self.activity_first)
-    )
-    average = self.usage_total / (since_first_transaction.in_months() + 1)
+    activity_first = self.activity_first
+    average = 0
+    if activity_first is not None:
+      since_first_transaction = (
+          pendulum.now() - pendulum.instance(activity_first)
+      )
+      average = self.usage_total / (since_first_transaction.in_months() + 1)
     return float("{:.2f}".format(average))
 
   @property

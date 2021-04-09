@@ -387,6 +387,20 @@ class TestItemCalculatedPropertiesInventory(ItemTestHarness):
 
   @patch(ITEM_MODULE + '.Transaction.objects.get_activity_first')
   @patch(ITEM_MODULE + '.Transaction.objects.get_usage_total')
+  def test_usage_avg_week_none_edge(self, m_usage, m_activity):
+    m_activity.return_value = None
+
+    expected = 0
+
+    self.assertEqual(
+        self.item1.usage_avg_week,
+        expected,
+    )
+    m_usage.assert_not_called()
+    m_activity.assert_called_with(self.item1.id)
+
+  @patch(ITEM_MODULE + '.Transaction.objects.get_activity_first')
+  @patch(ITEM_MODULE + '.Transaction.objects.get_usage_total')
   def test_usage_avg_month(self, m_usage, m_activity):
     m_usage.return_value = 999
     m_activity.return_value = self.today - datetime.timedelta(days=900)
@@ -418,6 +432,20 @@ class TestItemCalculatedPropertiesInventory(ItemTestHarness):
         expected,
     )
     m_usage.assert_called_with(self.item1.id)
+    m_activity.assert_called_with(self.item1.id)
+
+  @patch(ITEM_MODULE + '.Transaction.objects.get_activity_first')
+  @patch(ITEM_MODULE + '.Transaction.objects.get_usage_total')
+  def test_usage_avg_month_none_edge(self, m_usage, m_activity):
+    m_activity.return_value = None
+
+    expected = 0
+
+    self.assertEqual(
+        self.item1.usage_avg_month,
+        expected,
+    )
+    m_usage.assert_not_called()
     m_activity.assert_called_with(self.item1.id)
 
   @patch(ITEM_MODULE + '.Transaction.objects.get_usage_current_week')
