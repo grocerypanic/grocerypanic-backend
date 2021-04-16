@@ -14,5 +14,6 @@ utilities
    models/index.rst
    serializers/index.rst
    toctree/index.rst
+   urls/index.rst
    views/index.rst
    *
