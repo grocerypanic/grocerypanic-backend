@@ -167,6 +167,10 @@ class ItemConsumptionAPICrudTest(APICrudTestHarness):
                         'date': as_user_date(now() - timedelta(days=13)),
                         'change': 0,
                     },
+                    {
+                        'date': as_user_date(now() - timedelta(days=14)),
+                        'change': 0,
+                    },
                 ],
                 'usage_current_month':
                     float(

@@ -23,7 +23,7 @@ class TestActivityManagerWithoutData(ActivityManagerTestHarness):
 
   def test_activity_last_two_weeks_no_history(self):
     expected_results = []
-    for day in range(0, 14):
+    for day in range(0, settings.TRANSACTION_HISTORY_MAX + 1):
       expected_results.append({
           'date': timezone.now() - timedelta(days=day),
           'change': 0,
@@ -89,7 +89,7 @@ class TestActivityManagerTwoWeeks(ActivityManagerTestHarness):
     cls.create_transaction_history(create_pattern)
     cls._create_another_user_transaction()
     cls._create_lower_bounds_edge_case_transaction(
-        settings.TRANSACTION_HISTORY_MAX - 1
+        settings.TRANSACTION_HISTORY_MAX
     )
 
   def test_activity_last_two_weeks_utc(self):
@@ -149,6 +149,10 @@ class TestActivityManagerTwoWeeks(ActivityManagerTestHarness):
         },
         {
             'date': self.dates['today'] - timedelta(days=13),
+            'change': 0
+        },
+        {
+            'date': self.dates['today'] - timedelta(days=14),
             'change': 0
         },
     ]
@@ -220,11 +224,119 @@ class TestActivityManagerTwoWeeks(ActivityManagerTestHarness):
             'change': 0
         },
         {
+            'date': self.dates['today'] - timedelta(days=13),
+            'change': 0
+        },
+        {
             'date': honolulu_edge_case,
             'change': -2 * consumption_amount
         },
     ]
     expected_results = to_realdate(expected_results, 'date', offset=1)
+
+    received = Transaction.objects.get_activity_last_two_weeks(
+        self.item1,
+        zone=test_tz,
+    )
+
+    self.assertListEqual(
+        expected_results,
+        received,
+    )
+
+  def test_activity_last_two_weeks_hong_kong(self):
+    test_tz = "Asia/Hong_Kong"
+
+    consumption_amount = abs(self.transaction_quantity)
+
+    inside_bounds_time = timezone.now() - timedelta(
+        days=settings.TRANSACTION_HISTORY_MAX + 1
+    ) + timedelta(hours=17)
+
+    outside_bounds_time = timezone.now() - timedelta(
+        days=settings.TRANSACTION_HISTORY_MAX + 1
+    ) + timedelta(hours=15)
+
+    inside_bounds = {
+        'item': self.item1,
+        'date_object': inside_bounds_time,
+        'user': self.user1,
+        'quantity': 4 * consumption_amount
+    }
+
+    outside_bounds = {
+        'item': self.item1,
+        'date_object': outside_bounds_time,
+        'user': self.user1,
+        'quantity': consumption_amount
+    }
+
+    self.create_test_instance(**inside_bounds)
+    self.create_test_instance(**outside_bounds)
+
+    expected_results = [
+        {
+            'date': self.dates['today'],
+            'change': -2 * consumption_amount
+        },
+        {
+            'date': self.dates['yesterday'],
+            'change': -2 * consumption_amount
+        },
+        {
+            'date': self.dates['today'] - timedelta(days=2),
+            'change': 0
+        },
+        {
+            'date': self.dates['today'] - timedelta(days=3),
+            'change': 0
+        },
+        {
+            'date': self.dates['today'] - timedelta(days=4),
+            'change': 0
+        },
+        {
+            'date': self.dates['today'] - timedelta(days=5),
+            'change': 0
+        },
+        {
+            'date': self.dates['today'] - timedelta(days=6),
+            'change': 0
+        },
+        {
+            'date': self.dates['today'] - timedelta(days=7),
+            'change': 0
+        },
+        {
+            'date': self.dates['last_week'],
+            'change': -2 * consumption_amount
+        },
+        {
+            'date': self.dates['today'] - timedelta(days=9),
+            'change': 0
+        },
+        {
+            'date': self.dates['today'] - timedelta(days=10),
+            'change': 0
+        },
+        {
+            'date': self.dates['today'] - timedelta(days=11),
+            'change': 0
+        },
+        {
+            'date': self.dates['today'] - timedelta(days=12),
+            'change': 0
+        },
+        {
+            'date': self.dates['today'] - timedelta(days=13),
+            'change': 0
+        },
+        {
+            'date': self.dates['today'] - timedelta(days=14),
+            'change': consumption_amount * 2
+        },
+    ]
+    expected_results = to_realdate(expected_results, 'date', offset=0)
 
     received = Transaction.objects.get_activity_last_two_weeks(
         self.item1,

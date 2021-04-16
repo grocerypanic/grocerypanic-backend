@@ -62,8 +62,9 @@ class ActivityManager(models.Manager):
 
     start_of_window = pendulum.now(tz=timezone_object)
     end_of_window = (
-        start_of_window - timedelta(days=int(settings.TRANSACTION_HISTORY_MAX))
-    ).start_of("day").astimezone(pytz.utc)
+        start_of_window -
+        (timedelta(days=int(settings.TRANSACTION_HISTORY_MAX)))
+    ).astimezone(timezone_object).start_of("day")
 
     query = super().get_queryset().\
         filter(
@@ -90,7 +91,7 @@ class ActivityManager(models.Manager):
     for row in query_results:
       query_hash[row['date']] = row['change']
 
-    for day in range(0, int(settings.TRANSACTION_HISTORY_MAX)):
+    for day in range(0, int(settings.TRANSACTION_HISTORY_MAX + 1)):
       history_date = (current_datetime - timedelta(days=day))\
           .start_of('day')\
           .date()

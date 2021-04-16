@@ -1,6 +1,7 @@
 """Test the ItemActivityReport API."""
 
 import pytz
+from django.conf import settings
 from django.test import TestCase
 from django.urls import reverse
 from django.utils.http import urlencode
@@ -122,7 +123,8 @@ class PrivateItemActivityViewSetTest(ItemActivityViewSetHarness):
         res.data['recent_activity']['activity_last_two_weeks']
     )
 
-    assert len(consumption_past_two_weeks) == 14
+    assert len(consumption_past_two_weeks
+              ) == (settings.TRANSACTION_HISTORY_MAX + 1)
 
     self.assertEqual(
         self.deserialize_date(consumption_past_two_weeks[0]['date']),
