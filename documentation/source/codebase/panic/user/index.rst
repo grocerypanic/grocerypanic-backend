@@ -10,4 +10,5 @@ user
    models/index.rst
    serializers/index.rst
    signals/index.rst
+   utilities/index.rst
    *

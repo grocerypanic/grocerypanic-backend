@@ -51,4 +51,8 @@ urlpatterns = [
         UserDetailsView.as_view(),
         name='rest_user_details',
     ),
+    path(
+        "api/v1/users/",
+        include("user.urls"),
+    ),
 ]
