@@ -43,6 +43,7 @@ class UserModelAdmin(UserAdmin):
                   'is_active',
                   'is_staff',
                   'is_superuser',
+                  'has_profile_initialized',
                   'groups',
                   'user_permissions',
               ),
