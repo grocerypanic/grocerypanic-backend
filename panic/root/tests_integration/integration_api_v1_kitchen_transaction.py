@@ -5,6 +5,7 @@ import pytz
 from django.urls import reverse
 from rest_framework import status
 
+from kitchen.models.transaction import Transaction
 from .bases import APICrudTestHarness, APICrudTestHarnessUnauthorized
 
 
@@ -76,93 +77,18 @@ class TransactionAPICrudTest(APICrudTestHarness):
     transaction_data = self._data_generate_transaction(item_id)
     return transaction_data, item_id
 
-  def test_create_list(self):
+  def test_create(self):
     item_id = self._create_dependencies()
     transaction_data = self._data_generate_transaction(item_id)
 
     transaction_response = self._api_create(transaction_data, self.view)
     self.assertEqual(transaction_response.status_code, status.HTTP_201_CREATED)
 
-    list_response = self._api_list(self.view + f"?item={item_id}")
-    self.assertEqual(list_response.status_code, status.HTTP_200_OK)
+    Transaction.objects.get(**transaction_response.json())
 
-    converted_date_string = self._convert_datetime_to_drf_str(
-        transaction_data['datetime'],
-    )
-
-    self.assertDictEqual(
-        list_response.json(),
-        {
-            'count':
-                1,
-            'next':
-                None,
-            'previous':
-                None,
-            'results': [{
-                'id': transaction_response.json()['id'],
-                'item': item_id,
-                'datetime': converted_date_string,
-                'quantity': transaction_data['quantity'],
-            }],
-        },
-    )
-
-  def test_create_sequence_check_item_quantity(self):
-    item_id = self._create_dependencies()
-
-    transaction1_data = self._data_generate_transaction(item_id)
-    transaction2_data = dict(transaction1_data)
-    transaction2_data.update({'quantity': -1.0})
-
-    transaction1_response = self._api_create(transaction1_data, self.view)
-    self.assertEqual(transaction1_response.status_code, status.HTTP_201_CREATED)
-    transaction2_response = self._api_create(transaction2_data, self.view)
-    self.assertEqual(transaction2_response.status_code, status.HTTP_201_CREATED)
-
-    list_response = self._api_list(self.view + f"?item={item_id}")
-    self.assertEqual(list_response.status_code, status.HTTP_200_OK)
-
-    converted1_date_string = self._convert_datetime_to_drf_str(
-        transaction1_data['datetime'],
-    )
-    converted2_date_string = self._convert_datetime_to_drf_str(
-        transaction2_data['datetime'],
-    )
-
-    self.assertDictEqual(
-        list_response.json(),
-        {
-            'count':
-                2,
-            'next':
-                None,
-            'previous':
-                None,
-            'results': [
-                {
-                    'id': transaction1_response.json()['id'],
-                    'item': item_id,
-                    'datetime': converted1_date_string,
-                    'quantity': transaction1_data['quantity'],
-                },
-                {
-                    'id': transaction2_response.json()['id'],
-                    'item': item_id,
-                    'datetime': converted2_date_string,
-                    'quantity': transaction2_data['quantity'],
-                },
-            ],
-        },
-    )
-
-    item_response = self._api_detail(item_id, self.item_view)
-    self.assertEqual(item_response.status_code, status.HTTP_200_OK)
-
-    self.assertEqual(
-        item_response.json()['quantity'],
-        transaction1_data['quantity'] + transaction2_data['quantity']
-    )
+  def test_list(self):
+    response = self.client.get(self._build_url(self.view))
+    self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
 
   def test_delete(self):
     response = self.client.delete(self._build_url(self.view))
@@ -175,10 +101,6 @@ class TransactionAPICrudTest(APICrudTestHarness):
   def test_put(self):
     response = self.client.put(self._build_url(self.view))
     self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
-
-  def test_list_without_query_param(self):
-    response = self.client.get(self._build_url(self.view))
-    self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
 
 class TransactionCrudTestUnauthorized(APICrudTestHarnessUnauthorized):
