@@ -7,6 +7,7 @@ class KitchenConfig(AppConfig):
   """AppConfig for the kitchen app."""
 
   name = 'kitchen'
+  default_auto_field = 'django.db.models.BigAutoField'
 
   def ready(self):
     """Load Signals."""

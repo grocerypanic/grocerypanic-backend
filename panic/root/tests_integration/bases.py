@@ -128,7 +128,11 @@ class APICrudTestHarness(APILiveServerTestCase):
   def get_test_view(cls):
     if cls.test_view.endswith("-pk"):
       actual_view = cls.test_view[:-3]
-      return lambda _, pk: reverse(actual_view, args=[pk])
+
+      def pk_reverse(_, pk):
+        return reverse(actual_view, args=[pk])
+
+      return pk_reverse
     return reverse(cls.test_view)
 
   @classmethod

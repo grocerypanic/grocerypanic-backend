@@ -118,6 +118,6 @@ Run the CLI without arguments to see the complete list of available commands: `$
 You need the Postgresql CLI installed, [here's](https://www.compose.com/articles/postgresql-tips-installing-the-postgresql-client/
 ) how on a Mac.
 
-If you're on Mojave, you should run this command, prior to running `dev setup`:
+If you're on Mojave or Catalina, you should run this command, prior to running `dev setup`:
+- `PATH=/usr/local/Cellar/libpq/xx.y/bin/:$PATH` (where xx.y is the version of `libpq` you've installed)
 - `export LDFLAGS="-I/usr/local/opt/openssl/include -L/usr/local/opt/openssl/lib"`
-

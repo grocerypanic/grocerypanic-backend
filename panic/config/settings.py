@@ -113,6 +113,8 @@ WSGI_APPLICATION = 'root.wsgi.application'
 
 DATABASES = {'default': DATABASES_AVAILABLE[ENVIRONMENT]}
 
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
+
 # Password validation
 # https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators
 

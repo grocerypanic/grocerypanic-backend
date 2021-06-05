@@ -7,6 +7,7 @@ class UserConfig(AppConfig):
   """AppConfig for the user app."""
 
   name = 'user'
+  default_auto_field = 'django.db.models.BigAutoField'
 
   def ready(self):
     """Load Signals."""
