@@ -40,7 +40,7 @@ class TestItem(ModelTestMixin, ItemTestHarness):
     created = self.create_test_instance(**self.create_data)
     query = Item.objects.filter(name=self.create_data['name'])
 
-    self.assertQuerysetEqual(query, map(repr, [created]))
+    self.assertQuerysetEqual(query, [created])
     self.assertEqual(query[0]._index, self.create_data['name'].lower())
 
   def test_unique(self):

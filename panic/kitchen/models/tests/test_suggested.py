@@ -25,7 +25,7 @@ class TestItemList(ModelTestMixin, SuggestedItemTestHarness):
 
     query = SuggestedItem.objects.filter(name=self.test_item_name)
 
-    self.assertQuerysetEqual(query, [repr(item)])
+    self.assertQuerysetEqual(query, [item])
 
   def test_unique(self):
     _ = self.create_test_instance(name=self.test_item_name)

@@ -292,7 +292,7 @@ class TestAdjustmentManagerQueries(InventoryTestHarness):
         order_by("transaction__datetime")
     expected_results = Inventory.objects.select_inventory_by_item(self.item1)
 
-    self.assertQuerysetEqual(expected_results, map(repr, query))
+    self.assertQuerysetEqual(expected_results, query)
 
   def test_two_records(self):
     self.__apply_transaction(self.purchased_today)
@@ -303,4 +303,4 @@ class TestAdjustmentManagerQueries(InventoryTestHarness):
         order_by("transaction__datetime")
     expected_results = Inventory.objects.select_inventory_by_item(self.item1)
 
-    self.assertQuerysetEqual(expected_results, map(repr, query))
+    self.assertQuerysetEqual(expected_results, query)

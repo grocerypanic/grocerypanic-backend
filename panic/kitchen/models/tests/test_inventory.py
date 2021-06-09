@@ -28,7 +28,7 @@ class TestItem(ModelTestMixin, InventoryTestHarness):
     created = self.create_test_instance(**self.data)
     query = Inventory.objects.filter(item=self.item1)
 
-    self.assertQuerysetEqual(query, map(repr, [created]))
+    self.assertQuerysetEqual(query, [created])
 
   def test_str(self):
     inventory = self.create_test_instance(**self.data)

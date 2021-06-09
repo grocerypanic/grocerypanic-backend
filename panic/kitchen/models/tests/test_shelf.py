@@ -20,7 +20,7 @@ class TestShelf(ModelTestMixin, ShelfTestHarness):
     shelf = self.create_test_instance(user=self.user1, name=test_name)
     query = Shelf.objects.filter(name=test_name)
 
-    self.assertQuerysetEqual(query, [repr(shelf)])
+    self.assertQuerysetEqual(query, [shelf])
     self.assertEqual(query[0]._index, self.create_data['name'].lower())
 
   def test_unique(self):

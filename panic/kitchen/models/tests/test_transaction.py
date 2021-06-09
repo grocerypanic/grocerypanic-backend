@@ -33,7 +33,7 @@ class TestTransaction(ModelTestMixin, TransactionTestHarness):
 
     query = Transaction.objects.filter(item=self.item1)
 
-    self.assertQuerysetEqual(query, [repr(transaction)])
+    self.assertQuerysetEqual(query, [transaction])
 
     self.assertEqual(
         transaction.item.quantity,
@@ -58,7 +58,7 @@ class TestTransaction(ModelTestMixin, TransactionTestHarness):
 
     self.assertQuerysetEqual(
         query,
-        map(repr, [initial, transaction]),
+        [initial, transaction],
         ordered=False,
     )
     self.assertEqual(

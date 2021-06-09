@@ -21,7 +21,7 @@ class TestStore(ModelTestMixin, StoreTestHarness):
 
     query = Store.objects.filter(name=test_name)
 
-    self.assertQuerysetEqual(query, map(repr, [created]))
+    self.assertQuerysetEqual(query, [created])
     # pylint: disable=protected-access
     self.assertEqual(query[0]._index, test_name.lower())
 
