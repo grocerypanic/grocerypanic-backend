@@ -10,6 +10,7 @@ panic
    config/index.rst
    kitchen/index.rst
    legal/index.rst
+   naturalsortfield/index.rst
    root/index.rst
    social_accounts/index.rst
    spa_security/index.rst

@@ -2,8 +2,8 @@
 
 from django.contrib.auth import get_user_model
 from django.db import models
-from naturalsortfield import NaturalSortField
 
+from naturalsortfield import NaturalSortField
 from spa_security.fields import BlondeCharField
 from .mixins import FullCleanMixin, UniqueNameConstraintMixin
 

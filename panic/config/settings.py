@@ -69,6 +69,7 @@ INSTALLED_APPS = [
     'utilities',
     'watchman',
     'legal',
+    'naturalsortfield',
 ]
 
 MIDDLEWARE = [
