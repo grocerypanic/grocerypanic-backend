@@ -3,8 +3,8 @@
 from django.db.models.signals import m2m_changed
 from django.dispatch import receiver
 
-from utilities.models.validators.m2m import ManyToManyRelatedValidator
 from ..models.item import Item
+from utilities.models.validators.m2m import ManyToManyRelatedValidator
 
 
 @receiver(m2m_changed, sender=Item.preferred_stores.through)

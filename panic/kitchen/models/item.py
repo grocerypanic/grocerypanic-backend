@@ -6,9 +6,6 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.utils.functional import cached_property
 
-from naturalsortfield import NaturalSortField
-from spa_security.fields import BlondeCharField
-from utilities.models.decorators.caching import PersistentCachedProperty
 from . import constants
 from .inventory import Inventory
 from .managers.item import ItemManager
@@ -18,6 +15,9 @@ from .mixins import (
     UniqueNameConstraintMixin,
 )
 from .transaction import Transaction
+from naturalsortfield import NaturalSortField
+from spa_security.fields import BlondeCharField
+from utilities.models.decorators.caching import PersistentCachedProperty
 
 User = get_user_model()
 

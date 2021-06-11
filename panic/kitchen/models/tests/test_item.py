@@ -10,12 +10,12 @@ from django.utils import timezone
 from django.utils.functional import cached_property
 from freezegun import freeze_time
 
-from utilities.models.decorators.caching import PersistentCachedProperty
 from ...tests.fixtures.fixture_mixins import ModelTestMixin
 from ...tests.fixtures.fixtures_item import ItemTestHarness
 from .. import constants
 from .. import item as item_module
 from ..item import Item
+from utilities.models.decorators.caching import PersistentCachedProperty
 
 ITEM_MODULE = item_module.__name__
 

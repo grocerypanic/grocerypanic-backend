@@ -13,9 +13,10 @@ deploy_prod() {
 
         ./manage.py collectstatic --no-input
 
-        cp ../assets/requirements.txt requirements.txt
-        cat ../assets/requirements-prod.txt >> requirements.txt
+        poetry export --without-hashes -f requirements.txt -o requirements.txt
+        mv ../requirements.txt .
         cp ../environments/prod.yaml app.yaml
+
         while read -r line; do
           [[ -z "${line}" ]] && continue
           key="$(echo "${line}" | cut -d'=' -f1)"
@@ -26,8 +27,7 @@ deploy_prod() {
         gcloud auth activate-service-account --key-file=../service-account.json
         gcloud config set project "${GCP_PROJECT}"
         gcloud app deploy --version v1 --quiet
-        rm app.yaml
-        rm requirements.txt
+        rm app.yaml requirements.txt
 
     popd >/dev/null
   popd >/dev/null

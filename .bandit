@@ -1,2 +1,1 @@
 [bandit]
-exclude: panic/kitchen/tests,panic/spa_security/tests,panic/frontend/node_modules,

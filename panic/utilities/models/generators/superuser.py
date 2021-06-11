@@ -7,7 +7,7 @@ User = get_user_model()
 ERROR_MESSAGE = 'The admin user already exists.'
 
 
-def create_superuser(username="admin", password="admin"):
+def create_superuser(username="admin", password="admin"):  # nosec
   """Create a django superuser, with the specified name and password.
 
   :param username: The username to create

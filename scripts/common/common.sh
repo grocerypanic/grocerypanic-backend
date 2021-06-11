@@ -10,9 +10,9 @@ fmt() {
 
   pushd "${PROJECT_HOME}" >/dev/null
     echo "Running yapf ..."
-    yapf -i --recursive --exclude '**/*_pb2.py' --style='{based_on_style: google, INDENT_WIDTH: 2, ALIGN_CLOSING_BRACKET_WITH_VISUAL_INDENT: false, COALESCE_BRACKETS:true, DEDENT_CLOSING_BRACKETS: true}' "${PROJECT_NAME}/"
+    yapf -i --recursive "${PROJECT_NAME}/"
     echo "Running isort ..."
-    isort -y
+    isort .
   popd >/dev/null
 
 }
@@ -24,9 +24,9 @@ fmt_diff() {
     echo "Running yapf on DIFF ..."
     FILES=()
     IFS=" " read -r -a FILES <<< "$(git diff --name-only --diff-filter=d | grep -E '\.py$' | tr '\n' ' ')"
-    yapf -i --recursive --exclude '**/*_pb2.py' --style='{based_on_style: google, INDENT_WIDTH: 2, ALIGN_CLOSING_BRACKET_WITH_VISUAL_INDENT: false, COALESCE_BRACKETS:true, DEDENT_CLOSING_BRACKETS: true}' "${FILES[@]}"
+    yapf -i --recursive "${FILES[@]}"
     echo "Running isort on DIFF ..."
-    isort -y "${FILES[@]}"
+    isort "${FILES[@]}"
   popd >/dev/null
 }
 
@@ -46,14 +46,10 @@ lint_check() {
   fi
 
   pushd "${PROJECT_HOME}" >/dev/null
-
     lint_extras
-
     echo "Running pylint ..."
     pytest --pylint -m pylint --pylint-rcfile=.pylint.rc --pylint-jobs=3 "${ARGS[@]}"
-
     shellcheck_scripts
-
   popd >/dev/null
 
 }
@@ -75,7 +71,7 @@ lint_extras() {
     pydocstyle "${PROJECT_NAME}"
     pydocstyle --config=.pydocstyle.tests "${PROJECT_NAME}"
     echo "Checking imports ..."
-    isort -c
+    isort -c .
     shellcheck_scripts
   popd >/dev/null
 
@@ -86,8 +82,7 @@ reinstall_requirements() {
   set -e
 
   pushd "${PROJECT_HOME}" >/dev/null
-    pip install -r assets/requirements.txt --no-warn-script-location
-    pip install -r assets/requirements-dev.txt --no-warn-script-location
+    poetry install -E docs
   popd >/dev/null
 
 }
@@ -97,8 +92,10 @@ security() {
   set -e
 
   pushd "${PROJECT_HOME}" >/dev/null
-    bandit -r "${PROJECT_NAME}" -c .bandit.rc --ini .bandit
-    safety check
+    bandit -r "${PROJECT_NAME}" -c .bandit.rc --ini .bandit -x tests
+    poetry export --without-hashes --dev -f requirements.txt -o requirements.txt
+    safety check -r requirements.txt
+    rm requirements.txt
   popd >/dev/null
 
 }
@@ -121,9 +118,9 @@ setup_python() {
   pushd "${PROJECT_HOME}" >/dev/null
     if [[ ! -f /etc/container_release ]]; then
       set +e
-      pipenv --rm
+      poetry env remove python >/dev/null 2>&1
       set -e
-      pipenv --python 3.7
+      poetry install -E docs
     fi
     source_environment
     reinstall_requirements
@@ -148,7 +145,7 @@ source_environment() {
     unvirtualize
 
     # shellcheck disable=SC1090
-    source "$(pipenv --venv)/bin/activate"
+    source "$(poetry env info -p)/bin/activate"
 
   fi
 
@@ -252,23 +249,5 @@ update_cli() {
   echo "Disabled, due to upstream changes in the PIB api."
 
   return
-
-  set -e
-
-  updates=("/scripts/common/documentation.sh" "/scripts/common/wheel.sh" "/scripts/common/upload.sh" "/scripts/common/common.sh" "/development/bash/.bash_git" "/development/bash/.bash_profile" "/development/bash/.bashrc")
-
-  pushd "${PROJECT_HOME}" >/dev/null
-    mkdir -p scripts/common/.archive
-    mkdir -p development/bash/.archive
-    cp scripts/common/*.sh scripts/common/.archive
-    cp development/bash/.bash* development/bash/.archive
-    for filename in "${updates[@]}"; do
-      echo "Downloading: .${filename}"
-      echo "Source: https://raw.githubusercontent.com/niall-byrne/python-in-a-box/master/%7B%7Bcookiecutter.project_slug%7D%7D${filename}"
-      curl -s -L "https://raw.githubusercontent.com/niall-byrne/python-in-a-box/master/%7B%7Bcookiecutter.project_slug%7D%7D${filename}" >".${filename}"
-    done
-  popd >/dev/null
-
-  setup_bash
 
 }

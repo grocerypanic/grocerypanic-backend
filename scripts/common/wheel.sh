@@ -9,9 +9,9 @@ build_wheel() {
   BGreen='\033[32m'       # Green
   NC="\033[0m"            # Color Reset
 
-  OWNER="${OWNER}"
-  REPO="${REPO}"
-  TAG="${TAG}"
+  # OWNER
+  # REPO
+  # TAG
 
   source_environment
   pushd "${PROJECT_HOME}"  > /dev/null

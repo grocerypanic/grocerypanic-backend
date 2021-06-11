@@ -1,1 +1,4 @@
-panic/frontend/node_modules
+.mypy_cache/**/*.py
+.pytest_cache/**/*.py
+.idea/**/*.py
+.vscode/**/*.py

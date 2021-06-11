@@ -2,8 +2,8 @@
 
 from django.core.management.base import BaseCommand
 
-from utilities.management.shared.confirmation import ManagementConfirmation
 from ...models.item import Item
+from utilities.management.shared.confirmation import ManagementConfirmation
 
 MESSAGE_REBUILDING = "Rebuilding Item quantities from Inventory Table..."
 MESSAGE_SUCCESS = "Item quantities have been rebuilt!"

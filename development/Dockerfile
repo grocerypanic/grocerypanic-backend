@@ -3,6 +3,8 @@ MAINTAINER niall@niallbyrne.ca
 LABEL PROJECT=panic
 
 ENV PYTHONUNBUFFERED 1
+ENV POETRY_VIRTUALENVS_CREATE "false"
+ENV PYTHONUNBUFFERED 1
 ENV GITLEAKSVERSION="v7.2.0"
 
 # Mark Container
@@ -57,8 +59,17 @@ RUN curl --fail -sL https://dl.google.com/dl/cloudsdk/release/google-cloud-sdk.t
 # Initialize The gcloud sdk
 RUN /home/user/gcloud/google-cloud-sdk/install.sh
 
+# Include the local binary folder in PATH
+ENV PATH "/home/user/.local/bin/:${PATH}"
+
+USER user
+
+# Install Latest Poetry
+RUN pip install poetry wheel       && \
+    pip install --upgrade pip
+
 # Copy the codebase
 COPY . /app
 
-# Setup The Dev CLI
+# Install the Poetry Dependencies
 RUN scripts/commander.sh setup

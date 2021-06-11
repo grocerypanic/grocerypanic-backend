@@ -135,7 +135,6 @@ panic/static
 
 # App Engine Temporary Files
 app.yaml
-panic/requirements.txt
 
 # Frontend
 
@@ -153,5 +152,3 @@ gcloud*.json
 # asdf
 .tool-versions
 
-# Pipenv
-Pipfile.lock

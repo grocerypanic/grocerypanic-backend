@@ -2,8 +2,8 @@
 
 from django.core.management.base import BaseCommand
 
-from utilities.management.shared.confirmation import ManagementConfirmation
 from ...models.transaction import Transaction
+from utilities.management.shared.confirmation import ManagementConfirmation
 
 MESSAGE_REBUILDING = "Rebuilding for Inventory Table..."
 MESSAGE_SUCCESS = "Inventory table has been rebuilt!"

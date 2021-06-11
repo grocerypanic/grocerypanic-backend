@@ -22,7 +22,7 @@ A kitchen inventory management app.
 
 Once the development container is running, you can interact with the OpenApi Interface.
 
-Launch the container (instructions below) then create an admin user so you can login:
+Launch the container (instructions below) then create a default admin user:
 - `cd /app/panic`
 - `python manage.py autoadmin`
 - Login via the admin interface: 
@@ -58,10 +58,10 @@ Spawn a shell inside the container:
 ## Install the Project Packages on your Host Machine
 This is useful for making your IDE aware of what's installed in a venv.
 
-- `pip install pipenv`
+- `pip install poetry`
 - `source scripts/dev`
 - `dev setup` (Installs the requirements.txt in the `assets` folder.)
-- `pipenv --venv` (To get the path of the virtual environment for your IDE.)
+- `poetry env info -p` (To get the path of the virtual environment for your IDE.)
 
 ## Environment
 The [local.env](environments/local.env) file can be modified to inject environment variable content into the container.
@@ -77,19 +77,19 @@ You can override the values set in this file by setting shell ENV variables prio
 
 - Deployment to stage is fully automated on every commit to develop.  You will need to use the admin environment to manually manage database migrations as needed.
 
-- Deployment to production is trigged by a release tag.
+- Deployment to production is triggered by a release tag.
 
 #### Production Release Tags
 
 - The tag should follow [semantic versioning](https://semver.org/): "vDD.DD.DD" 
 
-- Once the tag is created, a github release draft is created, giving you the opportunity to review the changes before a deploy. Any database changes will need to be managed in the admin environment.
+- Once the tag is created, a GitHub release draft is created, giving you the opportunity to review the changes before a deployment. Any database changes will need to be managed in the admin environment.
 
 - Once the release is published, automatic deployment to production is triggered.  This is considered approval of the release.
 
 ## Database Migrations on Stage or Production
 
-Use the Admin environment to peform database migrations against Stage or Production.
+Use the Admin environment to perform database migrations against Stage or Production.
 A cloudsql proxy will be launched, looking for a gcp service account key file named `service-account.json` in the root of this repository.
 
 To start the admin environment:
@@ -113,11 +113,13 @@ The default configuration is to use the `pre-push` hook, with the goal being to 
 The CLI is enabled by default inside the container, and is also available on the host machine.
 Run the CLI without arguments to see the complete list of available commands: `$ dev`
 
+(This is mostly useful for setting up a venv for your IDE, it's recommended to use the container's managed environment.)
+
 ## Installing Dev CLI on a OSX host (outside the container)
 
 You need the Postgresql CLI installed, [here's](https://www.compose.com/articles/postgresql-tips-installing-the-postgresql-client/
 ) how on a Mac.
 
 If you're on Mojave or Catalina, you should run this command, prior to running `dev setup`:
-- `PATH=/usr/local/Cellar/libpq/xx.y/bin/:$PATH` (where xx.y is the version of `libpq` you've installed)
+- `export PATH=/usr/local/Cellar/libpq/xx.y/bin/:$PATH` (where xx.y is the version of `libpq` you've installed)
 - `export LDFLAGS="-I/usr/local/opt/openssl/include -L/usr/local/opt/openssl/lib"`

@@ -50,5 +50,5 @@ class TocTreeWriter(AbstractWriter):
   def _write_content(self):
     self.logger.info(self.writing_content_message)
     for file_name, content in self.tree.content.items():
-      file_handle = open(file_name, "w")
-      file_handle.write("\n".join(content))
+      with open(file_name, "w") as file_handle:
+        file_handle.write("\n".join(content))

@@ -46,7 +46,7 @@ class Debugger:
   def _start_debugger(self):
     debugger = importlib.import_module('debugpy')
     debugger_port = int(os.getenv("DJANGO_DEBUGGER_PORT", "5678"))
-    debugger.listen((
+    debugger.listen((  # nosec
         "0.0.0.0",
         debugger_port,
     ))

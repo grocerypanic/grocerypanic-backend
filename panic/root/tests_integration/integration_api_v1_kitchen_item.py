@@ -4,8 +4,8 @@ import faker
 from django.urls import reverse
 from rest_framework import status
 
-from kitchen.models.item import Item
 from .bases import APICrudTestHarness, APICrudTestHarnessUnauthorized
+from kitchen.models.item import Item
 
 
 class ItemCrudTest(APICrudTestHarness):

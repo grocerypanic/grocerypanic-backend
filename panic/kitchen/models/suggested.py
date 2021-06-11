@@ -2,8 +2,8 @@
 
 from django.db import models
 
-from spa_security.fields import BlondeCharField
 from .mixins import FullCleanMixin
+from spa_security.fields import BlondeCharField
 
 
 class SuggestedItem(

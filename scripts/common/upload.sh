@@ -40,9 +40,9 @@ main() {
 
   # Retag the master branch on latest commit local and remotes
   set +e
-  if git push origin :refs/tags/${_TAG} 2>/dev/null; then
-    git tag -d ${_TAG} 2>/dev/null
-    git tag ${_TAG} 2>/dev/null
+  if git push origin ":refs/tags/${_TAG}" 2>/dev/null; then
+    git tag -d "${_TAG}" 2>/dev/null
+    git tag "${_TAG}" 2>/dev/null
     git push origin --tags 2>/dev/null
   fi
 
@@ -64,7 +64,7 @@ main() {
   fi
 
   # Upload New Assets
-  GH_ASSET="https://uploads.github.com/repos/${_OWNER}/${_REPO}/releases/${_ID}/assets?name=$(basename ${_FILENAME})"
+  GH_ASSET="https://uploads.github.com/repos/${_OWNER}/${_REPO}/releases/${_ID}/assets?name=$(basename "${_FILENAME}")"
   ASSET=$(curl -s --data-binary @"${_FILENAME}" -H "Authorization: token ${_GITHUB_API_TOKEN}" -H "Content-Type: application/octet-stream" "${GH_ASSET}" | jq .url -r)
 
   # Pretty Print Result

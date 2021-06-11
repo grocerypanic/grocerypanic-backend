@@ -2,8 +2,8 @@
 
 from drf_yasg import openapi
 
-from utilities.serializers.fields.m2m import M2MThroughSerializerField
 from ..store import Store
+from utilities.serializers.fields.m2m import M2MThroughSerializerField
 
 
 class PreferredStoreSerializerField(M2MThroughSerializerField):

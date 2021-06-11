@@ -5,8 +5,8 @@ import pytz
 from django.urls import reverse
 from rest_framework import status
 
-from kitchen.models.transaction import Transaction
 from .bases import APICrudTestHarness, APICrudTestHarnessUnauthorized
+from kitchen.models.transaction import Transaction
 
 
 class TransactionAPICrudTest(APICrudTestHarness):
