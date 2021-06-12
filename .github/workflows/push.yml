@@ -117,6 +117,7 @@ jobs:
           - [ ] Ensure readthedocs is building correctly
           - [ ] Ensure unnecessary alerts are ignored/disabled
           - [ ] Successful web/mobile tests completed in stage environment
+          - [ ] Pre-deploy database backup
           - [ ] Use Admin environment to complete database migrations
         draft: true
         prerelease: false
