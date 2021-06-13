@@ -27,10 +27,7 @@ main() {
     bypass "${remote_ref}"
 
     bash scripts/commander.sh check-toctree
-    bash scripts/commander.sh lint
-    bash scripts/commander.sh sectest
-    bash scripts/commander.sh test-coverage
-    bash scripts/commander.sh test-integration
+    bash scripts/commander.sh types
 
   done
 
