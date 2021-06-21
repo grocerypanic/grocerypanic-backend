@@ -4,7 +4,6 @@ on:
   push:
   schedule:
     - cron:  '0 6 * * 1'
-  workflow_dispatch:
 
 jobs:
 
@@ -91,7 +90,7 @@ jobs:
         echo "{}" > package.json
     - name: Production -- Generate Changelog
       if: contains(github.ref, '/tags/v')
-      uses: scottbrenner/generate-changelog-action@1.0.3
+      uses: scottbrenner/generate-changelog-action@v1.3.1
       id: Changelog
       env:
         REPO: ${{ github.repository }}
