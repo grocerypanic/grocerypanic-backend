@@ -93,7 +93,7 @@ security() {
 
   pushd "${PROJECT_HOME}" >/dev/null
     bandit -r "${PROJECT_NAME}" -c .bandit.rc --ini .bandit -x tests
-    poetry export --without-hashes --dev -f requirements.txt -o requirements.txt
+    poetry export --without-hashes -f requirements.txt -o requirements.txt
     safety check -r requirements.txt
     rm requirements.txt
   popd >/dev/null
