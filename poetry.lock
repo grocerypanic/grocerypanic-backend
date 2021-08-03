@@ -307,7 +307,7 @@ requests-oauthlib = ">=0.3.0"
 
 [[package]]
 name = "django-bleach"
-version = "0.6.1"
+version = "0.7.2"
 description = "Easily use bleach with Django models and templates"
 category = "main"
 optional = false
@@ -1405,7 +1405,7 @@ docs = ["Sphinx", "sphinxcontrib-django"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "1c8318fd9ba59257b9d2793ba3b8f281e5f65be1a2efc53b7346fe70653b81d9"
+content-hash = "25a77fa1d08837daa5deded4689b443deb76ec836863eee4693ad86f47dbb124"
 
 [metadata.files]
 alabaster = [
@@ -1664,8 +1664,8 @@ django-allauth = [
     {file = "django-allauth-0.45.0.tar.gz", hash = "sha256:6d46be0e1480316ccd45476db3aefb39db70e038d2a543112d314b76bb999a4e"},
 ]
 django-bleach = [
-    {file = "django-bleach-0.6.1.tar.gz", hash = "sha256:674709c26040618aff0741ce8261fd151e5ead405bd50568c2034662d69daac3"},
-    {file = "django_bleach-0.6.1-py2.py3-none-any.whl", hash = "sha256:59de95cd98f924992313821ab7f94cd64a03aa900ca980bd3b062d8aef1a7954"},
+    {file = "django-bleach-0.7.2.tar.gz", hash = "sha256:2afc7ed5a10395b0bf84dfd43999305f77120902468071c18a7b666dcf5421bf"},
+    {file = "django_bleach-0.7.2-py2.py3-none-any.whl", hash = "sha256:8761714ff9737c81e595f0a362a0527fac31cf8208157f6d5f49c06863b21bad"},
 ]
 django-cors-headers = [
     {file = "django-cors-headers-3.7.0.tar.gz", hash = "sha256:96069c4aaacace786a34ee7894ff680780ec2644e4268b31181044410fecd12e"},
