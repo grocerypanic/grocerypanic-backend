@@ -47,10 +47,6 @@ class TestAdjustmentManager(InventoryTestHarness):
         'quantity': -1 * ((cls.positive_transaction['quantity'] * 2) - 1),
     })
 
-  @staticmethod
-  def __wipe_inventory():
-    Inventory.objects.all().delete()
-
   def __positive_transaction(self):
     transaction = self.create_test_transaction_instance(
         **self.positive_transaction,
@@ -274,10 +270,6 @@ class TestAdjustmentManagerQueries(InventoryTestHarness):
     cls.purchased_yesterday.update({
         'date_object': cls.today - timedelta(days=1),
     })
-
-  @staticmethod
-  def __wipe_inventory():
-    Inventory.objects.all().delete()
 
   def __apply_transaction(self, definition):
     transaction = self.create_test_transaction_instance(**definition,)
