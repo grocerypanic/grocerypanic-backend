@@ -43,6 +43,15 @@ class TestItem(ModelTestMixin, ItemTestHarness):
     self.assertQuerysetEqual(query, [created])
     self.assertEqual(query[0]._index, self.create_data['name'].lower())
 
+  def test_create_with_no_shelf(self):
+    create_without_shelf = dict(self.create_data)
+    create_without_shelf.update({"shelf": None})
+    created = self.create_test_instance(**create_without_shelf)
+    query = Item.objects.filter(name=self.create_data['name'])
+
+    self.assertQuerysetEqual(query, [created])
+    self.assertEqual(query[0].shelf, None)
+
   def test_unique(self):
     _ = self.create_test_instance(**self.create_data)
 

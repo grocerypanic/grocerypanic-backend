@@ -48,7 +48,9 @@ class Item(
           MaxValueValidator(constants.MAXIMUM_QUANTITY),
       ],
   )
-  shelf = models.ForeignKey('Shelf', on_delete=models.SET_NULL, null=True)
+  shelf = models.ForeignKey(
+      'Shelf', on_delete=models.SET_NULL, blank=True, null=True
+  )
   shelf_life = models.IntegerField(
       default=DEFAULT_SHELF_LIFE,
       validators=[
