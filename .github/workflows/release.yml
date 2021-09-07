@@ -4,6 +4,11 @@ on:
   release:
     types: [published]
 
+env:
+  ORGNAME: grocerypanic
+  REPONAME: grocerypanic-backend
+  WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+
 jobs:
   release:
     runs-on: ubuntu-20.04
@@ -36,12 +41,8 @@ jobs:
           PROD_SERVICE_ACCOUNT: ${{ secrets.PROD_SERVICE_ACCOUNT }}
       - name: Production -- Report Success
         run: |
-          curl -X POST -H 'Content-type: application/json' --data '{"text":"panic backend: automated production deployment was successful!"}' "${WEBHOOK_URL}"
-        env:
-          WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+          ./.github/workflows/scripts/notifications.sh ":white_check_mark: Automated production deployment was successful!"
       - name: Production -- Report Failure
         if: failure()
         run: |
-          curl -X POST -H 'Content-type: application/json' --data '{"text":"panic backend: automated production deployment has failed!"}' "${WEBHOOK_URL}"
-        env:
-          WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+          ./.github/workflows/scripts/notifications.sh ":x: Automated production deployment has failed!"

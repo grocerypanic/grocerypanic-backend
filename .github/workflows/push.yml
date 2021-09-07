@@ -6,6 +6,11 @@ on:
   schedule:
     - cron:  '0 6 * * 1'
 
+env:
+  ORGNAME: grocerypanic
+  REPONAME: grocerypanic-backend
+  WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+
 jobs:
 
   push:
@@ -14,6 +19,9 @@ jobs:
     - uses: actions/checkout@v2
       with:
         fetch-depth: 0
+    - name: Production -- Report Success
+      run: |
+        ./.github/workflows/scripts/notifications.sh ":white_check_mark: CI workflow has started!"
     - name: Create Docker Mounted Content
       run: |
         echo | ssh-keygen
@@ -46,15 +54,11 @@ jobs:
         docker-compose exec -T panic bash -l -c 'scripts/commander.sh test integration'
     - name: Report Job Status (Success)
       run: |
-        curl -X POST -H 'Content-type: application/json' --data '{"text":"panic backend build was successful!"}' "${WEBHOOK_URL}"
-      env:
-        WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+        ./.github/workflows/scripts/notifications.sh ":white_check_mark: Build was successful!"
     - name: Report Job Status
       if: failure()
       run: |
-        curl -X POST -H 'Content-type: application/json' --data '{"text":"panic backend build has failed!"}' "${WEBHOOK_URL}"
-      env:
-        WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+        ./.github/workflows/scripts/notifications.sh ":x: Build has failed!"
 
     - name: Stage -- Deploy
       if: github.ref == 'refs/heads/master'
@@ -71,15 +75,12 @@ jobs:
     - name: Stage -- Report Success
       if: github.ref == 'refs/heads/master'
       run: |
-        curl -X POST -H 'Content-type: application/json' --data '{"text":"panic backend: automated deploy to stage!"}' "${WEBHOOK_URL}"
-      env:
-        WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+        ./.github/workflows/scripts/notifications.sh ":white_check_mark: Automated deploy to stage!"
     - name: Stage -- Report Failure
       if: failure() && github.ref == 'refs/heads/master'
       run: |
-        curl -X POST -H 'Content-type: application/json' --data '{"text":"panic backend: stage deploy has failed!"}' "${WEBHOOK_URL}"
+        ./.github/workflows/scripts/notifications.sh ":x: Automated deploy to stage has failed!"
       env:
-        WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
         REF: ${{ github.ref }}
         EVENT: ${{ github.event_name }}
 
@@ -118,13 +119,8 @@ jobs:
     - name: Production -- Report Success
       if: contains(github.ref, '/tags/v')
       run: |
-        curl -X POST -H 'Content-type: application/json' --data "{\"text\":\"panic backend: automated release has been created for ${TAG}: https://github.com/niall-byrne/panic/releases\"}" "${WEBHOOK_URL}"
-      env:
-        WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
-        TAG: ${{ env.NEWTAG }}
+        ./.github/workflows/scripts/notifications.sh ":white_check_mark: Automated release has been created:\nhttps://github.com/${ORGNAME}/${REPONAME}/releases"
     - name: Production -- Report Failure
       if: failure() && contains(github.ref, '/tags/v')
       run: |
-        curl -X POST -H 'Content-type: application/json' --data '{"text":"panic backend: automated production release has failed!"}' "${WEBHOOK_URL}"
-      env:
-        WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+        ./.github/workflows/scripts/notifications.sh ":x: Automated release generation has failed!"
