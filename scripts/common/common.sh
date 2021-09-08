@@ -109,6 +109,11 @@ setup_bash() {
     ln -sf "${filename}" "/home/user/$(basename "${filename}")"
   done
 
+  for filename in /app/development/dotfiles/.[^.]*; do
+    echo "Symlinking ${filename} ..."
+    ln -sf "${filename}" "/home/user/$(basename "${filename}")"
+  done
+
 }
 
 setup_python() {

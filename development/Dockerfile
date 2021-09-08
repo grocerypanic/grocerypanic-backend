@@ -48,7 +48,6 @@ RUN useradd user -d /home/user        \
  && chown -R user:user /home/user     \
  && chown -R user:user /app           \
  && echo "user ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
-USER user
 
 # Install latest gcloud sdk
 RUN curl --fail -sL https://dl.google.com/dl/cloudsdk/release/google-cloud-sdk.tar.gz > gcloud.tar.gz \
