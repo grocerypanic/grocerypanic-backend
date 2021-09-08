@@ -40,6 +40,11 @@ class TestItem(SerializerTestMixin, ItemTestHarness):
         'price': 2.00,
     }
 
+    cls.create_data_no_shelf = dict(cls.create_data)
+    cls.create_data_no_shelf.update({
+      'shelf': None,
+    })
+
     cls.create_data_wrong_shelf = dict(cls.create_data)
     cls.create_data_wrong_shelf.update({
         'shelf': cls.shelf2.id,
@@ -60,6 +65,19 @@ class TestItem(SerializerTestMixin, ItemTestHarness):
         'price': 2.00,
     }
 
+    cls.serializer_data_no_shelf = dict(cls.serializer_data)
+    cls.serializer_data_no_shelf.update({
+      'shelf': None,
+    })
+
+  def update_with_default_create_values(self, source_dictionary):
+    new_dictionary = dict(source_dictionary)
+    new_dictionary['next_expiry_quantity'] = 0
+    new_dictionary['expired'] = 0
+    new_dictionary['next_expiry_date'] = None
+    new_dictionary['next_expiry_datetime'] = None
+    return new_dictionary
+
   @classmethod
   def setUpTestData(cls):
     test_data1 = cls.create_dependencies(2)
@@ -70,6 +88,21 @@ class TestItem(SerializerTestMixin, ItemTestHarness):
 
   def test_deserialize(self):
     item = self.create_test_instance(**self.create_data)
+    serialized = self.serializer(item)
+    deserialized = serialized.data
+    excluded_fields = [
+        'user',
+        '_expired',
+        '_next_expiry_quantity',
+    ]
+
+    representation = self._instance_to_dict(item, exclude=excluded_fields)
+    representation['price'] = "%.2f" % representation['price']
+
+    self.assertDictEqual(representation, deserialized)
+
+  def test_deserialize_no_shelf(self):
+    item = self.create_test_instance(**self.create_data_no_shelf)
     serialized = self.serializer(item)
     deserialized = serialized.data
     excluded_fields = [
@@ -96,12 +129,28 @@ class TestItem(SerializerTestMixin, ItemTestHarness):
     assert len(query) == 1
     item = query[0]
 
-    expected = dict(self.serializer_data)
-    expected['next_expiry_quantity'] = 0
-    expected['expired'] = 0
-    expected['next_expiry_date'] = None
-    expected['next_expiry_datetime'] = None
+    expected = self.update_with_default_create_values(self.serializer_data)
+    representation = self._instance_to_dict_subset(item, expected)
+    representation['price'] = float(item.price)
 
+    self.assertDictEqual(representation, expected)
+
+  def test_serialize_no_shelf(self):
+    serialized = self.serializer(
+        context={'request': self.request},
+        data=self.serializer_data_no_shelf,
+    )
+    serialized.is_valid(raise_exception=True)
+    serialized.save()
+
+    query = Item.objects.filter(name=self.serializer_data_no_shelf['name'])
+
+    assert len(query) == 1
+    item = query[0]
+
+    expected = self.update_with_default_create_values(
+      self.serializer_data_no_shelf
+    )
     representation = self._instance_to_dict_subset(item, expected)
     representation['price'] = float(item.price)
 

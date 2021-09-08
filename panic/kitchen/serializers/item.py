@@ -62,9 +62,10 @@ class ItemSerializer(KitchenBaseModelSerializer):
     """Ensure shelf is owned by the current request user.
 
     :param shelf: A related shelf instance for this model.
-    :type shelf: :class:`panic.kitchen.models.shelf.Shelf`
+    :type shelf: :class:`panic.kitchen.models.shelf.Shelf` or None
 
     :raises: :class:`rest_framework.serializers.ValidationError`
     """
-    self.related_validator(shelf, "shelf")
+    if shelf:
+      self.related_validator(shelf, "shelf")
     return shelf
