@@ -49,7 +49,7 @@ class Item(
       ],
   )
   shelf = models.ForeignKey(
-      'Shelf', on_delete=models.SET_NULL, blank=True, null=True
+      'Shelf', on_delete=models.RESTRICT, blank=True, null=True
   )
   shelf_life = models.IntegerField(
       default=DEFAULT_SHELF_LIFE,

@@ -7,6 +7,7 @@ from ..pagination import PagePaginationWithOverride
 from ..serializers.store import StoreSerializer
 from ..swagger import openapi_ready
 from .bases import KitchenBaseView
+from .mixins import ProtectedResourceMixin
 
 
 class StoreBaseView(
@@ -20,6 +21,7 @@ class StoreBaseView(
 
 class StoreViewSet(
     StoreBaseView,
+    ProtectedResourceMixin,
     mixins.DestroyModelMixin,
     viewsets.GenericViewSet,
 ):

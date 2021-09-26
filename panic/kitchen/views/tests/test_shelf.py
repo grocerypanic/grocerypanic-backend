@@ -10,6 +10,7 @@ from rest_framework.test import APIClient
 from ...models.shelf import Shelf
 from ...serializers.shelf import ShelfSerializer
 from ...tests.fixtures.fixtures_shelf import ShelfTestHarness
+from .fixtures.fixtures_item import ItemViewSetTestHarness
 from .fixtures.fixtures_shelf import AnotherUserTestHarness
 
 SHELF_URL = reverse("v1:shelves-list")
@@ -117,6 +118,26 @@ class PrivateShelfTest(ShelfTestHarness):
     assert len(shelves) == 1
     self.assertEqual(res.status_code, status.HTTP_201_CREATED)
     self.assertEqual(shelves[0].name, data['name'])
+
+
+class PrivateShelfTestInUse(ItemViewSetTestHarness):
+  """Test the authorized Shelf API with existing items referencing a Shelf."""
+
+  def setUp(self):
+    super().setUp()
+    self.client = APIClient()
+    self.client.force_authenticate(self.user1)
+
+  def test_delete_referenced_shelf(self):
+    delete = self.create_test_instance(**self.data1)
+    count1 = Shelf.objects.all().order_by("_index").count()
+
+    res = self.client.delete(SHELF_URL + str(delete.shelf.id) + '/')
+
+    count2 = Shelf.objects.all().order_by("_index").count()
+
+    assert count1 == count2
+    self.assertEqual(res.status_code, status.HTTP_409_CONFLICT)
 
 
 class PrivateShelfTestAnotherUser(AnotherUserTestHarness):

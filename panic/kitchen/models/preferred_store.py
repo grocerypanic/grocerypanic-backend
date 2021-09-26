@@ -14,7 +14,7 @@ class PreferredStore(
   )
   store = models.ForeignKey(
       'kitchen.Store',
-      on_delete=models.CASCADE,
+      on_delete=models.RESTRICT,
   )
 
   objects = models.Manager()

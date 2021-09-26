@@ -42,7 +42,7 @@ class TestItem(SerializerTestMixin, ItemTestHarness):
 
     cls.create_data_no_shelf = dict(cls.create_data)
     cls.create_data_no_shelf.update({
-      'shelf': None,
+        'shelf': None,
     })
 
     cls.create_data_wrong_shelf = dict(cls.create_data)
@@ -67,7 +67,7 @@ class TestItem(SerializerTestMixin, ItemTestHarness):
 
     cls.serializer_data_no_shelf = dict(cls.serializer_data)
     cls.serializer_data_no_shelf.update({
-      'shelf': None,
+        'shelf': None,
     })
 
   def update_with_default_create_values(self, source_dictionary):
@@ -149,7 +149,7 @@ class TestItem(SerializerTestMixin, ItemTestHarness):
     item = query[0]
 
     expected = self.update_with_default_create_values(
-      self.serializer_data_no_shelf
+        self.serializer_data_no_shelf
     )
     representation = self._instance_to_dict_subset(item, expected)
     representation['price'] = float(item.price)

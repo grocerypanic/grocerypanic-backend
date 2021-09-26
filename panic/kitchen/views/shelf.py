@@ -7,6 +7,7 @@ from ..pagination import PagePaginationWithOverride
 from ..serializers.shelf import ShelfSerializer
 from ..swagger import openapi_ready
 from .bases import KitchenBaseView
+from .mixins import ProtectedResourceMixin
 
 
 class BaseShelfView(
@@ -20,6 +21,7 @@ class BaseShelfView(
 
 class ShelfViewSet(
     BaseShelfView,
+    ProtectedResourceMixin,
     mixins.DestroyModelMixin,
     viewsets.GenericViewSet,
 ):

@@ -1,6 +1,7 @@
 """Test the PreferredStore model."""
 
 from django.core.exceptions import ValidationError
+from django.db.models import RestrictedError
 
 from ...tests.fixtures.fixtures_item import ItemTestHarness
 from ..preferred_store import PreferredStore
@@ -65,3 +66,15 @@ class TestPreferredStore(ItemTestHarness):
                 ["These selections must match the 'user' field."],
         }
     )
+
+  def test_delete_item(self):
+    item = self.create_test_instance(**self.create_data)
+    item.delete()
+
+    preferred_stores_count = PreferredStore.objects.filter(item=item).count()
+    self.assertEqual(preferred_stores_count, 0)
+
+  def test_delete_store(self):
+    self.create_test_instance(**self.create_data)
+    with self.assertRaises(RestrictedError):
+      self.store1.delete()

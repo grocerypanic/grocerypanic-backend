@@ -6,6 +6,7 @@ from unittest.mock import MagicMock, patch
 
 import pendulum
 from django.core.exceptions import ValidationError
+from django.db.models import RestrictedError
 from django.utils import timezone
 from django.utils.functional import cached_property
 from freezegun import freeze_time
@@ -561,20 +562,11 @@ class TestItemRelatedFields(ItemTestHarness):
     )
 
   def test_deleting_shelf(self):
-    item = self.create_test_instance(**self.create_data2)
-    self.shelf2.delete()
-    item.refresh_from_db()
-
-    self.assertEqual(
-        item.shelf,
-        None,
-    )
+    self.create_test_instance(**self.create_data)
+    with self.assertRaises(RestrictedError):
+      self.shelf1.delete()
 
   def test_delete_store(self):
-    created = self.create_test_instance(**self.create_data)
-    self.store1.delete()
-
-    self.assertEqual(
-        created.preferred_stores.all().count(),
-        0,
-    )
+    self.create_test_instance(**self.create_data)
+    with self.assertRaises(RestrictedError):
+      self.store1.delete()

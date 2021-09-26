@@ -10,6 +10,7 @@ from rest_framework.test import APIClient
 from ...models.store import Store
 from ...serializers.store import StoreSerializer
 from ...tests.fixtures.fixtures_store import StoreTestHarness
+from .fixtures.fixtures_item import ItemViewSetTestHarness
 from .fixtures.fixtures_store import AnotherUserTestHarness
 
 STORE_URL = reverse("v1:stores-list")
@@ -117,6 +118,27 @@ class PrivateStoreTest(StoreTestHarness):
     assert len(shelves) == 1
     self.assertEqual(res.status_code, status.HTTP_201_CREATED)
     self.assertEqual(shelves[0].name, data['name'])
+
+
+class PrivateStoreTestInUse(ItemViewSetTestHarness):
+  """Test the authorized Store API with existing items referencing a Store."""
+
+  def setUp(self):
+    super().setUp()
+    self.client = APIClient()
+    self.client.force_authenticate(self.user1)
+
+  def test_delete_referenced_shelf(self):
+    delete = self.create_test_instance(**self.data1)
+    count1 = Store.objects.all().order_by("_index").count()
+
+    first_store = delete.preferred_stores.all()[0]
+    res = self.client.delete(STORE_URL + str(first_store.id) + '/')
+
+    count2 = Store.objects.all().order_by("_index").count()
+
+    assert count1 == count2
+    self.assertEqual(res.status_code, status.HTTP_409_CONFLICT)
 
 
 class PrivateStoreTestAnotherUser(AnotherUserTestHarness):
