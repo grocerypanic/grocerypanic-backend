@@ -16,7 +16,7 @@ django-cors-headers = "^3.9.0"
 django-split-settings = "^1.0.1"
 django-timezone-field = "^4.1.1"
 django-watchman = "^1.2.0"
-dj-rest-auth = {extras = ["with_social"], version = "^1.0.0"}
+dj-rest-auth = {extras = ["with_social"], version = "^2.1.11"}
 drf-yasg = "^1.20.0"
 langcodes = "^3.1.0"
 pendulum = "2.1.2"

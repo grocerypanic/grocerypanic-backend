@@ -262,7 +262,7 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 
 [[package]]
 name = "dj-rest-auth"
-version = "1.1.2"
+version = "2.1.11"
 description = "Authentication and Registration in Django Rest Framework"
 category = "main"
 optional = false
@@ -270,11 +270,11 @@ python-versions = ">=3.5"
 
 [package.dependencies]
 Django = ">=2.0"
-django-allauth = {version = ">=0.25.0", optional = true, markers = "extra == \"with_social\""}
+django-allauth = {version = ">=0.40.0,<0.45.0", optional = true, markers = "extra == \"with_social\""}
 djangorestframework = ">=3.7.0"
 
 [package.extras]
-with_social = ["django-allauth (>=0.25.0)"]
+with_social = ["django-allauth (>=0.40.0,<0.45.0)"]
 
 [[package]]
 name = "django"
@@ -295,7 +295,7 @@ bcrypt = ["bcrypt"]
 
 [[package]]
 name = "django-allauth"
-version = "0.45.0"
+version = "0.44.0"
 description = "Integrated set of Django applications addressing authentication, registration, account management as well as 3rd party (social) account authentication."
 category = "main"
 optional = false
@@ -1430,7 +1430,7 @@ docs = ["Sphinx", "sphinxcontrib-django"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "7e27921083c565a6d66699a115c798a079921fc4219b26232d5882e8dfa53af9"
+content-hash = "0d130dd50141863c5aa8e7b9002ff61f04ae938c73bafd99eedb5376a53fc1ae"
 
 [metadata.files]
 alabaster = [
@@ -1634,14 +1634,14 @@ defusedxml = [
     {file = "defusedxml-0.7.1.tar.gz", hash = "sha256:1bb3032db185915b62d7c6209c5a8792be6a32ab2fedacc84e01b52c51aa3e69"},
 ]
 dj-rest-auth = [
-    {file = "dj-rest-auth-1.1.2.tar.gz", hash = "sha256:530f1dd71b96edb13ccedcbf783784a5b03e0148bdb115dba8729f4a66076bbb"},
+    {file = "dj-rest-auth-2.1.11.tar.gz", hash = "sha256:97290a3c98e5aa369cdb0d660a23f0f665d622ccc5ba25d1ab35888714be07c9"},
 ]
 django = [
     {file = "Django-3.2.8-py3-none-any.whl", hash = "sha256:42573831292029639b798fe4d3812996bfe4ff3275f04566da90764daec011a5"},
     {file = "Django-3.2.8.tar.gz", hash = "sha256:f6d2c4069c9b9bfac03bedff927ea1f9e0d29e34525cec8a68fd28eb2a8df7af"},
 ]
 django-allauth = [
-    {file = "django-allauth-0.45.0.tar.gz", hash = "sha256:6d46be0e1480316ccd45476db3aefb39db70e038d2a543112d314b76bb999a4e"},
+    {file = "django-allauth-0.44.0.tar.gz", hash = "sha256:e51af457466022f52154d74c8523ac69375120fad2acce6e239635d85e610b25"},
 ]
 django-bleach = [
     {file = "django-bleach-0.9.0.tar.gz", hash = "sha256:d76534566987187da35c60d9097bc18e6d8aadc2d8743cee46b820940e45cea7"},
