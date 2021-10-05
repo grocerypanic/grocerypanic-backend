@@ -5,7 +5,7 @@ echo "Development Server Starting ..."
 pushd "panic" || exit 127
 
 if [[ $1 == "admin" ]]; then
-  cloud_sql_proxy --instances=${CLOUDSQLINSTANCE}=tcp:5432 &
+  cloud_sql_proxy --instances=${CLOUDSQLINSTANCE}=tcp:0.0.0.0:5432 &
 else
   [[ -f ../environments/local_secret.env ]] && source ../environments/local_secret.env
   ./manage.py wait_for_db
