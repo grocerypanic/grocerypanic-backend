@@ -2,6 +2,29 @@
 
 set -e
 
+backup_stage() {
+
+  set -e
+
+  pushd "${PROJECT_HOME}" > /dev/null
+    pushd "${PROJECT_NAME}" >/dev/null
+
+      set -a
+      # shellcheck disable=SC1091
+      source ../environments/stage.env
+
+      gcloud config set project "${GCP_PROJECT}"
+      INSTANCE_NAME=$(echo "${CLOUDSQLINSTANCE}" | cut -d":" -f3)
+
+      prune_backups
+
+      echo "Creating new snapshot..."
+      gcloud sql backups create --instance="${INSTANCE_NAME}"
+
+    popd >/dev/null
+  popd >/dev/null
+
+}
 deploy_stage() {
 
   pushd "${PROJECT_HOME}" > /dev/null

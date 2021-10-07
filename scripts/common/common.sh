@@ -30,6 +30,13 @@ fmt_diff() {
   popd >/dev/null
 }
 
+is_admin() {
+  if [[ "${DJANGO_ENVIRONMENT}" != "admin" ]]; then
+    echo "This command can only be run in an admin mode container."
+    exit 127
+  fi
+}
+
 lint() {
 
   lint_check "$@"
@@ -149,7 +156,7 @@ source_environment() {
 
     unvirtualize
 
-    # shellcheck disable=SC1090
+    # shellcheck disable=SC1090,SC1091
     source "$(poetry env info -p)/bin/activate"
 
   fi

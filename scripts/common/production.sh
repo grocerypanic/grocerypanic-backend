@@ -2,6 +2,30 @@
 
 set -e
 
+backup_prod() {
+
+  set -e
+
+  pushd "${PROJECT_HOME}" > /dev/null
+    pushd "${PROJECT_NAME}" >/dev/null
+
+      set -a
+      # shellcheck disable=SC1091
+      source ../environments/prod.env
+
+      gcloud config set project "${GCP_PROJECT}"
+
+      prune_backups
+
+      echo "Creating new snapshot..."
+      INSTANCE_NAME=$(echo "${CLOUDSQLINSTANCE}" | cut -d":" -f3)
+      gcloud sql backups create --instance="${INSTANCE_NAME}"
+
+    popd >/dev/null
+  popd >/dev/null
+
+}
+
 deploy_prod() {
 
   pushd "${PROJECT_HOME}" > /dev/null

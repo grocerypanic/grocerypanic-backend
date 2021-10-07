@@ -1,3 +1,4 @@
+---
 name: panic-ProductionDeploys
 
 on:
@@ -6,29 +7,43 @@ on:
 
 env:
   ORGNAME: grocerypanic
-  REPONAME: grocerypanic-backend
-  WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+  PROJECT_NAME: grocerypanic-backend
 
 jobs:
-  release:
+
+  production_deploy:
+
     runs-on: ubuntu-20.04
+
     steps:
-      - uses: actions/checkout@v2
+
+      - name: Production Deploy -- Checkout Codebase
+        uses: actions/checkout@v2
         with:
           fetch-depth: 0
-      - name: Create Docker Mounted Content
+
+      - name: Production Deploy -- Setup Environment
+        run: |
+          source ./.github/scripts/setup.sh
+        env:
+          WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+
+      - name: Production Deploy -- Create Docker Mounted Content
         run: |
           echo | ssh-keygen
           touch ${HOME}/.gitconfig
           touch ${HOME}/.gitconfig_global
-      - name: Ensure File System is Writable by the Container
+
+      - name: Production Deploy -- Ensure File System is Writable by the Container
         run: |
           sudo chmod -R o+w .
-      - name: Build Container
+
+      - name: Production Deploy -- Build Container
         run: |
-          docker-compose build
-          docker-compose up -d
-      - name: Production -- Deploy
+          sed -i.bak 's/target: base/target: deploy/' docker-compose.yml
+          source .github/scripts/build_container.sh
+
+      - name: Production Deploy -- Deploy
         run: |
           # Deploy to Production
           echo -n "${ADMIN_ENV}" | base64 --decode > ./environments/admin.env
@@ -39,10 +54,12 @@ jobs:
           ADMIN_ENV: ${{ secrets.ADMIN_ENV }}
           PROD_ENV: ${{ secrets.PROD_ENV }}
           PROD_SERVICE_ACCOUNT: ${{ secrets.PROD_SERVICE_ACCOUNT }}
-      - name: Production -- Report Success
+
+      - name: Production Deploy -- Report Success
         run: |
-          ./.github/workflows/scripts/notifications.sh ":white_check_mark: Automated production deployment was successful!"
-      - name: Production -- Report Failure
+          ./.github/workflows/scripts/notifications.sh "${NOTIFICATION}" ":white_check_mark: Automated production deployment was successful!"
+
+      - name: Production Deploy -- Report Failure
         if: failure()
         run: |
-          ./.github/workflows/scripts/notifications.sh ":x: Automated production deployment has failed!"
+          ./.github/workflows/scripts/notifications.sh "${NOTIFICATION}" ":x: Automated production deployment has failed!"

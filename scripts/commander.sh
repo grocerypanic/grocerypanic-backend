@@ -17,6 +17,12 @@ source "$( dirname "${BASH_SOURCE[0]}" )/common/documentation.sh"
 
 # Add Additional Functionality Via Imports Here
 
+# shellcheck source=scripts/common/database.sh
+source "$( dirname "${BASH_SOURCE[0]}" )/common/database.sh"
+
+# shellcheck source=scripts/common/release.sh
+source "$( dirname "${BASH_SOURCE[0]}" )/common/release.sh"
+
 # shellcheck source=scripts/common/stage.sh
 source "$( dirname "${BASH_SOURCE[0]}" )/common/stage.sh"
 
@@ -24,6 +30,18 @@ source "$( dirname "${BASH_SOURCE[0]}" )/common/stage.sh"
 source "$( dirname "${BASH_SOURCE[0]}" )/common/production.sh"
 
 case $1 in
+  'backup-prod')
+    shift
+    source_environment
+    is_admin
+    backup_prod "$@"
+    ;;
+  'backup-stage')
+    shift
+    source_environment
+    is_admin
+    backup_stage "$@"
+    ;;
   'build-docs')
     shift
     source_environment
@@ -34,6 +52,10 @@ case $1 in
     source_environment
     build_toctree "$@"
     ;;
+  'check-release')
+    source_environment
+    check_release
+    ;;
   'check-toctree')
     shift
     source_environment
@@ -42,11 +64,13 @@ case $1 in
   'deploy-stage')
     shift
     source_environment
+    is_admin
     deploy_stage "$@"
     ;;
    'deploy-prod')
     shift
     source_environment
+    is_admin
     deploy_prod "$@"
     ;;
   'fmt')
@@ -90,7 +114,7 @@ case $1 in
     setup_python "$@"
     ;;
   'shortlist')
-    echo "build-docs build-toctree check-toctree deploy-prod deploy-stage fmt fmt-diff lint lint-diff lint-extras reinstall-requirements sectest setup test test-coverage test-integration types update"
+    echo "backup-prod backup-stage build-docs build-toctree check-release check-toctree deploy-prod deploy-stage fmt fmt-diff lint lint-diff lint-extras reinstall-requirements sectest setup test test-coverage test-integration types update"
     ;;
   'test')
     shift
@@ -118,11 +142,14 @@ case $1 in
     ;;
   *)
     echo "Valid Commands:"
+    echo ' - backup-prod             (ADMIN ONLY: snapshot the active database)'
+    echo ' - backup-stage            (ADMIN ONLY: snapshot the active database)'
     echo ' - build-docs              (Build Documentation)'
     echo ' - build-toctree           (re/Build Documentation TocTree)'
+    echo ' - check-release           (Check code is release ready)'
     echo ' - check-toctree           (Check Documentation TocTree)'
-    echo ' - deploy-prod             (Deploy to Cloud RUn)'
-    echo ' - deploy-stage            (Deploy to App Engine)'
+    echo ' - deploy-prod             (ADMIN ONLY: Deploy to Production)'
+    echo ' - deploy-stage            (ADMIN ONLY: Deploy to Stage)'
     echo ' - fmt                     (Run the code formatters)'
     echo ' - fmt-diff                (Run the code formatters on modified files.)'
     echo ' - lint                    (Run the linter)'

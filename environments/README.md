@@ -36,7 +36,9 @@ DJANGO_JWT_SECRET_KEY=LKEtEEk1rXLFkXqzIbFeGpCLBTskOOiUmiAXflLBXKorvqmtOvq05ZyhUP
 DJANGO_ENVIRONMENT=local
 ```
 
+<!-- markdown-link-check-disable -->
 ### [local_secret.env](./local_secret.env)
+<!-- markdown-link-check-enable -->
 
 This file should NOT be checked in, and contains information for third party integrations.
 

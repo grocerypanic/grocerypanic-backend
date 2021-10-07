@@ -19,6 +19,7 @@ A kitchen inventory management app.
 
 
 ## OpenAPI Specification
+<!-- markdown-link-check-disable -->
 
 Once the development container is running, you can interact with the OpenApi Interface.
 
@@ -30,6 +31,7 @@ Launch the container (instructions below) then create a default admin user:
 - View the OpenAPI interface: 
   - http://localhost:8080/swagger/
 
+<!-- markdown-link-check-enable -->
 ## Environment Configuration
 
 [Environment Documentation](./environments/README.md)
