@@ -1,3 +1,4 @@
+---
 version: "3"
 
 services:
@@ -5,6 +6,7 @@ services:
     build:
       context: .
       dockerfile: development/Dockerfile
+      target: base
     security_opt:
       - seccomp:unconfined
     cap_add:

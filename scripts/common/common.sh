@@ -4,6 +4,40 @@
 # INSTEAD: add additional functionality by adding separate library files
 # Import your new libraries into the commander.sh script and add them to the CLI.
 
+deploy_appengine() {
+
+  # $1 "stage" or "prod"
+
+  pushd "${PROJECT_HOME}" > /dev/null
+    pushd "${PROJECT_NAME}" >/dev/null
+
+        set -a
+        # shellcheck disable=SC1091,SC1090
+        source "../environments/${1}.env"
+
+        ./manage.py collectstatic --no-input
+
+        poetry export --without-hashes -f requirements.txt -o requirements.txt
+        mv ../requirements.txt .
+        cp "../environments/${1}.yaml" app.yaml
+
+        while read -r line; do
+          [[ -z "${line}" ]] && continue
+          key="$(echo "${line}" | cut -d'=' -f1)"
+          value=''
+          value="${line/$key=/$value}"
+          echo "  ${key}: \"${value}\"" >> app.yaml
+        done < "../environments/${1}.env"
+        gcloud auth activate-service-account --key-file=../service-account.json
+        gcloud config set project "${GCP_PROJECT}"
+        gcloud app deploy --version v1 --quiet
+        rm app.yaml requirements.txt
+
+    popd >/dev/null
+  popd >/dev/null
+
+}
+
 fmt() {
 
   set -e
@@ -28,6 +62,15 @@ fmt_diff() {
     echo "Running isort on DIFF ..."
     isort "${FILES[@]}"
   popd >/dev/null
+}
+
+is_admin() {
+
+  set -e
+  if ! command -v gcloud > /dev/null; then
+    echo "This command can only be run in an admin mode container."
+    exit 127
+  fi
 }
 
 lint() {
@@ -149,7 +192,7 @@ source_environment() {
 
     unvirtualize
 
-    # shellcheck disable=SC1090
+    # shellcheck disable=SC1090,SC1091
     source "$(poetry env info -p)/bin/activate"
 
   fi

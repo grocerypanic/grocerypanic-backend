@@ -1,3 +1,4 @@
+---
 # For Connecting to the Django Admin Interface on Remote Instances
 version: "3"
 
@@ -6,6 +7,7 @@ services:
     build:
       context: .
       dockerfile: development/Dockerfile
+      target: admin
     ports:
       - "127.0.0.1:8080:8080"
       - "127.0.0.1:5432:5432"

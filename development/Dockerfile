@@ -1,4 +1,5 @@
-FROM python:3.7-slim
+ARG PYTHON_VERSION=3.7
+FROM python:$PYTHON_VERSION-slim AS base
 MAINTAINER niall@niallbyrne.ca
 LABEL PROJECT=panic
 
@@ -11,21 +12,22 @@ ENV GITLEAKSVERSION="v7.2.0"
 RUN echo "panic" > /etc/container_release
 
 # Install Dependencies
-RUN apt-get update      && \
-    apt-get upgrade -y  && \
-    apt-get install -y     \
-    bash                   \
-    build-essential        \
-    curl                   \
-    gdb                    \
-    jq                     \
-    libpq-dev              \
-    openssh-client         \
-    postgresql-client      \
-    procps                 \
-    shellcheck             \
-    sudo                   \
-    tig                    \
+RUN apt-get update                       && \
+    apt-get upgrade -y                   && \
+    apt-get install -y                      \
+    bash                                    \
+    build-essential                         \
+    curl                                    \
+    gdb                                     \
+    golang-github-pelletier-go-toml         \
+    jq                                      \
+    libpq-dev                               \
+    openssh-client                          \
+    postgresql-client                       \
+    procps                                  \
+    shellcheck                              \
+    sudo                                    \
+    tig                                     \
     vim
 
 # Install Git Leaks
@@ -49,15 +51,6 @@ RUN useradd user -d /home/user        \
  && chown -R user:user /app           \
  && echo "user ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 
-# Install latest gcloud sdk
-RUN curl --fail -sL https://dl.google.com/dl/cloudsdk/release/google-cloud-sdk.tar.gz > gcloud.tar.gz \
-  && mkdir -p /home/user/gcloud \
-  && tar -C /home/user/gcloud -xf gcloud.tar.gz \
-  && rm gcloud.tar.gz
-
-# Initialize The gcloud sdk
-RUN /home/user/gcloud/google-cloud-sdk/install.sh
-
 # Include the local binary folder in PATH
 ENV PATH "/home/user/.local/bin/:${PATH}"
 
@@ -72,3 +65,17 @@ COPY . /app
 
 # Install the Poetry Dependencies
 RUN scripts/commander.sh setup
+
+# ======================================================
+
+# Admin Environment
+FROM base AS admin
+
+# Install latest gcloud sdk
+RUN sudo curl --fail -sL https://dl.google.com/dl/cloudsdk/release/google-cloud-sdk.tar.gz > gcloud.tar.gz \
+  && mkdir -p /home/user/gcloud \
+  && tar -C /home/user/gcloud -xf gcloud.tar.gz \
+  && rm gcloud.tar.gz
+
+# Initialize The gcloud sdk
+RUN sudo /home/user/gcloud/google-cloud-sdk/install.sh

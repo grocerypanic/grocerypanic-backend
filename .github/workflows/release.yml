@@ -1,48 +1,76 @@
+---
 name: panic-ProductionDeploys
 
 on:
+  workflow_dispatch:
+    inputs:
+      TAG:
+        description: 'Tag to Deploy'
+        required: true
+        default: ''
   release:
     types: [published]
 
 env:
   ORGNAME: grocerypanic
-  REPONAME: grocerypanic-backend
-  WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+  PROJECT_NAME: grocerypanic-backend
 
 jobs:
-  release:
+
+  production_deploy:
+
     runs-on: ubuntu-20.04
+
     steps:
-      - uses: actions/checkout@v2
+
+      - name: Production Deploy -- Code Checkout (Dispatch)
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/checkout@v2
         with:
           fetch-depth: 0
-      - name: Create Docker Mounted Content
+          ref: ${{ github.event.inputs.TAG  }}
+
+      - name: Production Deploy -- Code Checkout (Automated Release)
+        if: github.event_name != 'workflow_dispatch'
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Production Deploy -- Setup Environment
         run: |
-          echo | ssh-keygen
-          touch ${HOME}/.gitconfig
-          touch ${HOME}/.gitconfig_global
-      - name: Ensure File System is Writable by the Container
+          source ./.github/scripts/setup.sh
+        env:
+          WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+
+      - name: Production Deploy -- Report Started
         run: |
-          sudo chmod -R o+w .
-      - name: Build Container
+          ./.github/scripts/notifications.sh "${NOTIFICATION}" ":white_check_mark: automated production deploy has started!"
+
+      - name: Backup Production Database -- Prep Admin Environment
         run: |
-          docker-compose build
-          docker-compose up -d
-      - name: Production -- Deploy
-        run: |
-          # Deploy to Production
           echo -n "${ADMIN_ENV}" | base64 --decode > ./environments/admin.env
           echo -n "${PROD_ENV}" | base64 --decode > ./environments/prod.env
           echo -n "${PROD_SERVICE_ACCOUNT}" | base64 --decode > ./service-account.json
-          docker-compose exec -T panic bash -l -c 'scripts/commander.sh deploy-prod'
         env:
           ADMIN_ENV: ${{ secrets.ADMIN_ENV }}
           PROD_ENV: ${{ secrets.PROD_ENV }}
           PROD_SERVICE_ACCOUNT: ${{ secrets.PROD_SERVICE_ACCOUNT }}
-      - name: Production -- Report Success
+
+      - name: Production Deploy -- Build Admin Container
         run: |
-          ./.github/workflows/scripts/notifications.sh ":white_check_mark: Automated production deployment was successful!"
-      - name: Production -- Report Failure
+          source .github/scripts/build_container.sh "admin"
+        env:
+          ADMIN_ENVIRONMENT: "prod"
+
+      - name: Production Deploy -- Deploy
+        run: |
+          docker-compose exec -T panic bash -l -c 'scripts/commander.sh deploy-prod'
+
+      - name: Production Deploy -- Report Success
+        run: |
+          ./.github/scripts/notifications.sh "${NOTIFICATION}" ":white_check_mark: automated production deployment was successful!"
+
+      - name: Production Deploy -- Report Failure
         if: failure()
         run: |
-          ./.github/workflows/scripts/notifications.sh ":x: Automated production deployment has failed!"
+          ./.github/scripts/notifications.sh "${NOTIFICATION}" ":x: automated production deployment has failed!"
