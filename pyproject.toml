@@ -44,7 +44,7 @@
         version = "^0.5.1"
 
     [tool.poetry.dev-dependencies]
-      Faker = "^8.14.1"
+      Faker = "^9.8.1"
       bandit = "^1.7.0"
       commitizen = "^2.19.0"
       debugpy = "^1.3.0"
