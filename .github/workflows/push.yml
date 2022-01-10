@@ -23,7 +23,7 @@ jobs:
 
       - name: Backup Production Database -- Checkout
         if: contains(github.ref, '/tags/v')
-        uses: actions/checkout@v1
+        uses: actions/checkout@v2
 
       - name: Backup Production Database -- Setup Environment
         if: contains(github.ref, '/tags/v')
@@ -95,7 +95,9 @@ jobs:
     steps:
       - name: Create Release -- Checkout
         if: contains(github.ref, '/tags/v')
-        uses: actions/checkout@v1
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
 
       - name: Create Release -- Setup Environment
         if: contains(github.ref, '/tags/v')
@@ -152,7 +154,7 @@ jobs:
 
     steps:
       - name: Documentation Test -- Checkout Repository
-        uses: actions/checkout@v1
+        uses: actions/checkout@v2
 
       - name: Documentation Test -- Setup Environment
         run: |
@@ -187,7 +189,7 @@ jobs:
 
     steps:
       - name: Linter -- Checkout
-        uses: actions/checkout@v1
+        uses: actions/checkout@v2
 
       - name: Linter -- Setup Environment
         run: |
@@ -221,7 +223,9 @@ jobs:
     steps:
 
       - name: Security Test -- Checkout Repository
-        uses: actions/checkout@v1
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
 
       - name: Documentation Test -- Setup Environment
         run: |
@@ -248,7 +252,7 @@ jobs:
 
     steps:
       - name: Shellcheck -- Checkout Repository
-        uses: actions/checkout@v1
+        uses: actions/checkout@v2
 
       - name: Shellcheck -- Setup Environment
         run: |
@@ -334,7 +338,7 @@ jobs:
 
     steps:
       - name: Start -- Checkout Repository
-        uses: actions/checkout@v1
+        uses: actions/checkout@v2
 
       - name: Start -- Setup Environment
         run: |
@@ -362,7 +366,7 @@ jobs:
 
     steps:
       - name: Static Analysis -- Checkout
-        uses: actions/checkout@v1
+        uses: actions/checkout@v2
 
       - name: Static Analysis -- Setup Environment
         run: |
@@ -408,7 +412,7 @@ jobs:
 
     steps:
       - name: Successful Build -- Checkout Repository
-        uses: actions/checkout@v1
+        uses: actions/checkout@v2
 
       - name: Successful Build -- Setup Environment
         run: |
@@ -432,7 +436,7 @@ jobs:
 
     steps:
       - name: Success Post-Build -- Checkout Repository
-        uses: actions/checkout@v1
+        uses: actions/checkout@v2
 
       - name: Success Post-Build -- Setup Environment
         run: |
@@ -460,7 +464,7 @@ jobs:
 
     steps:
       - name: Tests -- Checkout
-        uses: actions/checkout@v1
+        uses: actions/checkout@v2
 
       - name: Tests -- Setup Environment
         run: |
@@ -498,7 +502,7 @@ jobs:
 
     steps:
       - name: Tests -- Checkout
-        uses: actions/checkout@v1
+        uses: actions/checkout@v2
 
       - name: Tests -- Setup Environment
         run: |
@@ -531,7 +535,7 @@ jobs:
 
     steps:
       - name: YAML Linter -- Checkout Repository
-        uses: actions/checkout@v1
+        uses: actions/checkout@v2
 
       - name: YAML Linter -- Setup Environment
         run: |
