@@ -455,7 +455,7 @@ validation = ["swagger-spec-validator (>=2.1.0)"]
 
 [[package]]
 name = "faker"
-version = "11.3.0"
+version = "8.16.0"
 description = "Faker is a Python package that generates fake data for you."
 category = "dev"
 optional = false
@@ -464,7 +464,6 @@ python-versions = ">=3.6"
 [package.dependencies]
 python-dateutil = ">=2.4"
 text-unidecode = "1.3"
-typing-extensions = {version = ">=3.10.0.2", markers = "python_version < \"3.8\""}
 
 [[package]]
 name = "freezegun"
@@ -1435,7 +1434,7 @@ docs = ["Sphinx", "sphinxcontrib-django"]
 [metadata]
 lock-version = "1.1"
       python-versions = "^3.7"
-content-hash = "cad2ac7cd61a2a4bcd1130b1e51791460d49396eed1ea82dff9b758675c3e61a"
+content-hash = "62b40638856c0f72df06af06f95e9c2640d592010a628e201f3ba9bc8e979a80"
 
 [metadata.files]
 alabaster = [
@@ -1711,8 +1710,8 @@ drf-yasg = [
     {file = "drf_yasg-1.20.0-py2.py3-none-any.whl", hash = "sha256:8b72e5b1875931a8d11af407be3a9a5ba8776541492947a0df5bafda6b7f8267"},
 ]
 faker = [
-    {file = "Faker-11.3.0-py3-none-any.whl", hash = "sha256:61f97034cea252b8426d81810afab2f3c27b584f2b4313400a0cc83a9b013ded"},
-    {file = "Faker-11.3.0.tar.gz", hash = "sha256:adbe567e64da6a1097feacab699000e1ad16e17a6592a8f0ae1ee0b7fbf19887"},
+    {file = "Faker-8.16.0-py3-none-any.whl", hash = "sha256:bb10913b9d3ac2aa37180f816c82040e81f9e0c32cb08445533f293cec8930bf"},
+    {file = "Faker-8.16.0.tar.gz", hash = "sha256:d70b375d0af0e4c3abd594003691a1055a96281a414884e623d27bccc7d781da"},
 ]
 freezegun = [
     {file = "freezegun-1.1.0-py2.py3-none-any.whl", hash = "sha256:2ae695f7eb96c62529f03a038461afe3c692db3465e215355e1bb4b0ab408712"},
