@@ -16,7 +16,6 @@ v1_router.register(
     item.ItemListCreateViewSet,
     basename="items",
 )
-
 v1_router.register(
     "items/activity",
     item.ItemActivityReportViewSet,

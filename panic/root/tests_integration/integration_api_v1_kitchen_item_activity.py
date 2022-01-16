@@ -15,7 +15,7 @@ from .bases import APICrudTestHarness, APICrudTestHarnessUnauthorized
 class ItemConsumptionAPICrudTest(APICrudTestHarness):
   """Test the V1 Kitchen ItemActivity API Authorized endpoints."""
 
-  test_view = 'v1:item-activity-detail-pk'
+  test_view = 'v1:items-activity-pk'
   transaction_view = 'v1:transactions-list'
   item_view = 'v1:items-list'
   store_view = 'v1:stores-list'

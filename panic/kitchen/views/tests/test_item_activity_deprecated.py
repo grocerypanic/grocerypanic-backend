@@ -12,7 +12,7 @@ from rest_framework.test import APIClient
 from ...serializers.reports.item_activity import ItemActivityReportSerializer
 from .fixtures.fixtures_item_activity import ItemActivityViewSetHarness
 
-ACTIVITY_REPORT_VIEW = "v1:items-activity"
+ACTIVITY_REPORT_VIEW = "v1:item-activity-detail"
 
 
 def item_pk_url(item):
