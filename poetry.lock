@@ -352,7 +352,7 @@ python-versions = ">=3.6,<4.0"
 
 [[package]]
 name = "django-timezone-field"
-version = "4.2.1"
+version = "4.2.3"
 description = "A Django app providing database and form fields for pytz timezone objects."
 category = "main"
 optional = false
@@ -565,7 +565,7 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 name = "importlib-metadata"
 version = "4.10.0"
 description = "Read metadata from Python packages"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.7"
 
@@ -969,14 +969,14 @@ toml = ">=0.7.1"
 
 [[package]]
 name = "pytest-subtests"
-version = "0.5.0"
+version = "0.6.0"
 description = "unittest subTest() support and subtests fixture"
 category = "dev"
 optional = false
-python-versions = ">=3.5"
+python-versions = ">=3.6"
 
 [package.dependencies]
-pytest = ">=5.3.0"
+pytest = ">=6.0"
 
 [[package]]
 name = "python-dateutil"
@@ -1138,7 +1138,7 @@ python-versions = "*"
 
 [[package]]
 name = "sphinx"
-version = "4.3.2"
+version = "4.4.0"
 description = "Python documentation generator"
 category = "main"
 optional = true
@@ -1150,6 +1150,7 @@ babel = ">=1.3"
 colorama = {version = ">=0.3.5", markers = "sys_platform == \"win32\""}
 docutils = ">=0.14,<0.18"
 imagesize = "*"
+importlib-metadata = {version = ">=4.4", markers = "python_version < \"3.10\""}
 Jinja2 = ">=2.3"
 packaging = "*"
 Pygments = ">=2.0"
@@ -1164,7 +1165,7 @@ sphinxcontrib-serializinghtml = ">=1.1.5"
 
 [package.extras]
 docs = ["sphinxcontrib-websupport"]
-lint = ["flake8 (>=3.5.0)", "isort", "mypy (>=0.920)", "docutils-stubs", "types-typed-ast", "types-pkg-resources", "types-requests"]
+lint = ["flake8 (>=3.5.0)", "isort", "mypy (>=0.931)", "docutils-stubs", "types-typed-ast", "types-requests"]
 test = ["pytest", "pytest-cov", "html5lib", "cython", "typed-ast"]
 
 [[package]]
@@ -1395,7 +1396,7 @@ python-versions = "*"
 name = "zipp"
 version = "3.7.0"
 description = "Backport of pathlib-compatible object wrapper for zip files"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.7"
 
@@ -1434,7 +1435,7 @@ docs = ["Sphinx", "sphinxcontrib-django"]
 [metadata]
 lock-version = "1.1"
       python-versions = "^3.7"
-content-hash = "5e3e1725f7cd22228c73c671fa186654e1fb8ef804f7a186abf8fd5716646f8f"
+content-hash = "d3b7a5e7747e3474d5660617c8841edd68dd56e6752d8020bb91b291bf8024c6"
 
 [metadata.files]
 alabaster = [
@@ -1682,8 +1683,8 @@ django-split-settings = [
     {file = "django_split_settings-1.1.0-py3-none-any.whl", hash = "sha256:5d97ae64cf9ed14a831722d82ac725944667ac8c08307b7cfd22e91367b411d0"},
 ]
 django-timezone-field = [
-    {file = "django-timezone-field-4.2.1.tar.gz", hash = "sha256:97780cde658daa5094ae515bb55ca97c1352928ab554041207ad515dee3fe971"},
-    {file = "django_timezone_field-4.2.1-py3-none-any.whl", hash = "sha256:6dc782e31036a58da35b553bd00c70f112d794700025270d8a6a4c1d2e5b26c6"},
+    {file = "django-timezone-field-4.2.3.tar.gz", hash = "sha256:5dd5bd9249382bef8847d3e7e4c32b7be182a4b538f354130d1252ed228892f8"},
+    {file = "django_timezone_field-4.2.3-py3-none-any.whl", hash = "sha256:7552d2b0f145684b7de3fb5046101c7efd600cc6ba951b15c630fa1e1b83558e"},
 ]
 django-watchman = [
     {file = "django-watchman-1.2.0.tar.gz", hash = "sha256:c38830c58984b8eb29db30a3e332968d1c7e235dee3f5c0a907d8d79a37a3125"},
@@ -2119,8 +2120,8 @@ pytest-pylint = [
     {file = "pytest_pylint-0.18.0-py3-none-any.whl", hash = "sha256:b63aaf8b80ff33c8ceaa7f68323ed04102c7790093ccf6bdb261a4c2dc6fd564"},
 ]
 pytest-subtests = [
-    {file = "pytest-subtests-0.5.0.tar.gz", hash = "sha256:5bd1e4bf0eda4c89a6cd42b0ee28e1d2ca0848de3fd67ad8cdd6d559ed00f120"},
-    {file = "pytest_subtests-0.5.0-py3-none-any.whl", hash = "sha256:ae0e920b76f23acf28fb6265d5a83aa39b688af1cf30b2b402ac7094ccbc6bdf"},
+    {file = "pytest-subtests-0.6.0.tar.gz", hash = "sha256:3ebd306a8dcf75133f1742f288c82f36426ebcf8a132d4ee89782d20e84fc13a"},
+    {file = "pytest_subtests-0.6.0-py3-none-any.whl", hash = "sha256:fb2fe6f95a80003c70055226077c784f40bc31f1994c3e2a99d5668f16730db6"},
 ]
 python-dateutil = [
     {file = "python-dateutil-2.8.2.tar.gz", hash = "sha256:0123cacc1627ae19ddf3c27a5de5bd67ee4586fbdd6440d9748f8abb483d3e86"},
@@ -2230,8 +2231,8 @@ snowballstemmer = [
     {file = "snowballstemmer-2.2.0.tar.gz", hash = "sha256:09b16deb8547d3412ad7b590689584cd0fe25ec8db3be37788be3810cbf19cb1"},
 ]
 sphinx = [
-    {file = "Sphinx-4.3.2-py3-none-any.whl", hash = "sha256:6a11ea5dd0bdb197f9c2abc2e0ce73e01340464feaece525e64036546d24c851"},
-    {file = "Sphinx-4.3.2.tar.gz", hash = "sha256:0a8836751a68306b3fe97ecbe44db786f8479c3bf4b80e3a7f5c838657b4698c"},
+    {file = "Sphinx-4.4.0-py3-none-any.whl", hash = "sha256:5da895959511473857b6d0200f56865ed62c31e8f82dd338063b84ec022701fe"},
+    {file = "Sphinx-4.4.0.tar.gz", hash = "sha256:6caad9786055cb1fa22b4a365c1775816b876f91966481765d7d50e9f0dd35cc"},
 ]
 sphinxcontrib-applehelp = [
     {file = "sphinxcontrib-applehelp-1.0.2.tar.gz", hash = "sha256:a072735ec80e7675e3f432fcae8610ecf509c5f1869d17e2eecff44389cdbc58"},
