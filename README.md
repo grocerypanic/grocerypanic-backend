@@ -116,12 +116,3 @@ The CLI is enabled by default inside the container, and is also available on the
 Run the CLI without arguments to see the complete list of available commands: `$ dev`
 
 (This is mostly useful for setting up a venv for your IDE, it's recommended to use the container's managed environment.)
-
-## Installing Dev CLI on a OSX host (outside the container)
-
-You need the Postgresql CLI installed, [here's](https://www.compose.com/articles/postgresql-tips-installing-the-postgresql-client/
-) how on a Mac.
-
-If you're on Mojave or Catalina, you should run this command, prior to running `dev setup`:
-- `export PATH=/usr/local/Cellar/libpq/xx.y/bin/:$PATH` (where xx.y is the version of `libpq` you've installed)
-- `export LDFLAGS="-I/usr/local/opt/openssl/include -L/usr/local/opt/openssl/lib"`
