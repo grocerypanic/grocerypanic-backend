@@ -1,6 +1,8 @@
 """A django admin command to manage the Sphinx TOC tree."""
 
-from django.core.management.base import BaseCommand, CommandError
+from typing import Any, Callable
+
+from django.core.management.base import BaseCommand, CommandError, CommandParser
 
 from ...filesystem.paths import (
     DOCUMENTATION_CODEBASE_DIRECTORY,
@@ -40,7 +42,7 @@ class Command(BaseCommand):
 
   help = 'Manage the Sphinx TOC tree during development.'
 
-  def add_arguments(self, parser):
+  def add_arguments(self, parser: CommandParser) -> None:
     """Add argument to the parser."""
     group = parser.add_mutually_exclusive_group()
     group.add_argument(
@@ -56,13 +58,14 @@ class Command(BaseCommand):
         help='Write the TOC tree to disk',
     )
 
-  def handle(self, *args, **options):
+  def handle(self, *args: Any, **options: Any) -> None:
     """Command implementation."""
     check = options['check']
     write = options['write']
 
     if check or write:
-      method = self.__check if check else self.__write
+      method: Callable[[TocTreeFactory], None] = \
+        self.__check if check else self.__write
       factory = TocTreeFactory(
           str(PROJECT_ROOT_DIRECTORY),
           str(DOCUMENTATION_CODEBASE_DIRECTORY),
@@ -72,7 +75,7 @@ class Command(BaseCommand):
     else:
       raise CommandError(NO_SELECTION_MADE)
 
-  def __check(self, factory):
+  def __check(self, factory: TocTreeFactory) -> None:
     tree = factory.build()
     results = tree.validate()
 
@@ -85,7 +88,7 @@ class Command(BaseCommand):
 
     self.stdout.write(self.style.SUCCESS(VALIDATION_SUCCESS))
 
-  def __write(self, factory):
+  def __write(self, factory: TocTreeFactory) -> None:
     confirm = Confirmation()
 
     if confirm.are_you_sure():

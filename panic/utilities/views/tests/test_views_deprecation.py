@@ -16,13 +16,13 @@ from ..deprecation import (
 class TestDeprecationWarning(TestCase):
   """Test the deprecated_warning function."""
 
-  def setUp(self):
+  def setUp(self) -> None:
     self.mock_response = Response(
         {"data": "mock_data"},
         status=status.HTTP_200_OK,
     )
 
-  def test_headers_are_set_with_sunset(self):
+  def test_headers_are_set_with_sunset(self) -> None:
     sunset = date(year=2021, month=3, day=1)
     res = deprecated_warning(self.mock_response, sunset)
     self.assertEqual(res.status_code, status.HTTP_200_OK)
@@ -34,7 +34,7 @@ class TestDeprecationWarning(TestCase):
 class TestDeprecatedResponse(TestCase):
   """Test the deprecated_response function."""
 
-  def test_response(self):
+  def test_response(self) -> None:
     message = "Test Message"
     res = deprecated_response(message)
     self.assertEqual(res.status_code, status.HTTP_410_GONE)

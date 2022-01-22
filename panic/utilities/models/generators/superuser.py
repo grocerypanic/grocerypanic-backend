@@ -1,13 +1,16 @@
 """Generate a Django superuser."""
 
 from django.contrib.auth import get_user_model
+from django.db.models import Model
 
 User = get_user_model()
 
 ERROR_MESSAGE = 'The admin user already exists.'
 
 
-def create_superuser(username="admin", password="admin"):  # nosec
+def create_superuser(  # nosec
+    username: str = "admin", password: str = "admin"
+) -> Model:
   """Create a django superuser, with the specified name and password.
 
   :param username: The username to create
@@ -29,7 +32,7 @@ def create_superuser(username="admin", password="admin"):  # nosec
       is_superuser=True,
       is_staff=True,
   )
-  user.set_password(password)
+  user.set_password(password)  # type: ignore
   user.save()
 
   return user

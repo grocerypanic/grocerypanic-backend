@@ -1,5 +1,7 @@
 """A django admin command to wait for the database to be accessible."""
 
+from typing import Any
+
 from django.conf import settings
 from django.core.management.base import BaseCommand
 
@@ -16,7 +18,7 @@ class Command(BaseCommand):
 
   help = 'Pauses for database connectivity before proceeding.'
 
-  def handle(self, *args, **options):
+  def handle(self, *args: Any, **options: Any) -> None:
     """Command implementation."""
     self.stdout.write(INITIALIZATION_MESSAGE)
     wait_for_database_connection(WAIT_TIME, WAITING_MESSAGE)

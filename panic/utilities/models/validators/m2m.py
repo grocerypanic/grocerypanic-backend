@@ -1,6 +1,9 @@
 """Validators for Django models with M2M fields."""
 
+from typing import Any, Dict, List, Set, Type
+
 from django.core.exceptions import ValidationError
+from django.db import models
 
 
 class ManyToManyRelatedValidator:
@@ -15,11 +18,11 @@ class ManyToManyRelatedValidator:
   :type match_field: str
   """
 
-  def __init__(self, related_field=None, match_field=None):
+  def __init__(self, related_field: str = "", match_field: str = ""):
     self.related_field = related_field
     self.match_field = match_field
 
-  def validate(self, instance, pk_set):
+  def validate(self, instance: models.Model, pk_set: Set[int]) -> None:
     """Perform validation on a many to many field.
 
     :param instance: A model instance that has a M2M field to validate
@@ -37,12 +40,18 @@ class ManyToManyRelatedValidator:
     if errors[self.match_field]:
       raise ValidationError(errors)
 
-  def _get_related_model(self, instance):
-    field = getattr(instance.__class__, self.related_field).field
+  def _get_related_model(self, instance: models.Model) -> Type[models.Model]:
+    field: "Field[Any, Any]" = getattr(
+        instance.__class__, self.related_field
+    ).field
     return field.related_model
 
-  def _collect_errors(self, instance, related_instances):
-    errors = {self.match_field: []}
+  def _collect_errors(
+      self,
+      instance: models.Model,
+      related_instances: models.QuerySet[Any],
+  ) -> Dict[str, List[Any]]:
+    errors: Dict[str, List[Any]] = {self.match_field: []}
     for related in related_instances:
       instance_value = self.get_instance_value(instance)
       related_value = self.get_related_value(related)
@@ -55,7 +64,7 @@ class ManyToManyRelatedValidator:
         ]
     return errors
 
-  def get_instance_value(self, instance):
+  def get_instance_value(self, instance: models.Model) -> Any:
     """Return the value of the instance's match_field.
 
     :param instance: A model instance
@@ -65,7 +74,7 @@ class ManyToManyRelatedValidator:
     """
     return getattr(instance, self.match_field)
 
-  def get_related_value(self, related_instance):
+  def get_related_value(self, related_instance: models.Model) -> Any:
     """Return the value of the related_instances's match_field.
 
     :param related_instance: A related model instance

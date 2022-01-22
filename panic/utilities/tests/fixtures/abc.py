@@ -1,7 +1,10 @@
 """Utilities for testing abstract base classes."""
 
+import abc
+from typing import Any, Type
 
-def concretor(abc_class):
+
+def concretor(abc_class: Type[abc.ABC]) -> Type[Any]:
   """Provide access to abc methods, to allow change detection in unittests.
 
   :param abc_class: An abstract base class
@@ -11,7 +14,7 @@ def concretor(abc_class):
   :rtype: class
   """
 
-  class ConcreteClass(abc_class):
+  class ConcreteClass(abc_class):  # type: ignore
     pass
 
   ConcreteClass.__abstractmethods__ = frozenset()

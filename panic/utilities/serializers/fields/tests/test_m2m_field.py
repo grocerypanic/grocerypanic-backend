@@ -10,7 +10,7 @@ from ..m2m import M2MThroughSerializerField
 class TestM2MThroughSerializerField(SimpleTestCase):
   """Test the M2MThroughSerializerField class."""
 
-  def setUp(self):
+  def setUp(self) -> None:
     super().setUp()
     self.model = Mock()
     self.model.id = 2
@@ -19,7 +19,7 @@ class TestM2MThroughSerializerField(SimpleTestCase):
 
     self.field = M2MThroughSerializerField(queryset=self.queryset)
 
-  def test_to_internal_int(self):
+  def test_to_internal_int(self) -> None:
     result = self.field.to_internal_value(self.model.id)
 
     self.queryset.get.assert_called_with(pk=self.model.id)
@@ -28,7 +28,7 @@ class TestM2MThroughSerializerField(SimpleTestCase):
         self.model,
     )
 
-  def test_to_internal_str(self):
+  def test_to_internal_str(self) -> None:
     result = self.field.to_internal_value(str(self.model.id))
 
     self.queryset.get.assert_called_with(pk=str(self.model.id))
@@ -37,7 +37,7 @@ class TestM2MThroughSerializerField(SimpleTestCase):
         self.model,
     )
 
-  def test_to_internal_instance(self):
+  def test_to_internal_instance(self) -> None:
     result = self.field.to_internal_value(self.model)
 
     self.queryset.get.assert_not_called()
@@ -46,7 +46,7 @@ class TestM2MThroughSerializerField(SimpleTestCase):
         self.model,
     )
 
-  def test_to_representation(self):
+  def test_to_representation(self) -> None:
     result = self.field.to_representation(self.model)
 
     self.assertEqual(

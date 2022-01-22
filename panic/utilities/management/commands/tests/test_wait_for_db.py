@@ -1,7 +1,7 @@
 """Test wait_for_db management command."""
 
 from io import StringIO
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 from django.core.management import call_command
 from django.db.utils import OperationalError
@@ -17,17 +17,17 @@ class CommandTests(SimpleTestCase):
   """Test the wait_for_db management command."""
 
   @patch(f"{COMMAND_MODULE}.wait_for_database_connection")
-  def test_wait_for_db_ready(self, m_wait):
+  def test_wait_for_db_ready(self, m_wait: Mock) -> None:
     capture = StringIO()
     call_command("wait_for_db", stdout=capture)
     self.assertEqual(m_wait.call_count, WAIT_TIME)
 
   @patch("time.sleep", return_value=True)
-  def test_wait_for_db(self, _):
+  def test_wait_for_db(self, _: Mock) -> None:
     capture = StringIO()
 
     with patch("django.db.connection.ensure_connection") as connection:
-      connection.side_effect = [OperationalError] * 5 + [True]
+      connection.side_effect = [OperationalError] * 5 + [True]  # type: ignore
       call_command("wait_for_db", stdout=capture)
       self.assertEqual(connection.call_count, 6)
 

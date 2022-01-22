@@ -1,7 +1,7 @@
 """Test wait_for_db admin command."""
 
 from io import StringIO
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 from django.core.management import call_command
 from django.core.management.base import CommandError
@@ -24,14 +24,14 @@ COMMAND_MODULE = command_module.__name__
 class CommandTests(SimpleTestCase):
   """Test the wait_for_db admin command."""
 
-  def test_no_selection(self):
+  def test_no_selection(self) -> None:
     capture = StringIO()
     with self.assertRaises(CommandError) as raised:
       call_command("toctree", stdout=capture)
     self.assertEqual("", capture.getvalue())
     self.assertEqual(raised.exception.args[0], NO_SELECTION_MADE)
 
-  def test_both_selected(self):
+  def test_both_selected(self) -> None:
     capture = StringIO()
     with self.assertRaises(CommandError) as raised:
       call_command("toctree", "--check", "--write", stdout=capture)
@@ -42,7 +42,7 @@ class CommandTests(SimpleTestCase):
     )
 
   @patch(FACTORY_MODULE + ".TocTreeFactory.build")
-  def test_no_errors(self, m_build):
+  def test_no_errors(self, m_build: Mock) -> None:
     m_build.return_value.validate.return_value.errors = []
     capture = StringIO()
     call_command("toctree", "--check", stdout=capture)
@@ -51,7 +51,7 @@ class CommandTests(SimpleTestCase):
     self.assertIn(VALIDATION_SUCCESS, capture.getvalue())
 
   @patch(FACTORY_MODULE + ".TocTreeFactory.build")
-  def test_errors(self, m_build):
+  def test_errors(self, m_build: Mock) -> None:
     error_definitions = ["error1", "error2"]
     m_build.return_value.validate.return_value.errors = error_definitions
     capture = StringIO()
@@ -64,7 +64,7 @@ class CommandTests(SimpleTestCase):
       self.assertIn(error, capture.getvalue())
 
   @patch(FACTORY_MODULE + ".TocTreeFactory.build")
-  def test_diff(self, m_build):
+  def test_diff(self, m_build: Mock) -> None:
     error_definitions = ["error1", "error2"]
     diff_definitions = {
         "error1": "play more music",
@@ -84,7 +84,7 @@ class CommandTests(SimpleTestCase):
 
   @patch(FACTORY_MODULE + ".TocTreeFactory.build")
   @patch(COMMAND_MODULE + ".Confirmation.are_you_sure", return_value=False)
-  def test_write_unconfirmed(self, _, m_build):
+  def test_write_unconfirmed(self, _: Mock, m_build: Mock) -> None:
     capture = StringIO()
     call_command("toctree", "--write", stdout=capture)
     m_build.assert_not_called()
@@ -92,7 +92,7 @@ class CommandTests(SimpleTestCase):
 
   @patch(FACTORY_MODULE + ".TocTreeFactory.build")
   @patch(COMMAND_MODULE + ".Confirmation.are_you_sure", return_value=True)
-  def test_write_confirmed(self, _, m_build):
+  def test_write_confirmed(self, _: Mock, m_build: Mock) -> None:
     capture = StringIO()
     call_command("toctree", "--write", stdout=capture)
     m_build.return_value.write.assert_called_once()

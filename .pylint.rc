@@ -137,7 +137,7 @@ variable-rgx=[a-z_][a-z0-9_]{2,30}$|^pk$
 
 # Regular expression which should only match correct attribute names in class
 # bodies
-class-attribute-rgx=([A-Za-z_][A-Za-z0-9_]{2,30}|(__.*__))$
+class-attribute-rgx=([A-Za-z_][A-Za-z0-9_]{2,30}|(__.*__))$|^id$
 
 # Regular expression which should only match correct list comprehension /
 # generator expression variable names

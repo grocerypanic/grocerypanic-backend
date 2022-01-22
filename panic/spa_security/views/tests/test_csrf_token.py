@@ -49,13 +49,13 @@ class PrivateCSRFTest(TestCase):
 
   @patch(
       VIEW_MODULE + '.get_token',
-      new_callable=Mock(return_value=lambda x: "MockToken")
+      new_callable=Mock(return_value=lambda x: "Mockoken")
   )
   def test_token_is_set(self, _):
     resp = self.client.get(CSRF_URL)
 
     self.assertEqual(resp.status_code, status.HTTP_200_OK)
-    self.assertEqual(resp.data["token"], "MockToken")
+    self.assertEqual(resp.data["token"], "Mockoken")
 
   def test_cookie_is_set(self):
     resp = self.client.get(CSRF_URL)

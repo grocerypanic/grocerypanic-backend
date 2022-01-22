@@ -9,7 +9,7 @@ class ManagementConfirmation:
   confirm_message: str
   confirm_yes: str
 
-  def are_you_sure(self):
+  def are_you_sure(self) -> bool:
     """Provide a simple confirmation prompt.
 
     :returns: A boolean indicating if the confirmation was accepted or denied.

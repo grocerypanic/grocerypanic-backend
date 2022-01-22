@@ -13,7 +13,7 @@ class AbstractVisitor(abc.ABC):
   tree: TocTree
 
   @abc.abstractmethod
-  def accept(self, tree_instance):
+  def accept(self, tree_instance: TocTree) -> None:
     """Abstract `accept` method.
 
     :param tree_instance: A TocTree instance

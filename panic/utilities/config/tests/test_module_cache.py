@@ -1,6 +1,6 @@
 """Test the appengine app views."""
 
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 from django.conf import settings
 from django.test import SimpleTestCase
@@ -15,7 +15,7 @@ MODULE_CACHE = module_cache.__name__
 class LoadInstalledAppsTest(SimpleTestCase):
   """Test the load_installed_apps function."""
 
-  def test_load_installed_apps(self, m_import):
+  def test_load_installed_apps(self, m_import: Mock) -> None:
     warm_module_cache()
     m_import.assert_called()
 
@@ -23,7 +23,7 @@ class LoadInstalledAppsTest(SimpleTestCase):
       for name in ('urls', 'views', 'models'):
         m_import.assert_any_call('%s.%s' % (app, name))
 
-  def test_load_installed_apps_w_wrror(self, m_import):
+  def test_load_installed_apps_w_wrror(self, m_import: Mock) -> None:
     m_import.side_effect = ImportError
     warm_module_cache()
 

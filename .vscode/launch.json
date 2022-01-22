@@ -4,6 +4,7 @@
     {
       "name": "Run Django Debugger",
       "type": "python",
+      "django": true,
       "request": "attach",
       "subProcess": true,
       "pathMappings": [
@@ -13,7 +14,7 @@
         }
       ],
       "port": 5678,
-      "host": "127.0.0.1",
+      "host": "127.0.0.1"
     }
   ]
 }

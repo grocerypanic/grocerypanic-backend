@@ -224,7 +224,8 @@ type_check() {
   set -e
 
   pushd "${PROJECT_HOME}" >/dev/null
-    mypy "${PROJECT_NAME}"
+    [[ -z $1 ]] && mypy --strict --no-strict-optional --implicit-reexport "${PROJECT_NAME}"
+    [[ -n $1 ]] && mypy --strict --no-strict-optional --implicit-reexport "${1}"
   popd >/dev/null
 
 }

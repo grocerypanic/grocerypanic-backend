@@ -5,7 +5,7 @@ from importlib import import_module
 from django.conf import settings
 
 
-def warm_module_cache():
+def warm_module_cache() -> None:
   """Load all configured apps, warming the module cache."""
   for app in settings.INSTALLED_APPS:
     for name in ('urls', 'views', 'models'):

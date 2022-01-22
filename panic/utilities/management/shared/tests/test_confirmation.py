@@ -1,7 +1,7 @@
 """Test management command confirmation dialogue."""
 
 from io import StringIO
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 from django.test import SimpleTestCase
 
@@ -19,19 +19,19 @@ class TestConfirmation(ManagementConfirmation):
 class TestManagementConfirmation(SimpleTestCase):
   """Test the ManagementConfirmation class."""
 
-  def setUp(self):
+  def setUp(self) -> None:
     self.confirm = TestConfirmation()
 
   @patch(confirmation_module.__name__ + ".sys.stdout", new_callable=StringIO)
   @patch(confirmation_module.__name__ + '.input', return_value='anything')
-  def test_confirm_invalid(self, _, m_stdout):
+  def test_confirm_invalid(self, _: Mock, m_stdout: Mock) -> None:
     response = self.confirm.are_you_sure()
     self.assertFalse(response)
     self.assertIn(TestConfirmation.confirm_message, m_stdout.getvalue())
 
   @patch(confirmation_module.__name__ + ".sys.stdout", new_callable=StringIO)
   @patch(confirmation_module.__name__ + '.input', return_value='n')
-  def test_confirm_valid_negative(self, _, m_stdout):
+  def test_confirm_valid_negative(self, _: Mock, m_stdout: Mock) -> None:
     response = self.confirm.are_you_sure()
     self.assertFalse(response)
     self.assertIn(TestConfirmation.confirm_message, m_stdout.getvalue())
@@ -41,7 +41,7 @@ class TestManagementConfirmation(SimpleTestCase):
       confirmation_module.__name__ + '.input',
       return_value=TestConfirmation.confirm_yes,
   )
-  def test_confirm_valid_affirmative(self, _, m_stdout):
+  def test_confirm_valid_affirmative(self, _: Mock, m_stdout: Mock) -> None:
     response = self.confirm.are_you_sure()
     self.assertTrue(response)
     self.assertIn(TestConfirmation.confirm_message, m_stdout.getvalue())

@@ -3,10 +3,11 @@
 import sys
 from contextlib import contextmanager
 from io import StringIO
+from typing import Generator
 
 
 @contextmanager
-def capture_stdout():
+def capture_stdout() -> Generator[StringIO, None, None]:
   """Capture stdout from within a context manager."""
 
   out, sys.stdout = sys.stdout, StringIO()

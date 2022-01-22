@@ -64,6 +64,8 @@
       types-freezegun = "^1.1.0"
       types-pytz = "^2021.3.4"
       yapf = "^0.32.0"
+      django-stubs = "^1.9.0"
+    djangorestframework-stubs = "^1.4.0"
 
     [tool.poetry.extras]
       docs = ["Sphinx", "sphinxcontrib-django"]

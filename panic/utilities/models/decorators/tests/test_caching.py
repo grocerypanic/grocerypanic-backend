@@ -1,6 +1,7 @@
 """Test the PersistentCachedProperty decorator class."""
 
 from datetime import datetime
+from typing import Any
 
 import pendulum
 from django.test import SimpleTestCase
@@ -13,17 +14,17 @@ from ..caching import SETTER_ERROR, PersistentCachedProperty
 class TestCachingDecoratorNonTTLRelated(SimpleTestCase):
   """Test the PersistentCachedProperty class for non TTL bounded conditions."""
 
-  def setUp(self):
+  def setUp(self) -> None:
     self.initial_value = 0
     self.instance1 = Model(1, self.initial_value, None)
 
-  def test_cached_calculation_base(self):
+  def test_cached_calculation_base(self) -> None:
     self.assertIsInstance(
         self.instance1.__class__.__dict__['cached_calculated'],
         PersistentCachedProperty,
     )
 
-  def test_calculation(self):
+  def test_calculation(self) -> None:
     self.assertEqual(self.instance1.calculation(), self.initial_value + 1)
 
     self.instance1.increment_cached_value()
@@ -33,7 +34,7 @@ class TestCachingDecoratorNonTTLRelated(SimpleTestCase):
         self.initial_value + 1,
     )
 
-  def test_setter_error(self):
+  def test_setter_error(self) -> None:
     with self.assertRaises(AttributeError) as raised:
       self.instance1.cached_calculated = 1
 
@@ -42,7 +43,7 @@ class TestCachingDecoratorNonTTLRelated(SimpleTestCase):
         (SETTER_ERROR,),
     )
 
-  def test_ttl_field_is_None(self):
+  def test_ttl_field_is_None(self) -> None:
     result1 = self.instance1.alias_calculation
 
     self.assertEqual(
@@ -64,13 +65,13 @@ class TestCachingDecoratorTTLTestHarness(SimpleTestCase):
   __test__ = False
   ttl_until: datetime
 
-  def setUp(self):
+  def setUp(self) -> None:
     self.ttl_valid = self.ttl_until > now()
     self.initial_value = 0
     self.instance1 = Model(1, self.initial_value, self.ttl_until)
     self.instance2 = Model(2, self.initial_value + 1, self.ttl_until)
 
-  def test_caching_is_dependent_on_ttl(self):
+  def test_caching_is_dependent_on_ttl(self) -> None:
     result1 = self.instance1.cached_calculated
 
     self.assertEqual(
@@ -86,7 +87,7 @@ class TestCachingDecoratorTTLTestHarness(SimpleTestCase):
         self.ttl_valid,
     )
 
-  def test_model_save_count_is_dependent_on_ttl(self):
+  def test_model_save_count_is_dependent_on_ttl(self) -> None:
     self.assertEqual(
         self.instance1._save_calls,
         0,
@@ -102,7 +103,7 @@ class TestCachingDecoratorTTLTestHarness(SimpleTestCase):
         expected_count,
     )
 
-  def test_model_save_only_if_value_is_different(self):
+  def test_model_save_only_if_value_is_different(self) -> None:
     self.assertEqual(
         self.instance1._save_calls,
         0,
@@ -121,7 +122,7 @@ class TestCachingDecoratorTTLTestHarness(SimpleTestCase):
         expected_count,
     )
 
-  def test_alias_calculation_caching_is_dependent_on_ttl(self):
+  def test_alias_calculation_caching_is_dependent_on_ttl(self) -> None:
     result1 = self.instance1.alias_calculation
 
     self.assertEqual(
@@ -137,7 +138,7 @@ class TestCachingDecoratorTTLTestHarness(SimpleTestCase):
         self.ttl_valid,
     )
 
-  def test_cached_calculation_invalidation(self):
+  def test_cached_calculation_invalidation(self) -> None:
     result1 = self.instance1.cached_calculated
 
     self.assertEqual(
@@ -151,7 +152,7 @@ class TestCachingDecoratorTTLTestHarness(SimpleTestCase):
 
     self.assertFalse(is_cached)
 
-  def test_cached_calculation_multiple_instances(self):
+  def test_cached_calculation_multiple_instances(self) -> None:
     result1 = self.instance1.cached_calculated
     result2 = self.instance2.cached_calculated
 
@@ -193,33 +194,37 @@ class TestCachingDecoratorTTLInvalid(TestCachingDecoratorTTLTestHarness):
 class Model:
   """A mock model for testing."""
 
-  def __init__(self, instance_id, initial, expiry):
+  id: int
+  initial: int
+  expiry: datetime
+
+  def __init__(self, instance_id: int, initial: Any, expiry: datetime) -> None:
     self.id = instance_id
     self.initial = initial
     self.expiry_date = expiry
     self._cached_calculated = None
     self._save_calls = 0
 
-  def save(self):
+  def save(self) -> None:
     self._save_calls += 1
 
-  def increment_cached_value(self):
+  def increment_cached_value(self) -> None:
     self.initial += 1
 
   @property
-  def get_expiry_date(self):
+  def get_expiry_date(self) -> datetime:
     return self.expiry_date
 
-  def calculation(self):
+  def calculation(self) -> int:
     return self.initial + 1
 
   @PersistentCachedProperty(
       ttl_field="get_expiry_date",
       cached_field="_cached_calculated",
   )
-  def alias_calculation(self):
+  def alias_calculation(self) -> int:
     return self.calculation()
 
   @PersistentCachedProperty(ttl_field="get_expiry_date")
-  def cached_calculated(self):
+  def cached_calculated(self) -> int:
     return self.calculation()

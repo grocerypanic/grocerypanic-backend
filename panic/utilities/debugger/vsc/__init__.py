@@ -10,14 +10,14 @@ STARTUP_MESSAGE = "Waiting for debugger client..."
 class Debugger:
   """An interface to the VSC remote debugger."""
 
-  def debug(self):
+  def debug(self) -> None:
     """Starts the remote debugger, if configured."""
     if not self.has_debug_enabled() or not self.is_run_server_command():
       return
     if self.is_main_process():
       self._start_debugger()
 
-  def has_debug_enabled(self):
+  def has_debug_enabled(self) -> bool:
     """Determines if remote debugging is enabled.
 
     :returns: A boolean indicating if remote debugging is enabled.
@@ -25,7 +25,7 @@ class Debugger:
     """
     return os.getenv("DJANGO_REMOTE_DEBUGGING") == "1"
 
-  def is_main_process(self):
+  def is_main_process(self) -> bool:
     """Determines if the main Django process is running.
 
     :returns: A boolean indicating if the main Django process is running.
@@ -35,7 +35,7 @@ class Debugger:
       return True
     return False
 
-  def is_run_server_command(self):
+  def is_run_server_command(self) -> bool:
     """Determines if the `runserver` command was used to start the process.
 
     :returns: A boolean indicating if the `runserver` command was used.
@@ -43,7 +43,7 @@ class Debugger:
     """
     return sys.argv[1] == "runserver"
 
-  def _start_debugger(self):
+  def _start_debugger(self) -> None:
     debugger = importlib.import_module('debugpy')
     debugger_port = int(os.getenv("DJANGO_DEBUGGER_PORT", "5678"))
     debugger.listen((  # nosec
