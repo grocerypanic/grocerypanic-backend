@@ -31,6 +31,16 @@ class CommandTests(SimpleTestCase):
     self.assertEqual("", capture.getvalue())
     self.assertEqual(raised.exception.args[0], NO_SELECTION_MADE)
 
+  def test_both_selected(self):
+    capture = StringIO()
+    with self.assertRaises(CommandError) as raised:
+      call_command("toctree", "--check", "--write", stdout=capture)
+    self.assertEqual("", capture.getvalue())
+    self.assertEqual(
+        raised.exception.args[0],
+        "Error: argument -w/--write: not allowed with argument -c/--check",
+    )
+
   @patch(FACTORY_MODULE + ".TocTreeFactory.build")
   def test_no_errors(self, m_build):
     m_build.return_value.validate.return_value.errors = []

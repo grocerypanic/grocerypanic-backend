@@ -42,13 +42,14 @@ class Command(BaseCommand):
 
   def add_arguments(self, parser):
     """Add argument to the parser."""
-    parser.add_argument(
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument(
         '-c',
         '--check',
         action='store_true',
         help='Check the TOC tree contents',
     )
-    parser.add_argument(
+    group.add_argument(
         '-w',
         '--write',
         action='store_true',
@@ -60,17 +61,16 @@ class Command(BaseCommand):
     check = options['check']
     write = options['write']
 
-    factory = TocTreeFactory(
-        str(PROJECT_ROOT_DIRECTORY),
-        str(DOCUMENTATION_CODEBASE_DIRECTORY),
-        load_settings(),
-    )
-
-    if check:
-      return self.__check(factory)
-    if write:
-      return self.__write(factory)
-    raise CommandError(NO_SELECTION_MADE)
+    if check or write:
+      method = self.__check if check else self.__write
+      factory = TocTreeFactory(
+          str(PROJECT_ROOT_DIRECTORY),
+          str(DOCUMENTATION_CODEBASE_DIRECTORY),
+          load_settings(),
+      )
+      method(factory)
+    else:
+      raise CommandError(NO_SELECTION_MADE)
 
   def __check(self, factory):
     tree = factory.build()
