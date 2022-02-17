@@ -21,7 +21,7 @@
       django-timezone-field = "^4.2.3"
       django-watchman = "^1.2.0"
       djangorestframework = "^3.12.0"
-      djangorestframework-simplejwt = ">=4.7.1,<4.8.0"
+      djangorestframework-simplejwt = "^5.0.0"
       drf-yasg = "^1.20.0"
       gevent = "^21.8.0"
       gunicorn = "^20.1.0"
@@ -37,7 +37,7 @@
 
       [tool.poetry.dependencies.dj-rest-auth]
         extras = ["with_social"]
-        version = "^1.0.0"
+        version = "^2.2.1"
 
       [tool.poetry.dependencies.sphinxcontrib-django]
         optional = true

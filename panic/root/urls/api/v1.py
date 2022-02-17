@@ -30,12 +30,16 @@ urlpatterns = [
         selective_include("dj_rest_auth.urls", blacklist="rest_user_details"),
     ),
     path(
-        'api/v1/auth/registration/account-confirm-email/<str:key>/',
-        ConfirmEmailView.as_view(),
-    ),
-    path(
         "api/v1/auth/registration/",
         include('dj_rest_auth.registration.urls'),
+    ),
+    path(
+        "api/v1/auth/accounts/",
+        include('allauth.urls'),
+    ),
+    path(
+        'api/v1/auth/registration/account-confirm-email/<str:key>/',
+        ConfirmEmailView.as_view(),
     ),
     path(
         'api/v1/auth/registration/account-confirm-email/',

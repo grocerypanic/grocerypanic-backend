@@ -7,8 +7,6 @@ from django.contrib.auth import get_user_model
 from django.contrib.sites.models import Site
 from django.core import mail
 from django.urls import reverse
-from django.utils.encoding import force_bytes
-from django.utils.http import urlsafe_base64_encode
 from rest_framework import status
 
 from .bases import (
@@ -16,7 +14,7 @@ from .bases import (
     AuthenticationRegistrationTestHarness,
 )
 
-USER_CONFIRMATION_EMAIL_SEND = reverse('account_email_verification_sent')
+USER_CONFIRMATION_EMAIL = reverse('rest_verify_email')
 USER_DETAILS = reverse('rest_user_details')
 USER_LOGIN = reverse('rest_login')
 USER_LOGOUT = reverse('rest_logout')
@@ -121,6 +119,10 @@ class UserDetailsUnauthorized(AuthenticationRegistrationTestHarness):
 class UserPasswordManagement(AuthenticationRegistrationTestHarness):
   """Test the user password management API endpoints."""
 
+  def setUp(self):
+    mail.outbox.clear()
+    super().setUp()
+
   def test_user_password_reset_request(self):
     user, _ = self._data_generate_user(
         has_profile_initialized=True,
@@ -137,19 +139,29 @@ class UserPasswordManagement(AuthenticationRegistrationTestHarness):
   def test_user_password_reset_confirm(self):
     user, _ = self._data_generate_user(has_profile_initialized=True)
 
-    token = self.generator.make_token(user)
-    uid = urlsafe_base64_encode(force_bytes(user.pk))
-    url = self._build_url(USER_PASSWORD_RESET_CONFIRM)
+    reset_request_url = self._build_url(USER_PASSWORD_RESET)
+    self.client.post(reset_request_url, {"email": user.email})
 
-    reset_url = f"{url}{uid}/{token}/"
+    email_contents = mail.outbox[0].body
+
+    # TODO: there needs to be a proper email template to complete the
+    # reset process seamlessly.  This works, but is not intuitive.
+
+    regex_match = re.match(
+        r".*http://testserver.*?confirm/(?P<uid>\S+)/(?P<token>\S+)/.*",
+        email_contents, re.DOTALL
+    )
+
+    reset_url = self._build_url(USER_PASSWORD_RESET_CONFIRM)
     reset_data = {
         "new_password1": "changed12345",
         "new_password2": "changed12345",
-        "token": token,
-        "uid": uid,
+        "token": regex_match.group("token"),
+        "uid": str(user.pk),
     }
 
     response = self.client.post(reset_url, data=reset_data)
+
     self.assertEqual(response.status_code, status.HTTP_200_OK)
     self.assertDictEqual(
         response.json(),
@@ -218,7 +230,7 @@ class UserRegistration(AuthenticationRegistrationTestHarness):
     confirmation.send(None)
     confirmation_data = {"key": confirmation.key}
 
-    email_confirmation_url = self._build_url(USER_CONFIRMATION_EMAIL_SEND)
+    email_confirmation_url = self._build_url(USER_CONFIRMATION_EMAIL)
 
     response = self.client.post(
         email_confirmation_url,
@@ -232,11 +244,7 @@ class UserRegistration(AuthenticationRegistrationTestHarness):
     )
 
     self.assertFalse(email.verified)
-
-    response = self.client.get(f"{email_confirmation_url}{confirmation.key}/",)
     email.refresh_from_db()
-    self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
-    self.assertEqual(response.url, f"{self._build_url(USER_LOGIN)}")
     self.assertTrue(email.verified)
 
   def test_user_registration_process(self):
@@ -272,6 +280,8 @@ class UserRegistration(AuthenticationRegistrationTestHarness):
 
     response = self.client.get(confirmation_url)
     email.refresh_from_db()
+    # TODO: there needs to be a proper email template to complete the
+    # registration seamlessly.  This works, but is not intuitive.
     self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
     self.assertEqual(response.url, f"{self._build_url(USER_LOGIN)}")
     self.assertTrue(email.verified)
