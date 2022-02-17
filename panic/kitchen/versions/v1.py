@@ -17,11 +17,6 @@ v1_router.register(
     basename="items",
 )
 v1_router.register(
-    "items/activity",
-    item.ItemActivityReportViewSet,
-    basename="item-activity",
-)
-v1_router.register(
     "shelves",
     shelf.ShelfViewSet,
     basename="shelves",

@@ -1,9 +1,6 @@
 """Views for the Item model."""
 
-from datetime import datetime
-
 from django_filters import rest_framework as filters
-from drf_yasg.utils import swagger_auto_schema
 from rest_framework import decorators, mixins, response, viewsets
 
 from ..filters import ItemFilter
@@ -13,7 +10,6 @@ from ..serializers.item import ItemSerializer
 from ..serializers.reports.item_activity import ItemActivityReportSerializer
 from ..swagger import openapi_ready
 from .bases import KitchenBaseView
-from utilities.views.deprecation import deprecated_warning
 
 
 class ItemBaseViewSet(
@@ -70,27 +66,3 @@ class ItemListCreateViewSet(
   def perform_create(self, serializer):
     """Create a new item."""
     serializer.save(user=self.request.user)
-
-
-class ItemActivityReportViewSet(
-    ItemBaseViewSet,
-    mixins.RetrieveModelMixin,
-    viewsets.GenericViewSet,
-):
-  """Item activity API view."""
-
-  serializer_class = ItemActivityReportSerializer
-
-  @swagger_auto_schema(deprecated=True)
-  def retrieve(self, request, *args, **kwargs):
-    """Retrieve the activity report for a Item.
-
-    (Deprecated.)
-    """
-
-    sunset = datetime(year=2022, month=1, day=29)
-    retrieve_response = super().retrieve(request, *args, **kwargs)
-    return deprecated_warning(
-        retrieve_response,
-        sunset,
-    )

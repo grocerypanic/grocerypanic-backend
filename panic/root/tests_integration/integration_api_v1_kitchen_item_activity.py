@@ -212,7 +212,7 @@ class ItemConsumptionAPICrudTest(APICrudTestHarness):
 class ItemConsumption(APICrudTestHarnessUnauthorized):
   """Test the V1 Kitchen ItemActivity API Authorized endpoints anonymously."""
 
-  test_view = 'v1:item-activity-detail-pk'
+  test_view = 'v1:items-activity-pk'
   __test__ = True
   __non_pk_checks__ = False
   __pk_checks__ = True
