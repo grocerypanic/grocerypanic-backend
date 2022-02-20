@@ -974,14 +974,14 @@ toml = ">=0.7.1"
 
 [[package]]
 name = "pytest-subtests"
-version = "0.6.0"
+version = "0.7.0"
 description = "unittest subTest() support and subtests fixture"
 category = "dev"
 optional = false
 python-versions = ">=3.6"
 
 [package.dependencies]
-pytest = ">=6.0"
+pytest = ">=7.0"
 
 [[package]]
 name = "python-dateutil"
@@ -1431,8 +1431,8 @@ docs = ["Sphinx", "sphinxcontrib-django"]
 
 [metadata]
 lock-version = "1.1"
-      python-versions = "^3.7"
-content-hash = "7f611a63830dad757fa3b2ffb10fe2b816b464ef4ef388ccf60be91f39ea2042"
+python-versions = "^3.7"
+content-hash = "4245101b00f5b53618aa12209b10f97fc350ab51ceb81c920b770855b0ac4fe7"
 
 [metadata.files]
 alabaster = [
@@ -2151,8 +2151,8 @@ pytest-pylint = [
     {file = "pytest_pylint-0.18.0-py3-none-any.whl", hash = "sha256:b63aaf8b80ff33c8ceaa7f68323ed04102c7790093ccf6bdb261a4c2dc6fd564"},
 ]
 pytest-subtests = [
-    {file = "pytest-subtests-0.6.0.tar.gz", hash = "sha256:3ebd306a8dcf75133f1742f288c82f36426ebcf8a132d4ee89782d20e84fc13a"},
-    {file = "pytest_subtests-0.6.0-py3-none-any.whl", hash = "sha256:fb2fe6f95a80003c70055226077c784f40bc31f1994c3e2a99d5668f16730db6"},
+    {file = "pytest-subtests-0.7.0.tar.gz", hash = "sha256:95c44c77e3fbede9848bb88ca90b384815fcba8090ef9a9f55659ab163b1681c"},
+    {file = "pytest_subtests-0.7.0-py3-none-any.whl", hash = "sha256:2e3691caedea0c464fe96ffffd14bf872df1406b88d1930971dafe1966095bad"},
 ]
 python-dateutil = [
     {file = "python-dateutil-2.8.2.tar.gz", hash = "sha256:0123cacc1627ae19ddf3c27a5de5bd67ee4586fbdd6440d9748f8abb483d3e86"},
