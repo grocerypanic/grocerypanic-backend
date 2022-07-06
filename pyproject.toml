@@ -10,10 +10,10 @@
     description = "Grocery Shopping App"
     license = "MPL-2"
     name = "panic"
-    version = "0.27.7"
+    version = "0.27.8"
 
     [tool.poetry.dependencies]
-      Django = "^3.2.13"
+      Django = "^3.2.14"
       django-bleach = "^2.0.0"
       django-cors-headers = "^3.9.0"
       django-filter = "^21.1"
@@ -60,7 +60,7 @@
       pytest-django = "^4.5.2"
       pytest-pylint = "^0.18.0"
       pytest-subtests = "^0.7.0"
-      safety = "^1.10.3"
+      safety = "^2.0.0"
       types-freezegun = "^1.1.0"
       types-pytz = ">=2021.3.4"
       yapf = "^0.32.0"
