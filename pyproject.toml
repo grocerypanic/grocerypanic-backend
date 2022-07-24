@@ -60,7 +60,7 @@
       pytest-django = "^4.5.2"
       pytest-pylint = "^0.18.0"
       pytest-subtests = "^0.7.0"
-      safety = "^1.10.3"
+      safety = "^2.1.1"
       types-freezegun = "^1.1.0"
       types-pytz = ">=2021.3.4"
       yapf = "^0.32.0"
