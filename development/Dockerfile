@@ -56,8 +56,8 @@ ENV PATH "/home/user/.local/bin/:${PATH}"
 
 USER user
 
-# Install Latest Poetry
-RUN pip install poetry wheel       && \
+# Install Poetry and Wheel
+RUN pip install "poetry<1.2" wheel       && \
     pip install --upgrade pip
 
 # Copy the codebase
