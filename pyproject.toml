@@ -63,7 +63,7 @@
       pytest-cov = "^3.0.0"
       pytest-django = "^4.5.2"
       pytest-pylint = "^0.18.0"
-      pytest-subtests = "^0.7.0"
+      pytest-subtests = "^0.8.0"
       safety = "^1.10.3"
       types-freezegun = "^1.1.0"
       types-pytz = ">=2021.3.4"
