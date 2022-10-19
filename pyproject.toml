@@ -37,7 +37,11 @@
 
       [tool.poetry.dependencies.dj-rest-auth]
         extras = ["with_social"]
-        version = "^2.2.1"
+        version = "^2.2.5"
+
+      [tool.poetry.dependencies.django-allauth]
+        optional = true
+        version = ">=0.40.0,<0.51.0"
 
       [tool.poetry.dependencies.sphinxcontrib-django]
         optional = true
@@ -66,4 +70,4 @@
       yapf = "^0.32.0"
 
     [tool.poetry.extras]
-      docs = ["Sphinx", "sphinxcontrib-django"]
+      docs = ["django-allauth", "Sphinx", "sphinxcontrib-django"]

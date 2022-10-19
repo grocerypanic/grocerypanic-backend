@@ -1457,7 +1457,7 @@ docs = ["Sphinx", "sphinxcontrib-django"]
 [metadata]
 lock-version = "1.1"
       python-versions = "^3.7"
-content-hash = "31d2a3e689f791a78cfb27e97142e7d86e8d2fb6838a31dc1f54de0c85e39e6d"
+content-hash = "28bf02b1611a9a7b64a6bf7d1d59d3a4829217cee9614976baf078732dc16467"
 
 [metadata.files]
 alabaster = [
