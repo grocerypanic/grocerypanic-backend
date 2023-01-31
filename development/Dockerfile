@@ -1,7 +1,11 @@
-ARG PYTHON_VERSION=3.7
-FROM python:$PYTHON_VERSION-slim AS base
+ARG BUILD_ARG_PYTHON_VERSION=3.7
+
+FROM python:$BUILD_ARG_PYTHON_VERSION-slim AS base
 MAINTAINER niall@niallbyrne.ca
 LABEL PROJECT=panic
+
+ARG BUILD_ARG_CONTAINER_GID=1000
+ARG BUILD_ARG_CONTAINER_UID=1000
 
 ENV PYTHONUNBUFFERED 1
 ENV POETRY_VIRTUALENVS_CREATE "false"
@@ -39,17 +43,21 @@ RUN curl --fail -sL "https://github.com/zricethezav/gitleaks/releases/download/$
 RUN curl --fail -sL https://dl.google.com/cloudsql/cloud_sql_proxy.linux.amd64 > /usr/bin/cloud_sql_proxy \
   && chmod +x /usr/bin/cloud_sql_proxy
 
+# Create the runtime user, and enforce permissions
+RUN groupadd user -g "${BUILD_ARG_CONTAINER_GID}"
+RUN useradd user -d /home/user                    \
+                 -s /bin/bash                     \
+                 -u "${BUILD_ARG_CONTAINER_UID}"  \
+                 -g "${BUILD_ARG_CONTAINER_GID}"  \
+                 -m
+
 # Setup directories
-RUN mkdir -p /home/user /app
+RUN mkdir -p /app
+RUN chown -R user:user /app
 WORKDIR /app
 
-# Create the runtime user, and change permissions
-RUN useradd user -d /home/user        \
-                 -s /bin/bash         \
-                 -M                   \
- && chown -R user:user /home/user     \
- && chown -R user:user /app           \
- && echo "user ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+# Add user to sudoers, and make the default user
+RUN echo "user ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 
 # Include the local binary folder in PATH
 ENV PATH "/home/user/.local/bin/:${PATH}"
@@ -62,6 +70,11 @@ RUN pip install "poetry<1.2" wheel       && \
 
 # Copy the codebase
 COPY . /app
+
+# Enforce git repository permissions
+USER root
+RUN chown -R user:user /app
+USER user
 
 # Install the Poetry Dependencies
 RUN scripts/commander.sh setup
