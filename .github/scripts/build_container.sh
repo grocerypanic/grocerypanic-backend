@@ -10,15 +10,19 @@ main() {
   touch "${HOME}/.gitconfig"
   touch "${HOME}/.gitconfig_global"
 
-  sudo chmod -R o+w .
-
   case $1 in
     admin)
-      docker-compose -f admin.yml build
+      docker-compose -f admin.yml build                 \
+        --build-arg BUILD_ARG_CONTAINER_GID="$(id -g)"  \
+        --build-arg BUILD_ARG_CONTAINER_UID="$(id -u)"
+
       docker-compose -f admin.yml up -d
       ;;
     *)
-      docker-compose build
+      docker-compose build                              \
+        --build-arg BUILD_ARG_CONTAINER_GID="$(id -g)"  \
+        --build-arg BUILD_ARG_CONTAINER_UID="$(id -u)"
+
       docker-compose up -d
       ;;
   esac
