@@ -1,15 +1,16 @@
 [run]
 branch = True
 omit =
-    */test*,
     */apps.py,
     */urls.py,
-    */migrations/*.py,
+    **/migrations/*.py,
+    **/tests/**/*.py,
     panic/config/environments/*.py,
     panic/manage.py,
     panic/root/asgi.py,
+    panic/root/tests_integration/*.py,
+    panic/root/urls/*.py
     panic/root/wsgi.py,
-    panic/root/urls/*
 source = panic
 
 [report]
