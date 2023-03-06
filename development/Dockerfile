@@ -73,7 +73,7 @@ COPY . /app
 
 # Enforce git repository permissions
 USER root
-RUN chown -R user:user /app
+RUN chown -R user /app
 USER user
 
 # Install the Poetry Dependencies
