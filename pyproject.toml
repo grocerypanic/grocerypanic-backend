@@ -37,7 +37,7 @@
 
       [tool.poetry.dependencies.dj-rest-auth]
         extras = ["with_social"]
-        version = "^2.2.5"
+        version = "^3.0.0"
 
       [tool.poetry.dependencies.django-allauth]
         optional = true

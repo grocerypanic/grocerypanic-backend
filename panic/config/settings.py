@@ -73,7 +73,6 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    'spa_security.middlewares.samesite.SameSiteMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'corsheaders.middleware.CorsMiddleware',
@@ -173,7 +172,6 @@ SESSION_COOKIE_SAMESITE = "Strict"
 # Rest Framework Configuration
 
 REST_FRAMEWORK = REST_FRAMEWORK_AVAILABLE[ENVIRONMENT]
-REST_USE_JWT = True
 
 # CSRF
 
@@ -195,6 +193,9 @@ LOGIN_URL = "/api/v1/auth/login/"
 LOGIN_REDIRECT_URL = "/api/v1/auth/login/"
 LOGOUT_REDIRECT_URL = None
 ACCOUNT_LOGOUT_REDIRECT_URL = LOGIN_URL
+
+# OAuth Parameters
+GOOGLE_CALLBACK_URL = os.getenv("GOOGLE_CALLBACK_URL")
 
 # API Versioning
 

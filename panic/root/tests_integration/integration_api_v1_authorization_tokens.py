@@ -45,7 +45,7 @@ class TokenAuthorization(AuthenticationRegistrationTestHarness):
     self._data_generate_user(has_profile_initialized=True, verified=True)
     self._login()
 
-    jwt_token = self.client.cookies.get(settings.JWT_AUTH_COOKIE)
+    jwt_token = self.client.cookies.get(settings.REST_AUTH["JWT_AUTH_COOKIE"])
 
     token_data = {
         'token': jwt_token,

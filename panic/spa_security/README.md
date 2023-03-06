@@ -22,19 +22,12 @@ This can surely work with a broader range of versions, YMMV.  Test!
     - protects char fields from javascript injection, has standard char field properties and validators
     - `spa_security.fields.BlondeCharField`
     - provides the `BLEACH_RESTORE_LIST` Django setting, as a dictionary of key, value pairs that allow restoring specific bleached values (for example, ampersand)
-2. **DRF Authentication via JWT over HTTP Cookies:**
-    - allows authentication with http only cookies, which cannot be accessed client side
-    - `spa_security.auth.JWTCookieAuthentication`
-3. **CSRF Cookie Protection View Mixin:**
+2. **CSRF Cookie Protection View Mixin:**
     - add this mixin to the leftmost baseclass of your view to ensure it performs CSRF validation
     - `spa_security.mixins.csrf.CSRFMixin`
-4. **CSRF Token Generation View:**
+3. **CSRF Token Generation View:**
     - presents an authenticated view which returns a CSRF token as a JSON response
     - `spa_security.views.csrf_token.CSRFTokenView`
-5. **Compliant SameSite Cookies:**
-    - Correctly sets the SameSite "None" option on responses
-    - the "Secure" cookie flag can be toggled on and off via the setting "REST_COOKIES_SECURE"
-    - `spa_security.middlewares.samesite.SameSiteMiddleware`
 
 ## Configuration / Example Usage
 
@@ -65,27 +58,7 @@ class ItemList(models.Model):
     super().save(*args, **kwargs)
 ```
 
-### 2. DRF Authentication via JWT over HTTP Cookies
-
-In your settings file add:
-```python
-REST_USE_JWT = True
-JWT_AUTH_COOKIE = 'panic-auth'
-
-REST_FRAMEWORK ={
-  'DEFAULT_AUTHENTICATION_CLASSES': [
-    'spa_security.auth.JWTCookieAuthentication',
-  ],
-    'DEFAULT_PERMISSION_CLASSES': [
-    'rest_framework.permissions.IsAuthenticated',
-  ]
-}
-```
-
-This is in addition to configuring the JWT token itself.
-You should also review the [dj-auth-rest](https://github.com/jazzband/dj-rest-auth) documentation. 
-
-### 3. View CSRF Cookie Protection
+### 2. View CSRF Cookie Protection
 
 In your settings file add:
 ```python
@@ -117,7 +90,7 @@ class ListItemsViewSet(
 
 On a CSRF validation error, the csrf_error view will return a JSON message telling you such, with a 403 error.
 
-### 4. CSRF Token Generation View
+### 3. CSRF Token Generation View
 
 Add this to your root urls file:
 ```python
@@ -135,27 +108,3 @@ Ensure you are configuring the cookie [name](https://docs.djangoproject.com/en/3
 
 You can use the cookie value, or JSON response, to create a `X-CSRFToken` header in your client's REST requests, so that CSRF validation is performed.  On a CSRF error, your client can simply request a new token and retry the request.
 For more information please read [this documentation](https://docs.djangoproject.com/en/3.0/ref/csrf/#ajax).
-
-
-### 5. SameSite Cookies
-
-Add the following to your middlewares:
-```python
-MIDDLEWARE = [
-    'spa_security.middlewares.samesite.SameSiteMiddleware',
-    "...",
-]
-```
-
-This existing Django setting for CSRF and dj_rest_auth's JWT_AUTH, will now render correctly on responses:
-```python
-CSRF_COOKIE_SAMESITE = None # (None, "Lax", "Strict")
-JWT_AUTH_COOKIE_SAMESITE = None  # (None, "Lax", "Strict")
-```
-
-Toggle the secure option on both the JWT Authentication Cookie and the CSRF Cookie by using this Django setting:
-```python
-REST_COOKIES_SECURE = True
-```
-
-The JWT Authentication Cookies are SameSite 'None' by default.

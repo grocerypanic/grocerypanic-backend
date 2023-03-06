@@ -18,15 +18,22 @@ CURRENT_DOMAIN = os.environ.get("PROD_HOSTNAME", None)
 CURRENT_PROTOCOL = 'https'
 ACCOUNT_DEFAULT_HTTP_PROTOCOL = "https"
 
-REST_COOKIES_SECURE = True
-JWT_AUTH_COOKIE_SAMESITE = "Strict"
+REST_AUTH = {
+    "USE_JWT": True,
+    "JWT_AUTH_COOKIE_SAMESITE": "Strict",
+    "JWT_AUTH_COOKIE": "panic_auth_prod",
+    "JWT_AUTH_REFRESH_COOKIE": "panic_refresh_prod",
+    "JWT_AUTH_SECURE": True,
+    "JWT_AUTH_HTTPONLY": True,
+    "USER_DETAILS_SERIALIZER": "user.serializers.details.UserDetailsSerializer",
+}
+
 CSRF_USE_SESSIONS = False
 CSRF_COOKIE_SAMESITE = "Strict"
 SESSION_COOKIE_SAMESITE = "Strict"
 CSRF_COOKIE_SECURE = True
 
 CSRF_TRUSTED_ORIGINS = ['prod.grocerypanic.com', 'grocerypanic.com']
-JWT_AUTH_COOKIE = 'panic_auth_prod'
 CSRF_COOKIE_NAME = "panic_csrf_prod"
 
 DEFAULT_FROM_EMAIL = "no-reply@grocerypanic.com"
