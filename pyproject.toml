@@ -10,7 +10,7 @@
     description = "Grocery Shopping App"
     license = "MPL-2"
     name = "panic"
-    version = "0.28.0"
+    version = "0.28.1"
 
     [tool.poetry.dependencies]
       Django = "^3.2.17"
