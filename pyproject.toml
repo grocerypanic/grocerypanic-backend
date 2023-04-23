@@ -30,6 +30,7 @@
       psycopg2-binary = "^2.9.3"
       python = "^3.7"
       pytz = ">=2022.1"
+      sqlparse = "^0.4.4"
 
       [tool.poetry.dependencies.Sphinx]
         optional = true
