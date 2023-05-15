@@ -29,15 +29,15 @@ class TokenAuthorization(AuthenticationRegistrationTestHarness):
 
   def test_auth_user_token_refresh(self):
     self._data_generate_user(has_profile_initialized=True, verified=True)
-    tokens = self._login().json()
-
-    token_data = {
-        'refresh': tokens['refresh_token'],
+    response = self._login()
+    request_cookies = {
+        settings.REST_AUTH['JWT_AUTH_REFRESH_COOKIE']:
+            response.cookies.get(settings.REST_AUTH['JWT_AUTH_REFRESH_COOKIE']),
     }
-
     url = self._build_url(USER_TOKEN_REFRESH)
 
-    response = self.client.post(url, token_data)
+    response = self.client.post(url, cookies=request_cookies)
+
     self.assertEqual(response.status_code, status.HTTP_200_OK)
     self.assertIsNotNone(response.json()['access'])
 
