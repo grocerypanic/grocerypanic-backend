@@ -18,7 +18,6 @@ deploy_appengine() {
         ./manage.py collectstatic --no-input
 
         poetry export --without-hashes -f requirements.txt -o requirements.txt
-        mv ../requirements.txt .
         cp "../environments/${1}.yaml" app.yaml
 
         while read -r line; do

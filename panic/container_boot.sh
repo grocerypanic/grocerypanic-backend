@@ -2,6 +2,9 @@
 
 echo "Development Server Starting ..."
 
+# shellcheck disable=SC1091
+source "$(poetry env info --path)/bin/activate"
+
 pushd "panic" || exit 127
 
 if [[ $1 == "admin" ]]; then

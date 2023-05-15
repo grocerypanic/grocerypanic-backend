@@ -4,3 +4,4 @@
 # INSTEAD: add additional functionality though the .bash_customize file.
 
 source "${HOME}/.bashrc"
+

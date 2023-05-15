@@ -19,3 +19,5 @@ set -e
   source /home/user/.bash_git
   source /home/user/.bash_customize
 set +e
+
+source "$(poetry env info --path)/bin/activate"

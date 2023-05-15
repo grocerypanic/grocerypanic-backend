@@ -8,7 +8,6 @@ ARG BUILD_ARG_CONTAINER_GID=1000
 ARG BUILD_ARG_CONTAINER_UID=1000
 
 ENV PYTHONUNBUFFERED 1
-ENV POETRY_VIRTUALENVS_CREATE "false"
 ENV PYTHONUNBUFFERED 1
 ENV GITLEAKSVERSION "v7.2.0"
 
@@ -65,7 +64,7 @@ ENV PATH "/home/user/.local/bin/:${PATH}"
 USER user
 
 # Install Poetry and Wheel
-RUN pip install "poetry<1.2" wheel       && \
+RUN pip install poetry wheel       && \
     pip install --upgrade pip
 
 # Copy the codebase
