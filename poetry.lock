@@ -2756,4 +2756,4 @@ docs = ["Sphinx", "django-allauth", "sphinxcontrib-django"]
 [metadata]
 lock-version = "2.0"
       python-versions = "^3.7"
-content-hash = "4127a8cef3b02d9ed2c8f6be5928c714ea24267de8573360f4d920346ca706bd"
+content-hash = "db123eb94d265e0d26f6ef3d9c6bb59204bd2e8f98030ba0885c13f9c5c0aa26"
