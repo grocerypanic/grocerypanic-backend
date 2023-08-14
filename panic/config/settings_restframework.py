@@ -72,7 +72,7 @@ REST_FRAMEWORK_AVAILABLE = {
     },
     'admin': {
         'DEFAULT_AUTHENTICATION_CLASSES': [
-            'spa_security.auth.JWTCookieAuthentication',
+            'dj_rest_auth.jwt_auth.JWTCookieAuthentication',
             'rest_framework.authentication.BasicAuthentication',
         ],
         'DEFAULT_PERMISSION_CLASSES': [
