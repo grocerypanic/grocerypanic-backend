@@ -1,5 +1,5 @@
 # Stage Deployment for Panic
-runtime: python37
+runtime: python38
 entrypoint: gunicorn -k gevent -b :$PORT root.wsgi:application
 
 default_expiration: "3d"

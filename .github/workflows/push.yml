@@ -178,7 +178,7 @@ jobs:
       max-parallel: 4
       matrix:
         include:
-          - python-version: 3.7
+          - python-version: 3.8
 
     steps:
       - name: Linter -- Checkout
@@ -355,7 +355,7 @@ jobs:
       max-parallel: 4
       matrix:
         include:
-          - python-version: 3.7
+          - python-version: 3.8
 
     steps:
       - name: Static Analysis -- Checkout
@@ -453,7 +453,7 @@ jobs:
       max-parallel: 4
       matrix:
         include:
-          - python-version: 3.7
+          - python-version: 3.8
 
     steps:
       - name: Tests -- Checkout
@@ -491,7 +491,7 @@ jobs:
       max-parallel: 4
       matrix:
         include:
-          - python-version: 3.7
+          - python-version: 3.8
 
     steps:
       - name: Tests -- Checkout

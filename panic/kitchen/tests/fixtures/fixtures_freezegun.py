@@ -23,7 +23,7 @@ def to_realdate(queryset, field, offset=0):
     date_object = record[field]
     if offset:
       days = timedelta(days=offset)
-      date_object = (date_object - days)
+      date_object = date_object - days
 
     record[field] = datetime.fromtimestamp(date_object.timestamp()).date()
   return queryset

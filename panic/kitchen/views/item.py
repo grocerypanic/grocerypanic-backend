@@ -32,11 +32,11 @@ class ItemViewSet(
 
   @openapi_ready
   def perform_update(self, serializer):
-    """Update a Item."""
+    """Update an Item."""
     serializer.save(user=self.request.user)
 
   @decorators.action(methods=["GET"], detail=True)
-  def activity(self, request, *args, **kwargs):
+  def activity(self, *args, **kwargs):  # pylint: disable=unused-argument
     """Retrieve the activity report for an Item."""
 
     instance = self.get_object()

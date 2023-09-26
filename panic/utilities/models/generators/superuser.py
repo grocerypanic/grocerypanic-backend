@@ -1,6 +1,7 @@
 """Generate a Django superuser."""
 
 from django.contrib.auth import get_user_model
+from django.db import Error
 
 User = get_user_model()
 
@@ -21,7 +22,7 @@ def create_superuser(username="admin", password="admin"):  # nosec
 
   exists = User.objects.all().filter(username=username).count()
   if exists:
-    raise Exception(ERROR_MESSAGE)
+    raise Error(ERROR_MESSAGE)  # pylint: disable=broad-exception-raised
 
   user = User(
       username=username,

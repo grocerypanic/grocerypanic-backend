@@ -3,6 +3,7 @@
 import os
 
 from allauth.socialaccount.models import SocialApp
+from django.core.exceptions import ImproperlyConfigured
 
 ENVIRONMENT_VARIABLE_ERROR = "Environment variables not set correctly."
 ALREADY_EXISTS_ERROR = "Social app already exists."
@@ -29,11 +30,11 @@ def create_social_app(provider, site_number=1):
   secret = os.getenv(('%s_SECRET_KEY' % provider).upper(), None)
 
   if client_id is None or secret is None:
-    raise Exception(ENVIRONMENT_VARIABLE_ERROR)
+    raise ImproperlyConfigured(ENVIRONMENT_VARIABLE_ERROR)
 
   query = SocialApp.objects.all().filter(provider=provider).count()
   if query > 0:
-    raise Exception(ALREADY_EXISTS_ERROR)
+    raise ImproperlyConfigured(ALREADY_EXISTS_ERROR)
 
   social_app = SocialApp(
       provider=provider,

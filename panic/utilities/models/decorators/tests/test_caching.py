@@ -42,7 +42,7 @@ class TestCachingDecoratorNonTTLRelated(SimpleTestCase):
         (SETTER_ERROR,),
     )
 
-  def test_ttl_field_is_None(self):
+  def test_ttl_field_is_none(self):
     result1 = self.instance1.alias_calculation
 
     self.assertEqual(
@@ -51,7 +51,7 @@ class TestCachingDecoratorNonTTLRelated(SimpleTestCase):
     )
 
     self.instance1.increment_cached_value()
-    is_cached = (self.instance1.cached_calculated == self.initial_value + 1)
+    is_cached = self.instance1.cached_calculated == self.initial_value + 1
 
     self.assertFalse(is_cached,)
 
@@ -79,7 +79,7 @@ class TestCachingDecoratorTTLTestHarness(SimpleTestCase):
     )
 
     self.instance1.increment_cached_value()
-    is_cached = (self.instance1.cached_calculated == self.initial_value + 1)
+    is_cached = self.instance1.cached_calculated == self.initial_value + 1
 
     self.assertEqual(
         is_cached,
@@ -130,7 +130,7 @@ class TestCachingDecoratorTTLTestHarness(SimpleTestCase):
     )
 
     self.instance1.increment_cached_value()
-    is_cached = (self.instance1.alias_calculation == result1)
+    is_cached = self.instance1.alias_calculation == result1
 
     self.assertEqual(
         is_cached,
@@ -147,7 +147,7 @@ class TestCachingDecoratorTTLTestHarness(SimpleTestCase):
 
     self.instance1.increment_cached_value()
     del self.instance1.cached_calculated
-    is_cached = (self.instance1.cached_calculated == self.initial_value + 1)
+    is_cached = self.instance1.cached_calculated == self.initial_value + 1
 
     self.assertFalse(is_cached)
 
@@ -162,8 +162,8 @@ class TestCachingDecoratorTTLTestHarness(SimpleTestCase):
 
     self.instance1.increment_cached_value()
 
-    is_cached = (self.instance1.cached_calculated == self.initial_value + 1)
-    is_independent = (self.instance2.cached_calculated == result2)
+    is_cached = self.instance1.cached_calculated == self.initial_value + 1
+    is_independent = self.instance2.cached_calculated == result2
 
     self.assertEqual(
         is_cached,

@@ -15,7 +15,7 @@ class TimeZones(APIView):
   @swagger_auto_schema(
       responses={status.HTTP_200_OK: TimezoneSerializer(many=True)},
   )
-  def get(self, request):
+  def get(self, request):  # pylint: disable=unused-argument
     """User Timezones API view."""
 
     serialized = TimezoneSerializer(generate_timezones(), many=True)

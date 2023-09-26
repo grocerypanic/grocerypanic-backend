@@ -15,20 +15,20 @@ from ..csrf import CSRFMixin
 class PlaceboTest(APIView):
   """Mocked API view without the CSRFMixin."""
 
-  def get(self, request):
+  def get(self, request):  # pylint: disable=unused-argument
     return Response({}, status=HTTP_200_OK)
 
-  def post(self, request):
+  def post(self, request):  # pylint: disable=unused-argument
     return Response({}, status=HTTP_200_OK)
 
 
 class Ensured(CSRFMixin, APIView):
   """Mocked API view with the CSRFMixin."""
 
-  def get(self, request):
+  def get(self, request):  # pylint: disable=unused-argument
     return Response({}, status=HTTP_200_OK)
 
-  def post(self, request):
+  def post(self, request):  # pylint: disable=unused-argument
     return Response({}, status=HTTP_200_OK)
 
 
