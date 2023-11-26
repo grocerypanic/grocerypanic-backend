@@ -261,10 +261,8 @@ class UserRegistration(AuthenticationRegistrationTestHarness):
     current_site = Site.objects.get_current()
 
     expected_message = {
-        'subject':
-            f"[{current_site.domain}] Please Confirm Your E-mail Address",
-        'from_email':
-            f"no-reply@{current_site.domain}",
+        'subject': f"[{current_site.domain}] Please Confirm Your Email Address",
+        'from_email': f"no-reply@{current_site.domain}",
         'to': [user.email],
     }
 

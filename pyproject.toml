@@ -39,11 +39,11 @@
 
       [tool.poetry.dependencies.dj-rest-auth]
         extras = ["with_social"]
-        version = "^4.0.1"
+        version = "^5.0.2"
 
       [tool.poetry.dependencies.django-allauth]
         optional = true
-        version = "^0.52.0"
+        version = "^0.57.0"
 
       [tool.poetry.dependencies.sphinxcontrib-django]
         optional = true
