@@ -61,11 +61,12 @@ RUN echo "user ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 # Include the local binary folder in PATH
 ENV PATH "/home/user/.local/bin/:${PATH}"
 
-USER user
-
 # Install Poetry and Wheel
-RUN pip install poetry wheel       && \
+RUN pip install poetry wheel              && \
+    poetry self add poetry-plugin-export  && \
     pip install --upgrade pip
+
+USER user
 
 # Copy the codebase
 COPY . /app
