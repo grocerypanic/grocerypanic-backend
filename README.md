@@ -12,8 +12,8 @@ A kitchen inventory management app.
 [Production Deploy](https://grocerypanic.com)
 
 
-#### Stage Environment (master branch)
-[![panic-automation](https://github.com/grocerypanic/grocerypanic-backend/workflows/panic%20Automation/badge.svg?branch=master)](https://github.com/grocerypanic/grocerypanic-backend/actions)
+#### Stage Environment (main branch)
+[![panic-automation](https://github.com/grocerypanic/grocerypanic-backend/workflows/panic%20Automation/badge.svg?branch=main)](https://github.com/grocerypanic/grocerypanic-backend/actions)
 
 [Stage Deploy](https://stage.grocerypanic.com)
 
@@ -107,9 +107,9 @@ To start the admin environment:
 The admin environment is the only way to access the production environment's admin console.
 
 ## Git Hooks
-Git hooks are installed that will enforce linting, unit-testing and other basic checks on the `production` and `master` branches.
+Git hooks are installed that will enforce linting, unit-testing and other basic checks on the `production` and `main` branches.
 
-The default configuration is to use the `pre-push` hook, with the goal being to prevent any unnecessary rebasing of the master branch, regardless of the circumstances around the commit.
+The default configuration is to use the `pre-push` hook, with the goal being to prevent any unnecessary rebasing of the main branch, regardless of the circumstances around the commit.
 
 ## CLI Reference
 The CLI is enabled by default inside the container, and is also available on the host machine.

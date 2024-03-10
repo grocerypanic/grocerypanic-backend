@@ -280,21 +280,21 @@ jobs:
           fetch-depth: 0
 
       - name: Stage Deploy -- Setup Environment
-        if: github.ref == 'refs/heads/master'
+        if: github.ref == 'refs/heads/main'
         run: |
           source ./.github/scripts/setup.sh
         env:
           WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
 
       - name: Stage Deploy -- Setup Environment
-        if: github.ref == 'refs/heads/master'
+        if: github.ref == 'refs/heads/main'
         run: |
           source ./.github/scripts/setup.sh
         env:
           WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
 
       - name: Stage Deploy -- Prep Admin Environment
-        if: github.ref == 'refs/heads/master'
+        if: github.ref == 'refs/heads/main'
         run: |
           echo -n "${ADMIN_ENV}" | base64 --decode > ./environments/admin.env
           echo -n "${STAGE_ENV}" | base64 --decode > ./environments/stage.env
@@ -305,14 +305,14 @@ jobs:
           STAGE_SERVICE_ACCOUNT: ${{ secrets.STAGE_SERVICE_ACCOUNT }}
 
       - name: Stage Deploy -- Build Admin Container
-        if: github.ref == 'refs/heads/master'
+        if: github.ref == 'refs/heads/main'
         run: |
           source .github/scripts/build_container.sh "admin"
         env:
           ADMIN_ENVIRONMENT: "stage"
 
       - name: Stage Deploy -- Deploy
-        if: github.ref == 'refs/heads/master'
+        if: github.ref == 'refs/heads/main'
         run: |
           docker-compose exec -T panic bash -l -c 'scripts/commander.sh backup-stage'
           docker-compose exec -T panic bash -l -c 'scripts/commander.sh deploy-stage'

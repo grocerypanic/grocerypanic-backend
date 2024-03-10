@@ -21,8 +21,8 @@ Development Environment Configuration
 PYTHONPATH=/app/panic/
 GIT_HOOKS_PREPUSH=1
 GIT_HOOKS_PRECOMMIT=1
-GIT_HOOKS_PROTECTED_BRANCHES=^(master|production)
-GIT_HOOKS_PROTECTED_HEADS=^(refs/heads/master|refs/heads/production)
+GIT_HOOKS_PROTECTED_BRANCHES=^(main|production)
+GIT_HOOKS_PROTECTED_HEADS=^(refs/heads/main|refs/heads/production)
 ```
 
 Django and Postgresql Configuration

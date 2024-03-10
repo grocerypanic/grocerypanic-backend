@@ -38,7 +38,7 @@ main() {
   fi
 
 
-  # Retag the master branch on latest commit local and remotes
+  # Retag the main branch on latest commit local and remotes
   set +e
   if git push origin ":refs/tags/${_TAG}" 2>/dev/null; then
     git tag -d "${_TAG}" 2>/dev/null
