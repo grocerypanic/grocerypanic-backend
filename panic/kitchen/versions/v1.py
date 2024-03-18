@@ -14,7 +14,7 @@ v1_router.register(
 v1_router.register(
     "items",
     item.ItemListCreateViewSet,
-    basename="items",
+    basename="items-supplementary",
 )
 v1_router.register(
     "shelves",
@@ -24,7 +24,7 @@ v1_router.register(
 v1_router.register(
     "shelves",
     shelf.ShelfListCreateViewSet,
-    basename="shelves",
+    basename="shelves-supplementary",
 )
 v1_router.register(
     "stores",
@@ -34,7 +34,7 @@ v1_router.register(
 v1_router.register(
     "stores",
     store.StoreListCreateViewSet,
-    basename="stores",
+    basename="stores-supplementary",
 )
 v1_router.register(
     "suggestions",

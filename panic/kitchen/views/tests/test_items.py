@@ -10,7 +10,7 @@ from ...models.item import Item
 from ...serializers.item import ItemSerializer
 from .fixtures.fixtures_item import ItemViewSetTestHarness
 
-ITEM_URL = reverse("v1:items-list")
+ITEM_URL = reverse("v1:items-supplementary-list")
 
 
 def item_url_with_params(query_kwargs):

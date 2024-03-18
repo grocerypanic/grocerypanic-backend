@@ -8,7 +8,7 @@ from .bases import APICrudTestHarness, APICrudTestHarnessUnauthorized
 class StoreCrudTest(APICrudTestHarness):
   """Test the V1 Kitchen Store API Authorized endpoints."""
 
-  test_view = 'v1:stores-list'
+  test_view = 'v1:stores-supplementary-list'
 
   def setUp(self):
     self.test_name = 'test_shelf_1'
@@ -74,5 +74,5 @@ class StoreCrudTest(APICrudTestHarness):
 class StoreCrudTestUnauthorized(APICrudTestHarnessUnauthorized):
   """Test the V1 Kitchen Store API Authorized endpoints anonymously."""
 
-  test_view = 'v1:stores-list'
+  test_view = 'v1:stores-supplementary-list'
   __test__ = True

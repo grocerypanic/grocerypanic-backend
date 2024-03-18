@@ -17,9 +17,9 @@ class ItemConsumptionAPICrudTest(APICrudTestHarness):
 
   test_view = 'v1:items-activity-pk'
   transaction_view = 'v1:transactions-list'
-  item_view = 'v1:items-list'
-  store_view = 'v1:stores-list'
-  shelf_view = 'v1:shelves-list'
+  item_view = 'v1:items-supplementary-list'
+  store_view = 'v1:stores-supplementary-list'
+  shelf_view = 'v1:shelves-supplementary-list'
 
   @classmethod
   def setUpClass(cls):

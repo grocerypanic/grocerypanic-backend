@@ -8,7 +8,7 @@ from .bases import APICrudTestHarness, APICrudTestHarnessUnauthorized
 class ShelfCrudTest(APICrudTestHarness):
   """Test the V1 Kitchen Shelf API Auth endpoints with user data."""
 
-  test_view = 'v1:shelves-list'
+  test_view = 'v1:shelves-supplementary-list'
 
   def setUp(self):
     self.test_name = 'test_shelf_1'
@@ -74,5 +74,5 @@ class ShelfCrudTest(APICrudTestHarness):
 class ShelfCrudTestUnauthorized(APICrudTestHarnessUnauthorized):
   """Test the V1 Kitchen Shelf API Authorized endpoints anonymously."""
 
-  test_view = 'v1:shelves-list'
+  test_view = 'v1:shelves-supplementary-list'
   __test__ = True

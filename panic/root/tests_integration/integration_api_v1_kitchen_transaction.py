@@ -13,9 +13,9 @@ class TransactionAPICrudTest(APICrudTestHarness):
   """Test the V1 Kitchen Transaction API Authorized endpoints."""
 
   test_view = 'v1:transactions-list'
-  item_view = 'v1:items-list'
-  store_view = 'v1:stores-list'
-  shelf_view = 'v1:shelves-list'
+  item_view = 'v1:items-supplementary-list'
+  store_view = 'v1:stores-supplementary-list'
+  shelf_view = 'v1:shelves-supplementary-list'
 
   @classmethod
   def setUpClass(cls):

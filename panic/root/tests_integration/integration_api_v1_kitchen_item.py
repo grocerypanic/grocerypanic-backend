@@ -11,9 +11,9 @@ from kitchen.models.item import Item
 class ItemCrudTest(APICrudTestHarness):
   """Test the V1 Kitchen Item API Authorized endpoints."""
 
-  test_view = 'v1:items-list'
-  store_view = 'v1:stores-list'
-  shelf_view = 'v1:shelves-list'
+  test_view = 'v1:items-supplementary-list'
+  store_view = 'v1:stores-supplementary-list'
+  shelf_view = 'v1:shelves-supplementary-list'
 
   mutable_properties = {
       'has_partial_quantities': True,
@@ -244,5 +244,5 @@ class ItemCrudTest(APICrudTestHarness):
 class ItemCrudTestUnauthorized(APICrudTestHarnessUnauthorized):
   """Test the V1 Kitchen Item API Authorized endpoints anonymously."""
 
-  test_view = 'v1:items-list'
+  test_view = 'v1:items-supplementary-list'
   __test__ = True

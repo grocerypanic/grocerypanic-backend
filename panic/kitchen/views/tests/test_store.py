@@ -13,7 +13,7 @@ from ...tests.fixtures.fixtures_store import StoreTestHarness
 from .fixtures.fixtures_item import ItemViewSetTestHarness
 from .fixtures.fixtures_store import AnotherUserTestHarness
 
-STORE_URL = reverse("v1:stores-list")
+STORE_URL = reverse("v1:stores-supplementary-list")
 
 
 def store_url_with_params(query_kwargs):

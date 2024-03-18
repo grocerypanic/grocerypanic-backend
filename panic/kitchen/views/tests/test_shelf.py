@@ -13,7 +13,7 @@ from ...tests.fixtures.fixtures_shelf import ShelfTestHarness
 from .fixtures.fixtures_item import ItemViewSetTestHarness
 from .fixtures.fixtures_shelf import AnotherUserTestHarness
 
-SHELF_URL = reverse("v1:shelves-list")
+SHELF_URL = reverse("v1:shelves-supplementary-list")
 
 
 def shelf_url_with_params(query_kwargs):
