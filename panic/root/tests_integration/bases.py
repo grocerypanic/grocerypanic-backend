@@ -65,14 +65,14 @@ class AuthenticationRegistrationTestHarness(APILiveServerTestCase):
     self.assertEqual(response.status_code, status.HTTP_200_OK)
     return response
 
-  def _data_generate_user(self, has_profile_initialized=False, verified=False):
+  def _data_generate_user(self, has_profile_initialized=False, verified=False, active=True):
     user_data = dict(self.user_login_data)
     user_data.update({
         "timezone": self.timezone,
         "language_code": self.language_code,
     })
 
-    user = User.objects.create_user(**user_data)
+    user = User.objects.create_user(**user_data, is_active=active)
     user.has_profile_initialized = has_profile_initialized
     user.save()
 
