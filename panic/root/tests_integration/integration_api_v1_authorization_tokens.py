@@ -41,7 +41,7 @@ class TokenAuthorization(AuthenticationRegistrationTestHarness):
     self.assertEqual(response.status_code, status.HTTP_200_OK)
     self.assertIsNotNone(response.json()['access'])
 
-  def test_auth_user_token_verify(self):
+  def test_auth_user_token_verify__inactive_user(self):
     self._data_generate_user(has_profile_initialized=True, verified=True)
     self._login()
 

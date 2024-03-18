@@ -42,6 +42,14 @@ class UserDetails(AuthenticationRegistrationTestHarness):
     })
     return expected_response
 
+  def test_user_login_inactive(self):
+    self._data_generate_user(
+        has_profile_initialized=True,
+        verified=True,
+        active=False,
+    )
+    self._login(expected_status=status.HTTP_400_BAD_REQUEST)
+
   def test_user_details_profile_uninitialized(self):
     user, _ = self._data_generate_user(
         has_profile_initialized=False,
